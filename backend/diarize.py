@@ -26,7 +26,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import torch
-import torchaudio
+import soundfile as sf
 
 from .config import APP_ROOT
 
@@ -81,11 +81,20 @@ def _get_embedder():
     return _embedding_model
 
 
-def _vad_speech_regions(audio_path: str) -> list[tuple[float, float]]:
-    """Return list of (start, end) seconds for speech regions."""
-    from silero_vad import get_speech_timestamps, read_audio
+def _vad_speech_regions(audio_path: str, waveform: torch.Tensor | None = None) -> list[tuple[float, float]]:
+    """
+    Return list of (start, end) seconds for speech regions.
+
+    Audio loading goes through soundfile (see _load_audio_16k) instead of
+    silero_vad.read_audio because the latter calls torchaudio.load — which in
+    torchaudio 2.11+ requires the torchcodec extension we don't bundle.
+    """
+    from silero_vad import get_speech_timestamps
     model = _get_vad()
-    audio = read_audio(audio_path, sampling_rate=16000)
+    if waveform is None:
+        waveform, _ = _load_audio_16k(audio_path)
+    # silero accepts a 1-D float32 tensor at 16 kHz
+    audio = waveform.squeeze(0).float()
     ts = get_speech_timestamps(
         audio, model,
         sampling_rate=16000,
@@ -116,10 +125,25 @@ def _windows_for_region(start: float, end: float,
 
 
 def _load_audio_16k(audio_path: str) -> tuple[torch.Tensor, int]:
-    waveform, sr = torchaudio.load(audio_path)
+    """
+    Load audio as a (1, N) float32 tensor at 16 kHz mono.
+
+    Uses soundfile (libsndfile) instead of torchaudio.load — torchaudio 2.11+
+    requires torchcodec for I/O which we don't ship. The backend's audio
+    pre-conversion to 16 kHz mono WAV (via ffmpeg in process_job) means we
+    almost always read a file that is already correctly formatted; the resample
+    and downmix branches below are kept as a safety net for direct callers.
+    """
+    data, sr = sf.read(audio_path, always_2d=True, dtype="float32")
+    # data is (frames, channels) — convert to (channels, frames)
+    waveform = torch.from_numpy(data.T)
     if waveform.shape[0] > 1:
         waveform = waveform.mean(dim=0, keepdim=True)
+    elif waveform.dim() == 1:
+        waveform = waveform.unsqueeze(0)
     if sr != 16000:
+        # Lazy import: only needed if caller skips ffmpeg pre-processing.
+        import torchaudio
         waveform = torchaudio.functional.resample(waveform, sr, 16000)
         sr = 16000
     return waveform, sr
@@ -201,7 +225,9 @@ def diarize_audio(
         speaker_info = f"{min_speakers}-{max_speakers}"
     print(f"Diarizing: {Path(audio_path).name} (speakers: {speaker_info}, threshold: {threshold})")
 
-    speech_regions = _vad_speech_regions(audio_path)
+    waveform, sr = _load_audio_16k(audio_path)
+
+    speech_regions = _vad_speech_regions(audio_path, waveform=waveform)
     if not speech_regions:
         print("VAD found no speech regions.")
         return []
@@ -218,7 +244,6 @@ def diarize_audio(
     if not all_windows:
         return []
 
-    waveform, sr = _load_audio_16k(audio_path)
     print(f"Embedding {len(all_windows)} windows...")
     embeddings = _embed_windows(waveform, sr, all_windows)
     if len(embeddings) == 0:
