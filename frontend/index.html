@@ -256,6 +256,30 @@
         </footer>
     </div>
 
+    <!-- Glossary / Term Rename Modal -->
+    <div class="modal-overlay" id="glossaryModal" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Begriffe prüfen</h2>
+                <button class="modal-close" id="closeGlossaryBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="rename-hint">
+                    Eigennamen, Orte und Fachbegriffe aus dem Transkript, sortiert nach Häufigkeit.
+                    Trag im Feld die korrekte Schreibung ein. Beim Speichern werden alle Vorkommen in VTT, TXT und CSV ersetzt (Wort-genau, Groß-/Kleinschreibung wird beachtet).
+                </p>
+                <div class="glossary-search">
+                    <input type="text" id="glossarySearch" placeholder="Begriffe filtern…">
+                </div>
+                <ul class="rename-list" id="glossaryList"></ul>
+                <div class="rename-actions">
+                    <button class="btn-secondary" id="glossaryCancelBtn">Abbrechen</button>
+                    <button class="btn-primary" id="glossarySaveBtn">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Speaker Rename Modal -->
     <div class="modal-overlay" id="renameModal" hidden>
         <div class="modal-content">

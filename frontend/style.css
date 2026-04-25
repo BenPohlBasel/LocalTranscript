@@ -699,6 +699,65 @@ main {
     border-color: var(--accent);
 }
 
+.glossary-search {
+    margin-bottom: 12px;
+}
+
+.glossary-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.glossary-search input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.rename-list .glossary-row {
+    grid-template-columns: 60px 1fr 1fr;
+}
+
+.glossary-count {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: right;
+    padding-right: 6px;
+}
+
+.glossary-original {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.glossary-kind {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.glossary-kind.kind-PER { background: rgba(99, 102, 241, 0.25); color: #a5b4fc; }
+.glossary-kind.kind-ORG { background: rgba(34, 197, 94, 0.25); color: #86efac; }
+.glossary-kind.kind-LOC { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+.glossary-kind.kind-MISC { background: rgba(251, 191, 36, 0.25); color: #fcd34d; }
+.glossary-kind.kind-PROPN { background: var(--bg-tertiary); color: var(--text-secondary); }
+
 .btn-csv:hover {
     background: var(--accent-hover);
 }

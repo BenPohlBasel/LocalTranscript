@@ -50,6 +50,13 @@ const renameSaveBtn = document.getElementById('renameSaveBtn');
 const renameCancelBtn = document.getElementById('renameCancelBtn');
 const closeRenameBtn = document.getElementById('closeRenameBtn');
 
+const glossaryModal = document.getElementById('glossaryModal');
+const glossaryList = document.getElementById('glossaryList');
+const glossarySearch = document.getElementById('glossarySearch');
+const glossarySaveBtn = document.getElementById('glossarySaveBtn');
+const glossaryCancelBtn = document.getElementById('glossaryCancelBtn');
+const closeGlossaryBtn = document.getElementById('closeGlossaryBtn');
+
 const resultList = document.getElementById('resultList');
 const resultTitle = document.getElementById('resultTitle');
 const resultSubtitle = document.getElementById('resultSubtitle');
@@ -83,6 +90,7 @@ let batchAborted = false;
 let currentRunFolder = null; // Electron run folder path for the current batch
 let transcriptsRoot = null;  // Cached config from Electron
 let renameContext = null;    // {jobId, audio, currentRow} while modal is open
+let glossaryContext = null;  // {jobId, candidates, result} while modal is open
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -188,6 +196,16 @@ function setupEventListeners() {
     if (renameModal) {
         renameModal.addEventListener('click', (e) => {
             if (e.target === renameModal) closeRenameModal();
+        });
+    }
+
+    if (closeGlossaryBtn) closeGlossaryBtn.addEventListener('click', closeGlossaryModal);
+    if (glossaryCancelBtn) glossaryCancelBtn.addEventListener('click', closeGlossaryModal);
+    if (glossarySaveBtn) glossarySaveBtn.addEventListener('click', saveGlossaryRenames);
+    if (glossarySearch) glossarySearch.addEventListener('input', filterGlossaryList);
+    if (glossaryModal) {
+        glossaryModal.addEventListener('click', (e) => {
+            if (e.target === glossaryModal) closeGlossaryModal();
         });
     }
 
@@ -680,6 +698,144 @@ async function saveSpeakerNames() {
     }
 }
 
+async function openGlossaryModal(result) {
+    if (!glossaryModal) return;
+    glossaryContext = { jobId: result.jobId, candidates: [], result };
+
+    glossaryList.innerHTML = '';
+    glossaryList.appendChild(makeLoadingRow('Lade Begriffe…'));
+    if (glossarySearch) glossarySearch.value = '';
+    glossaryModal.hidden = false;
+
+    try {
+        const response = await fetch(`${API_BASE}/jobs/${result.jobId}/glossary`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Glossar konnte nicht geladen werden');
+        }
+        const data = await response.json();
+        glossaryContext.candidates = data.candidates || [];
+        renderGlossaryList();
+    } catch (err) {
+        glossaryList.innerHTML = '';
+        glossaryList.appendChild(makeLoadingRow('Fehler: ' + (err.message || err)));
+    }
+}
+
+function makeLoadingRow(msg) {
+    const li = document.createElement('li');
+    li.className = 'glossary-row';
+    li.style.gridTemplateColumns = '1fr';
+    li.style.color = 'var(--text-secondary)';
+    li.textContent = msg;
+    return li;
+}
+
+function renderGlossaryList() {
+    if (!glossaryContext) return;
+    glossaryList.innerHTML = '';
+
+    if (glossaryContext.candidates.length === 0) {
+        glossaryList.appendChild(makeLoadingRow('Keine Begriffe gefunden.'));
+        return;
+    }
+
+    glossaryContext.candidates.forEach((c) => {
+        const li = document.createElement('li');
+        li.className = 'glossary-row';
+        li.dataset.term = c.term;
+
+        const count = document.createElement('span');
+        count.className = 'glossary-count';
+        count.textContent = '×' + c.count;
+        li.appendChild(count);
+
+        const orig = document.createElement('span');
+        orig.className = 'glossary-original';
+        const kindBadge = document.createElement('span');
+        kindBadge.className = 'glossary-kind kind-' + c.kind;
+        kindBadge.textContent = c.kind;
+        orig.appendChild(kindBadge);
+        const termText = document.createElement('span');
+        termText.textContent = c.term;
+        orig.appendChild(termText);
+        li.appendChild(orig);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'rename-name';
+        input.placeholder = c.term;
+        input.dataset.original = c.term;
+        li.appendChild(input);
+
+        glossaryList.appendChild(li);
+    });
+}
+
+function filterGlossaryList() {
+    if (!glossaryContext || !glossarySearch) return;
+    const q = glossarySearch.value.trim().toLowerCase();
+    glossaryList.querySelectorAll('li').forEach((li) => {
+        const term = (li.dataset.term || '').toLowerCase();
+        li.hidden = q.length > 0 && !term.includes(q);
+    });
+}
+
+function closeGlossaryModal() {
+    if (glossaryModal) glossaryModal.hidden = true;
+    glossaryContext = null;
+}
+
+async function saveGlossaryRenames() {
+    if (!glossaryContext) return;
+
+    const renames = {};
+    glossaryList.querySelectorAll('input.rename-name').forEach((input) => {
+        const original = input.dataset.original;
+        const value = input.value.trim();
+        if (original && value && value !== original) {
+            renames[original] = value;
+        }
+    });
+
+    if (Object.keys(renames).length === 0) {
+        closeGlossaryModal();
+        return;
+    }
+
+    glossarySaveBtn.disabled = true;
+    glossarySaveBtn.textContent = 'Speichere...';
+
+    try {
+        const response = await fetch(`${API_BASE}/jobs/${glossaryContext.jobId}/rename-terms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ renames })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Speichern fehlgeschlagen');
+        }
+
+        // Re-copy updated files into the run folder if Electron mode
+        if (currentRunFolder && isElectron) {
+            try {
+                const job = await fetch(`${API_BASE}/jobs/${glossaryContext.jobId}`).then(r => r.json());
+                await autosaveJob(job, currentRunFolder);
+            } catch (err) {
+                console.warn('Re-copy after term-rename failed:', err);
+            }
+        }
+
+        closeGlossaryModal();
+    } catch (error) {
+        alert('Fehler: ' + (error.message || error));
+    } finally {
+        glossarySaveBtn.disabled = false;
+        glossarySaveBtn.textContent = 'Speichern';
+    }
+}
+
 async function autosaveJob(job, runFolder) {
     const baseName = audioBasename(job.filename);
     const audioExt = (job.filename.match(/\.[^.]+$/) || ['.bin'])[0];
@@ -761,15 +917,24 @@ function renderResults() {
         li.appendChild(name);
 
         if (res.status === 'completed') {
+            const actions = document.createElement('span');
+            actions.className = 'result-downloads';
             // Show "Korrigieren" only when speakers exist (skip diarize=off jobs)
             if (res.speakerCount && res.speakerCount >= 1) {
                 const correct = document.createElement('button');
                 correct.type = 'button';
                 correct.className = 'btn-correct';
-                correct.textContent = 'Korrigieren';
+                correct.textContent = 'Sprecher';
                 correct.addEventListener('click', () => openRenameModal(res));
-                li.appendChild(correct);
+                actions.appendChild(correct);
             }
+            const terms = document.createElement('button');
+            terms.type = 'button';
+            terms.className = 'btn-correct';
+            terms.textContent = 'Begriffe';
+            terms.addEventListener('click', () => openGlossaryModal(res));
+            actions.appendChild(terms);
+            li.appendChild(actions);
             // In Electron mode the files are already in the run folder, so
             // skip per-file VTT/CSV/TXT download buttons. Browser-mode keeps them.
             if (!(isElectron && currentRunFolder)) {
@@ -1219,14 +1384,25 @@ function renderInfoContent(info, config) {
                 </div>
                 <div class="info-row">
                     <span class="info-label">Sprechererkennung</span>
-                    <span class="info-value ${info.technology.diarization.available ? 'success' : 'warning'}">
-                        ${info.technology.diarization.name}
-                        ${info.technology.diarization.available ? '✓' : '(Token fehlt)'}
-                    </span>
+                    <span class="info-value">${info.technology.diarization.name}</span>
                 </div>
+                ${info.technology.glossary ? `
+                <div class="info-row">
+                    <span class="info-label">Begriffe (NER)</span>
+                    <span class="info-value">${info.technology.glossary.name}</span>
+                </div>
+                ` : ''}
                 <div class="info-row">
                     <span class="info-label">Backend</span>
                     <span class="info-value">${info.technology.backend.framework}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Laufzeit</span>
+                    <span class="info-value">${info.technology.backend.language}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Frontend</span>
+                    <span class="info-value">${info.technology.frontend.native_wrapper} + ${info.technology.frontend.type}</span>
                 </div>
             </div>
         </div>
@@ -1289,8 +1465,14 @@ function renderInfoContent(info, config) {
                     <span class="info-label">${info.technology.diarization.name}</span>
                     <span class="info-value"><span class="info-badge">${info.technology.diarization.license}</span></span>
                 </div>
+                ${info.technology.glossary ? `
                 <div class="info-row">
-                    <span class="info-label">FastAPI</span>
+                    <span class="info-label">${info.technology.glossary.name}</span>
+                    <span class="info-value"><span class="info-badge">${info.technology.glossary.license}</span></span>
+                </div>
+                ` : ''}
+                <div class="info-row">
+                    <span class="info-label">FastAPI / Electron</span>
                     <span class="info-value"><span class="info-badge">${info.technology.backend.license}</span></span>
                 </div>
                 <div class="info-row">
