@@ -1,0 +1,106 @@
+{
+  "name": "localtranscript",
+  "productName": "LocalTranscript",
+  "version": "0.1.0",
+  "description": "Native macOS shell for LocalTranscript (FastAPI backend + Chromium frontend)",
+  "author": "BIAS.City",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "start:bundle": "WHISPER_USE_BUNDLE=1 electron .",
+    "build:python-runtime": "node scripts/build-python-runtime.mjs",
+    "build:python-runtime:force": "node scripts/build-python-runtime.mjs --force",
+    "build:resources": "node scripts/sync-resources.mjs",
+    "build:binaries": "node scripts/build-binaries.mjs",
+    "build:bundle": "npm run build:python-runtime && npm run build:binaries && npm run build:resources",
+    "dist": "npm run build:bundle && electron-builder --mac",
+    "dist:dir": "npm run build:bundle && electron-builder --mac --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "ffmpeg-static": "^5.3.0"
+  },
+  "build": {
+    "appId": "city.bias.localtranscript",
+    "productName": "LocalTranscript",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/python-runtime",
+        "to": "python-runtime"
+      },
+      {
+        "from": "resources/venv",
+        "to": "venv"
+      },
+      {
+        "from": "resources/backend",
+        "to": "backend"
+      },
+      {
+        "from": "resources/bin",
+        "to": "bin"
+      },
+      {
+        "from": "resources/lib",
+        "to": "lib"
+      },
+      {
+        "from": "resources/models",
+        "to": "models"
+      },
+      {
+        "from": "resources/.env",
+        "to": ".env"
+      },
+      {
+        "from": "resources/BUNDLED",
+        "to": "BUNDLED"
+      },
+      {
+        "from": "../frontend",
+        "to": "frontend"
+      },
+      {
+        "from": "../LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "../NOTICE",
+        "to": "NOTICE"
+      },
+      {
+        "from": "../THIRD-PARTY-LICENSES.md",
+        "to": "THIRD-PARTY-LICENSES.md"
+      }
+    ],
+    "asarUnpack": [],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "${productName} ${version}"
+    }
+  }
+}
