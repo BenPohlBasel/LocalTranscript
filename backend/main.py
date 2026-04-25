@@ -363,7 +363,7 @@ async def create_transcription(
 async def process_job(job_id: str):
     """Process a transcription job"""
     from .diarize import diarize_audio
-    from .transcribe import transcribe_segment_with_timestamps, transcribe_classic
+    from .transcribe import transcribe_classic, transcribe_segment_with_timestamps
     from .merge import (
         build_vtt_from_speaker_transcript_segments,
         build_csv_from_speaker_transcript_segments,
@@ -481,18 +481,35 @@ async def process_job(job_id: str):
         job["message"] = f"{num_speakers} Sprecher erkannt. Transkribiere {len(merged_diar)} Segmente..."
         print(f"Diarization: {num_speakers} speakers, {len(merged_diar)} merged segments")
 
-        # Step 2: Transcribe each speaker segment with VTT timestamps
+        # Persist the diarization (after merging) so the speaker-sample and
+        # rename endpoints can work without a re-run. Stored as plain dicts so
+        # the job dict stays JSON-serialisable.
+        job["diarization"] = [
+            {"start": s.start, "end": s.end, "speaker": s.speaker}
+            for s in merged_diar
+        ]
+        # Speakers ordered by total speech time (matches diarize.py post-processing)
+        speaker_durations: dict[str, float] = {}
+        for s in merged_diar:
+            speaker_durations[s.speaker] = speaker_durations.get(s.speaker, 0.0) + (s.end - s.start)
+        job["speakers"] = sorted(speaker_durations, key=lambda sp: -speaker_durations[sp])
+        job["speaker_names"] = {sp: format_speaker_name(sp) for sp in job["speakers"]}
+
+        # Step 2: Per-speaker-block transcription. We cut the audio at the
+        # diarization boundaries and run whisper-cli on each clip, so each
+        # whisper call contains exactly one speaker — no post-hoc word-to-
+        # speaker matching needed. whisper.cpp Metal makes the per-call
+        # overhead negligible.
         job["status"] = JobStatus.TRANSCRIBING
-        all_segments = []  # List of (speaker, transcript_segments)
+        all_segments = []
         all_text_parts = []
 
         for i, diar_seg in enumerate(merged_diar):
             progress = 25 + int((i / len(merged_diar)) * 55)
             speaker_name = format_speaker_name(diar_seg.speaker)
             job["progress"] = progress
-            job["message"] = f"Transkribiere Segment {i+1}/{len(merged_diar)} ({speaker_name})..."
+            job["message"] = f"Transkribiere Segment {i + 1}/{len(merged_diar)} ({speaker_name})..."
 
-            # Extract audio segment with ffmpeg
             segment_path = upload_path.parent / f"{job_id}_seg{i}.wav"
             temp_files.append(segment_path)
 
@@ -505,27 +522,24 @@ async def process_job(job_id: str):
                 "-ar", "16000",
                 "-ac", "1",
                 "-c:a", "pcm_s16le",
-                str(segment_path)
+                str(segment_path),
             ]
-            await asyncio.to_thread(
-                subprocess.run, extract_cmd, capture_output=True
-            )
+            await asyncio.to_thread(subprocess.run, extract_cmd, capture_output=True)
 
-            # Transcribe segment with timestamps (offset by segment start time)
+            # Transcribe this single-speaker clip with absolute timestamps
             transcript_segments = await asyncio.to_thread(
                 transcribe_segment_with_timestamps,
                 str(segment_path),
                 job["model"],
                 job["language"],
-                diar_seg.start  # Time offset
+                diar_seg.start,
             )
 
             if transcript_segments:
                 all_segments.append({
-                    'speaker': diar_seg.speaker,
-                    'segments': transcript_segments
+                    "speaker": diar_seg.speaker,
+                    "segments": transcript_segments,
                 })
-                # Update live preview
                 for seg in transcript_segments:
                     all_text_parts.append(seg.text)
                 job["partial_text"] = " ".join(all_text_parts)
@@ -793,6 +807,216 @@ async def save_txt_to_downloads(job_id: str):
 
     shutil.copy(txt_path, dest_path)
     return {"saved_to": str(dest_path), "filename": dest_path.name}
+
+
+def _pick_clean_window(diarization: list[dict], speaker_label: str,
+                       clip_len: float = 10.0, margin: float = 1.0,
+                       min_segment: float = 6.0,
+                       min_gap: float = 0.3) -> tuple[float, float] | None:
+    """
+    Find a (start, end) inside a clean segment of the given speaker.
+
+    Strategy:
+      1. Sort all segments by start, locate the speaker's segments.
+      2. Prefer segments that are >= min_segment seconds long AND have at
+         least min_gap seconds of silence (or no neighbor) before/after.
+      3. Among preferred candidates, pick the longest. Fallback: longest
+         overall segment for that speaker.
+      4. Extract a clip_len window from the middle with `margin` seconds
+         buffer on both sides if the segment is long enough.
+    """
+    sorted_segs = sorted(diarization, key=lambda s: s["start"])
+    own = [(i, s) for i, s in enumerate(sorted_segs) if s.get("speaker") == speaker_label]
+    if not own:
+        return None
+
+    def neighbor_gap_before(idx: int) -> float:
+        if idx == 0:
+            return float("inf")
+        prev = sorted_segs[idx - 1]
+        if prev.get("speaker") == speaker_label:
+            return float("inf")
+        return sorted_segs[idx]["start"] - prev["end"]
+
+    def neighbor_gap_after(idx: int) -> float:
+        if idx >= len(sorted_segs) - 1:
+            return float("inf")
+        nxt = sorted_segs[idx + 1]
+        if nxt.get("speaker") == speaker_label:
+            return float("inf")
+        return nxt["start"] - sorted_segs[idx]["end"]
+
+    preferred = [
+        (i, s) for i, s in own
+        if (s["end"] - s["start"]) >= min_segment
+        and neighbor_gap_before(i) >= min_gap
+        and neighbor_gap_after(i) >= min_gap
+    ]
+
+    pool = preferred or own
+    chosen = max(pool, key=lambda pair: pair[1]["end"] - pair[1]["start"])[1]
+
+    seg_start, seg_end = chosen["start"], chosen["end"]
+    duration = seg_end - seg_start
+
+    # Apply margin only if the segment is long enough to absorb it
+    if duration > clip_len + 2 * margin:
+        inner_start = seg_start + margin
+        inner_end = seg_end - margin
+        mid = (inner_start + inner_end) / 2.0
+        start = max(inner_start, mid - clip_len / 2.0)
+        end = start + clip_len
+    else:
+        # Take whatever fits; still try to center
+        clip = min(clip_len, duration)
+        mid = (seg_start + seg_end) / 2.0
+        start = max(seg_start, mid - clip / 2.0)
+        end = start + clip
+
+    return (start, end)
+
+
+@app.get("/api/jobs/{job_id}/speaker/{speaker_label}/sample")
+async def get_speaker_sample(job_id: str, speaker_label: str):
+    """
+    Stream a ~10-second WAV clip taken from a clean segment of the given
+    speaker. Used by the correction modal to play a loopable preview.
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    diar = job.get("diarization") or []
+    if not any(seg.get("speaker") == speaker_label for seg in diar):
+        raise HTTPException(status_code=404, detail="Speaker not in this job")
+
+    window = _pick_clean_window(diar, speaker_label, clip_len=10.0)
+    if not window:
+        raise HTTPException(status_code=404, detail="No clean segment found for this speaker")
+    start, end = window
+    clip = end - start
+
+    audio_src = job.get("upload_path")
+    if not audio_src or not Path(audio_src).exists():
+        raise HTTPException(status_code=404, detail="Source audio not found (already cleaned up)")
+
+    outputs_dir = Path(job["output_path"]).parent
+    sample_path = outputs_dir / f"{job_id}_sample_{speaker_label}.wav"
+    if not sample_path.exists():
+        import subprocess
+        cmd = [
+            _get_ffmpeg(), "-y",
+            "-ss", f"{start:.3f}",
+            "-t", f"{clip:.3f}",
+            "-i", str(audio_src),
+            "-ar", "16000",
+            "-ac", "1",
+            "-c:a", "pcm_s16le",
+            str(sample_path),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise HTTPException(status_code=500, detail=f"ffmpeg failed: {result.stderr[:200]}")
+
+    return FileResponse(sample_path, media_type="audio/wav")
+
+
+def _sanitize_speaker_name(name: str) -> str:
+    """Strip control chars / colons / line breaks; clamp length. Empty -> empty."""
+    cleaned = "".join(c for c in (name or "") if c.isprintable() and c not in "\r\n\t:")
+    return cleaned.strip()[:60]
+
+
+class RenameSpeakersRequest(BaseModel):
+    names: dict[str, str]
+
+
+@app.post("/api/jobs/{job_id}/rename-speakers")
+async def rename_speakers(job_id: str, request: RenameSpeakersRequest):
+    """
+    Apply a {speaker_label -> custom_name} map and re-render VTT/TXT/CSV
+    so all references use the new names.
+
+    Empty / missing entries fall back to the previously displayed name
+    (default `Speaker 1`, `Speaker 2`, ... in input order).
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    if job.get("status") != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job not completed yet")
+
+    diar_data = job.get("diarization")
+    if not diar_data:
+        raise HTTPException(status_code=400, detail="Job has no diarization data")
+
+    # Build the name map: caller-provided names override the defaults; blanks
+    # revert to the auto-generated `Speaker N` label.
+    from .merge import format_speaker_name as _default_name
+    sanitized: dict[str, str] = {}
+    for sp, raw in (request.names or {}).items():
+        clean = _sanitize_speaker_name(raw)
+        sanitized[sp] = clean if clean else _default_name(sp)
+    # Fill in any speakers the client didn't send
+    for sp in job.get("speakers", []):
+        sanitized.setdefault(sp, _default_name(sp))
+    job["speaker_names"] = sanitized
+
+    # Re-render outputs by passing through the renamed labels. We rebuild from
+    # the stored transcripts. all_segments isn't kept on the job — we have to
+    # rebuild from diarization + saved files. Easier: read existing VTT, do a
+    # textual prefix replacement of `OLD_NAME:` -> `NEW_NAME:` at each line
+    # start. Same for TXT. CSV: replace whole-cell match in the Speaker column.
+    vtt_path = Path(job["output_path"])
+    txt_path = Path(job.get("txt_path", ""))
+    csv_path = Path(job.get("csv_path", ""))
+
+    # Map of OLD displayed name -> NEW displayed name
+    rename_pairs: list[tuple[str, str]] = []
+    for sp in job.get("speakers", []):
+        old_label = _default_name(sp)
+        new_label = sanitized[sp]
+        if old_label != new_label:
+            rename_pairs.append((old_label, new_label))
+
+    if rename_pairs:
+        for path in (vtt_path, txt_path):
+            if not path or not Path(path).exists():
+                continue
+            text = Path(path).read_text(encoding="utf-8")
+            for old, new in rename_pairs:
+                # Match "OLD: " at start of a cue line. Use re for safety.
+                import re
+                pattern = re.compile(rf"(^|\n){re.escape(old)}: ", flags=re.MULTILINE)
+                text = pattern.sub(rf"\1{new}: ", text)
+            Path(path).write_text(text, encoding="utf-8")
+
+        if csv_path and Path(csv_path).exists():
+            import csv as csv_mod
+            from io import StringIO
+            rows = list(csv_mod.reader(Path(csv_path).read_text(encoding="utf-8").splitlines()))
+            if rows:
+                header = rows[0]
+                speaker_col = header.index("Speaker") if "Speaker" in header else 2
+                rename_map = dict(rename_pairs)
+                for r in rows[1:]:
+                    if len(r) > speaker_col and r[speaker_col] in rename_map:
+                        r[speaker_col] = rename_map[r[speaker_col]]
+                buf = StringIO()
+                w = csv_mod.writer(buf, quoting=csv_mod.QUOTE_ALL)
+                for r in rows:
+                    w.writerow(r)
+                Path(csv_path).write_text(buf.getvalue(), encoding="utf-8")
+
+    return {
+        "status": "ok",
+        "speaker_names": sanitized,
+        "renamed": dict(rename_pairs),
+        "output_path": str(vtt_path),
+        "csv_path": str(csv_path) if csv_path else None,
+        "txt_path": str(txt_path) if txt_path else None,
+    }
 
 
 @app.delete("/api/jobs/{job_id}")

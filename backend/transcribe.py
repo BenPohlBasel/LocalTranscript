@@ -116,17 +116,21 @@ def transcribe_with_word_timestamps(
                 readable = " ".join(partial_text)
                 progress_callback(overall, f"Transkribiere... {whisper_progress}%", readable)
 
-            # Capture text for live display
-            # Whisper stdout format: [timestamp] text (spaces are formatting, not part of token)
-            text_match = re.search(r'\[\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}\]\s*(.+)', line)
+            # Capture text for live display.
+            # Whisper-CLI's stdout format is `[ts --> ts]  TOKEN` — exactly two
+            # spaces between the closing bracket and the token text. With
+            # `-ml 1` each TOKEN is a sub-word; word-starts have an *additional*
+            # leading space inside TOKEN. Match the fixed 2-space prefix so we
+            # preserve the per-token leading-space marker, then concatenate
+            # without an extra separator. This reassembles "Bewohner" cleanly
+            # instead of producing "Bew ohner".
+            text_match = re.search(r'\[\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}\] {2}(.*)', line)
             if text_match:
-                text = text_match.group(1).strip()
-                if text:
-                    # Add space between tokens for readable display
+                text = text_match.group(1).rstrip('\r\n')
+                if text.strip():
                     partial_text.append(text)
                     if progress_callback:
-                        # Join with spaces for readable live preview
-                        readable = " ".join(partial_text)
+                        readable = "".join(partial_text).strip()
                         progress_callback(-1, "", readable)
 
         process.wait()

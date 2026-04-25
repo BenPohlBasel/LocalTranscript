@@ -95,11 +95,14 @@ def _vad_speech_regions(audio_path: str, waveform: torch.Tensor | None = None) -
         waveform, _ = _load_audio_16k(audio_path)
     # silero accepts a 1-D float32 tensor at 16 kHz
     audio = waveform.squeeze(0).float()
+    # Tighter min_silence (150 ms) so brief pauses between speakers split the
+    # region instead of being swallowed into one. Region-level majority votes
+    # are then less likely to mislabel a stretch where two people overlap.
     ts = get_speech_timestamps(
         audio, model,
         sampling_rate=16000,
         return_seconds=True,
-        min_silence_duration_ms=300,
+        min_silence_duration_ms=150,
         min_speech_duration_ms=250,
     )
     return [(float(t["start"]), float(t["end"])) for t in ts]
@@ -205,7 +208,24 @@ def _cluster(embeddings: np.ndarray,
         linkage="average",
         distance_threshold=ahc_distance,
     )
-    return ahc.fit_predict(distance)
+    labels = ahc.fit_predict(distance)
+
+    # Centroid refinement: compute the mean (normalized) embedding per cluster,
+    # then re-assign each window to its nearest centroid. This pulls borderline
+    # windows toward the cluster they actually belong to.
+    for _ in range(2):
+        unique = np.unique(labels)
+        centroids = np.zeros((len(unique), X.shape[1]))
+        for i, lab in enumerate(unique):
+            mean = X[labels == lab].mean(axis=0)
+            n = np.linalg.norm(mean) + 1e-9
+            centroids[i] = mean / n
+        sims = X @ centroids.T  # (N, K)
+        new_labels = unique[np.argmax(sims, axis=1)]
+        if np.array_equal(new_labels, labels):
+            break
+        labels = new_labels
+    return labels
 
 
 def diarize_audio(

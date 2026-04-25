@@ -274,10 +274,13 @@ def merge_tokens_with_speakers(
 
 def assign_tokens_to_diarization(
     tokens: list[WordToken],
-    diarization: list[SpeakerSegment]
+    diarization: list
 ) -> list[dict]:
     """
     Assign word tokens to diarization segments.
+
+    `diarization` may be a list of SpeakerSegment objects or dicts with
+    start/end/speaker keys (e.g. as stored in the job record).
 
     Each diarization segment gets all tokens that fall within its time range.
     Returns list of {speaker, start, end, tokens} dicts.
@@ -285,34 +288,53 @@ def assign_tokens_to_diarization(
     if not tokens or not diarization:
         return []
 
+    def _attr(seg, name):
+        return seg[name] if isinstance(seg, dict) else getattr(seg, name)
+
     # Sort diarization by start time
-    sorted_diar = sorted(diarization, key=lambda x: x.start)
+    sorted_diar = sorted(diarization, key=lambda x: _attr(x, 'start'))
+
+    # For each token, pick the diarization segment whose interval contains its
+    # midpoint OR — if it falls into a silence gap between segments — the
+    # *nearest* segment by time. Without the fallback, tokens that whisper
+    # places inside silero's sub-second silence boundaries get dropped, which
+    # cuts off the first words of speaker turns.
+    seg_starts = [_attr(s, 'start') for s in sorted_diar]
+    seg_ends = [_attr(s, 'end') for s in sorted_diar]
+
+    def best_seg_idx(t_mid: float) -> int:
+        best_i = 0
+        best_d = float('inf')
+        for i, (s, e) in enumerate(zip(seg_starts, seg_ends)):
+            if s <= t_mid <= e:
+                return i
+            d = s - t_mid if t_mid < s else t_mid - e
+            if d < best_d:
+                best_d = d
+                best_i = i
+        return best_i
+
+    by_seg: dict[int, list] = {}
+    for token in tokens:
+        t_mid = (token.start + token.end) / 2.0
+        by_seg.setdefault(best_seg_idx(t_mid), []).append(token)
 
     result = []
+    for i, diar_seg in enumerate(sorted_diar):
+        toks = by_seg.get(i, [])
+        if not toks:
+            continue
+        result.append({
+            'speaker': _attr(diar_seg, 'speaker'),
+            'start': _attr(diar_seg, 'start'),
+            'end': _attr(diar_seg, 'end'),
+            'tokens': toks,
+        })
 
-    for diar_seg in sorted_diar:
-        # Find all tokens that belong to this diarization segment
-        seg_tokens = []
-
-        for token in tokens:
-            # Token belongs to segment if its midpoint falls within the segment
-            token_mid = (token.start + token.end) / 2
-            if diar_seg.start <= token_mid <= diar_seg.end:
-                seg_tokens.append(token)
-
-        if seg_tokens:
-            result.append({
-                'speaker': diar_seg.speaker,
-                'start': diar_seg.start,
-                'end': diar_seg.end,
-                'tokens': seg_tokens
-            })
-
-    # Merge consecutive segments from same speaker (optional, for cleaner output)
+    # Merge consecutive segments from same speaker (cleaner output)
     merged = []
     for seg in result:
         if merged and merged[-1]['speaker'] == seg['speaker']:
-            # Same speaker - merge
             merged[-1]['end'] = seg['end']
             merged[-1]['tokens'].extend(seg['tokens'])
         else:
@@ -862,6 +884,39 @@ def build_csv_from_speaker_segments(speaker_segments: list[dict]) -> str:
         ])
 
     return output.getvalue()
+
+
+def tokens_to_speaker_segments(tokens: list, diarization: list) -> list[dict]:
+    """
+    Group word-level tokens (from a single whisper-cli pass) into speaker
+    blocks using a diarization timeline.
+
+    Output mirrors the structure expected by
+    `build_{vtt,csv,txt}_from_speaker_transcript_segments`:
+        [{"speaker": "SPEAKER_00", "segments": [TranscriptSegment, ...]}, ...]
+
+    Each block becomes a single TranscriptSegment with the speaker's full
+    text in that block; downstream `normalize_vtt_cues` then splits long
+    cues at natural sentence/clause boundaries.
+    """
+    if not tokens:
+        return []
+
+    assigned = assign_tokens_to_diarization(tokens, diarization)
+    blocks: list[dict] = []
+    for block in assigned:
+        toks = block.get('tokens') or []
+        if not toks:
+            continue
+        text = tokens_to_text(toks).strip()
+        if not text:
+            continue
+        block_start = toks[0].start
+        block_end = toks[-1].end
+        seg = TranscriptSegment(start=block_start, end=block_end, text=text)
+        blocks.append({'speaker': block['speaker'], 'segments': [seg]})
+
+    return blocks
 
 
 def build_vtt_from_speaker_transcript_segments(all_segments: list[dict]) -> str:

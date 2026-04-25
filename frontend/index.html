@@ -256,6 +256,27 @@
         </footer>
     </div>
 
+    <!-- Speaker Rename Modal -->
+    <div class="modal-overlay" id="renameModal" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sprecher benennen</h2>
+                <button class="modal-close" id="closeRenameBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="rename-hint">
+                    Klick &raquo;Anhören&laquo; um eine 5-Sekunden-Probe des jeweiligen Sprechers im Loop zu hören.
+                    Der eingetragene Name ersetzt das automatische Label in VTT, TXT und CSV.
+                </p>
+                <ul class="rename-list" id="renameList"></ul>
+                <div class="rename-actions">
+                    <button class="btn-secondary" id="renameCancelBtn">Abbrechen</button>
+                    <button class="btn-primary" id="renameSaveBtn">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Info Modal -->
     <div class="modal-overlay" id="infoModal" hidden>
         <div class="modal-content">

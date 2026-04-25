@@ -44,6 +44,12 @@ const progressMessage = document.getElementById('progressMessage');
 const timeElapsed = document.getElementById('timeElapsed');
 const timeEstimate = document.getElementById('timeEstimate');
 
+const renameModal = document.getElementById('renameModal');
+const renameList = document.getElementById('renameList');
+const renameSaveBtn = document.getElementById('renameSaveBtn');
+const renameCancelBtn = document.getElementById('renameCancelBtn');
+const closeRenameBtn = document.getElementById('closeRenameBtn');
+
 const resultList = document.getElementById('resultList');
 const resultTitle = document.getElementById('resultTitle');
 const resultSubtitle = document.getElementById('resultSubtitle');
@@ -76,6 +82,7 @@ let batchIndex = 0;          // index of currently processing file
 let batchAborted = false;
 let currentRunFolder = null; // Electron run folder path for the current batch
 let transcriptsRoot = null;  // Cached config from Electron
+let renameContext = null;    // {jobId, audio, currentRow} while modal is open
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -175,6 +182,15 @@ function setupEventListeners() {
     if (firstRunPickBtn) {
         firstRunPickBtn.addEventListener('click', () => pickTranscriptsRoot('pick'));
     }
+    if (closeRenameBtn) closeRenameBtn.addEventListener('click', closeRenameModal);
+    if (renameCancelBtn) renameCancelBtn.addEventListener('click', closeRenameModal);
+    if (renameSaveBtn) renameSaveBtn.addEventListener('click', saveSpeakerNames);
+    if (renameModal) {
+        renameModal.addEventListener('click', (e) => {
+            if (e.target === renameModal) closeRenameModal();
+        });
+    }
+
     if (showRunBtn) {
         showRunBtn.addEventListener('click', () => {
             if (currentRunFolder && electronBridge) {
@@ -538,6 +554,132 @@ function updateBatchIndicator() {
     batchIndicator.textContent = `Datei ${batchIndex + 1} von ${selectedFiles.length}: ${current ? current.name : ''}`;
 }
 
+function openRenameModal(result) {
+    if (!renameModal || !result.speakers || result.speakers.length === 0) return;
+
+    renameContext = { jobId: result.jobId, audio: null, currentRow: null, result };
+
+    renameList.innerHTML = '';
+    result.speakers.forEach((speakerLabel, idx) => {
+        const li = document.createElement('li');
+        li.dataset.speaker = speakerLabel;
+
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'rename-play';
+        playBtn.textContent = '▶ Anhören';
+        playBtn.addEventListener('click', () => toggleSpeakerPlayback(speakerLabel, playBtn));
+        li.appendChild(playBtn);
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'rename-name';
+        nameInput.placeholder = `Speaker ${idx + 1}`;
+        // Pre-fill with the current display name (or default if equal to default)
+        const current = (result.speakerNames && result.speakerNames[speakerLabel]) || `Speaker ${idx + 1}`;
+        if (current !== `Speaker ${idx + 1}`) {
+            nameInput.value = current;
+        }
+        nameInput.dataset.speaker = speakerLabel;
+        li.appendChild(nameInput);
+
+        renameList.appendChild(li);
+    });
+
+    renameModal.hidden = false;
+}
+
+function closeRenameModal() {
+    if (renameContext && renameContext.audio) {
+        renameContext.audio.pause();
+        renameContext.audio = null;
+    }
+    if (renameModal) renameModal.hidden = true;
+    renameContext = null;
+}
+
+function toggleSpeakerPlayback(speakerLabel, btn) {
+    if (!renameContext) return;
+
+    // Stop any currently playing audio
+    if (renameContext.audio) {
+        renameContext.audio.pause();
+        renameContext.audio = null;
+    }
+    document.querySelectorAll('.rename-play.playing').forEach(b => {
+        b.classList.remove('playing');
+        b.textContent = '▶ Anhören';
+    });
+
+    if (renameContext.currentRow === speakerLabel) {
+        // Was playing this one — toggle off
+        renameContext.currentRow = null;
+        return;
+    }
+
+    const audio = new Audio(`${API_BASE}/jobs/${renameContext.jobId}/speaker/${encodeURIComponent(speakerLabel)}/sample`);
+    audio.loop = true;
+    audio.play().catch(err => {
+        alert('Konnte Audio-Probe nicht abspielen: ' + (err.message || err));
+    });
+    renameContext.audio = audio;
+    renameContext.currentRow = speakerLabel;
+    btn.classList.add('playing');
+    btn.textContent = '■ Stop';
+}
+
+async function saveSpeakerNames() {
+    if (!renameContext) return;
+
+    // Collect names
+    const names = {};
+    renameList.querySelectorAll('input.rename-name').forEach(input => {
+        const sp = input.dataset.speaker;
+        const value = input.value.trim();
+        if (sp && value) names[sp] = value;
+    });
+
+    renameSaveBtn.disabled = true;
+    renameSaveBtn.textContent = 'Speichere...';
+
+    try {
+        const response = await fetch(`${API_BASE}/jobs/${renameContext.jobId}/rename-speakers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ names })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Speichern fehlgeschlagen');
+        }
+        const data = await response.json();
+
+        // If we autosaved into the run folder, refresh those copies too.
+        if (currentRunFolder && isElectron && Object.keys(data.renamed || {}).length > 0) {
+            try {
+                const job = await fetch(`${API_BASE}/jobs/${renameContext.jobId}`).then(r => r.json());
+                await autosaveJob(job, currentRunFolder);
+            } catch (err) {
+                console.warn('Re-copy after rename failed:', err);
+            }
+        }
+
+        // Update local state for this result
+        if (renameContext.result) {
+            renameContext.result.speakerNames = data.speaker_names || {};
+        }
+
+        closeRenameModal();
+    } catch (error) {
+        alert('Fehler: ' + (error.message || error));
+        renameSaveBtn.disabled = false;
+        renameSaveBtn.textContent = 'Speichern';
+    } finally {
+        renameSaveBtn.disabled = false;
+        renameSaveBtn.textContent = 'Speichern';
+    }
+}
+
 async function autosaveJob(job, runFolder) {
     const baseName = audioBasename(job.filename);
     const audioExt = (job.filename.match(/\.[^.]+$/) || ['.bin'])[0];
@@ -589,10 +731,10 @@ function renderResults() {
         resultTitle.textContent = title;
     }
 
-    // Electron + run folder: simplified view, single "Transkripte zeigen" button
-    if (isElectron && currentRunFolder) {
-        const autosaveErrors = batchResults.filter(r => r.autosaveError);
-        if (resultSubtitle) {
+    // Subtitle (Electron mode): show run-folder path and any errors
+    if (resultSubtitle) {
+        if (isElectron && currentRunFolder) {
+            const autosaveErrors = batchResults.filter(r => r.autosaveError);
             const lines = [`Gespeichert in: ${currentRunFolder}`];
             if (failCount > 0) lines.push(`${failCount} Datei(en) fehlgeschlagen.`);
             if (autosaveErrors.length > 0) {
@@ -600,19 +742,13 @@ function renderResults() {
             }
             resultSubtitle.textContent = lines.join('  ·  ');
             resultSubtitle.hidden = false;
+        } else {
+            resultSubtitle.hidden = true;
+            resultSubtitle.textContent = '';
         }
-        resultList.hidden = true;
-        resultList.innerHTML = '';
-        if (showRunBtn) showRunBtn.hidden = false;
-        return;
     }
+    if (showRunBtn) showRunBtn.hidden = !(isElectron && currentRunFolder);
 
-    // Browser-mode: show per-file download list
-    if (resultSubtitle) {
-        resultSubtitle.hidden = true;
-        resultSubtitle.textContent = '';
-    }
-    if (showRunBtn) showRunBtn.hidden = true;
     resultList.hidden = false;
     resultList.innerHTML = '';
     batchResults.forEach(res => {
@@ -625,27 +761,40 @@ function renderResults() {
         li.appendChild(name);
 
         if (res.status === 'completed') {
-            const downloads = document.createElement('span');
-            downloads.className = 'result-downloads';
+            // Show "Korrigieren" only when speakers exist (skip diarize=off jobs)
+            if (res.speakerCount && res.speakerCount >= 1) {
+                const correct = document.createElement('button');
+                correct.type = 'button';
+                correct.className = 'btn-correct';
+                correct.textContent = 'Korrigieren';
+                correct.addEventListener('click', () => openRenameModal(res));
+                li.appendChild(correct);
+            }
+            // In Electron mode the files are already in the run folder, so
+            // skip per-file VTT/CSV/TXT download buttons. Browser-mode keeps them.
+            if (!(isElectron && currentRunFolder)) {
+                const downloads = document.createElement('span');
+                downloads.className = 'result-downloads';
 
-            const txt = document.createElement('a');
-            txt.className = 'btn-txt';
-            txt.textContent = 'TXT';
-            txt.addEventListener('click', () => saveFileForJob(res.jobId, 'txt'));
-            downloads.appendChild(txt);
+                const txt = document.createElement('a');
+                txt.className = 'btn-txt';
+                txt.textContent = 'TXT';
+                txt.addEventListener('click', () => saveFileForJob(res.jobId, 'txt'));
+                downloads.appendChild(txt);
 
-            const vtt = document.createElement('a');
-            vtt.className = 'btn-vtt';
-            vtt.textContent = 'VTT';
-            vtt.addEventListener('click', () => saveFileForJob(res.jobId, 'vtt'));
-            downloads.appendChild(vtt);
+                const vtt = document.createElement('a');
+                vtt.className = 'btn-vtt';
+                vtt.textContent = 'VTT';
+                vtt.addEventListener('click', () => saveFileForJob(res.jobId, 'vtt'));
+                downloads.appendChild(vtt);
 
-            const csv = document.createElement('a');
-            csv.textContent = 'CSV';
-            csv.addEventListener('click', () => saveFileForJob(res.jobId, 'csv'));
-            downloads.appendChild(csv);
+                const csv = document.createElement('a');
+                csv.textContent = 'CSV';
+                csv.addEventListener('click', () => saveFileForJob(res.jobId, 'csv'));
+                downloads.appendChild(csv);
 
-            li.appendChild(downloads);
+                li.appendChild(downloads);
+            }
         } else {
             const status = document.createElement('span');
             status.className = 'result-status';
@@ -716,7 +865,10 @@ function startPolling() {
                 const result = {
                     filename: selectedFiles[batchIndex].name,
                     jobId: currentJobId,
-                    status: 'completed'
+                    status: 'completed',
+                    speakers: job.speakers || [],
+                    speakerCount: (job.speakers || []).length,
+                    speakerNames: job.speaker_names || {}
                 };
                 if (currentRunFolder) {
                     try {
