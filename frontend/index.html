@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalTranscript - Audio Transcription</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="drag-region"></div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>LocalTranscript</h1>
+                    <p class="subtitle">Audio-Transkription mit Sprechererkennung</p>
+                </div>
+                <button class="btn-info" id="infoBtn" title="Info & Hilfe">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- First Run: Speicherort wählen (nur in Electron) -->
+            <section class="setup-section" id="firstRunSection" hidden>
+                <div class="setup-card">
+                    <div class="setup-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h2>Speicherort wählen</h2>
+                    <p class="setup-description">
+                        Wo sollen deine Transkripte gespeichert werden?
+                        Pro Lauf wird ein Unterordner mit Datum und Uhrzeit angelegt
+                        (z.&nbsp;B. <code>260425_1430</code>) — darin liegen Audio, VTT, TXT und CSV.
+                    </p>
+
+                    <p class="setup-default-path" id="firstRunDefaultPath"></p>
+
+                    <div class="first-run-actions">
+                        <button class="btn-primary" id="firstRunDefaultBtn">
+                            Empfohlenen Ort verwenden
+                        </button>
+                        <button class="btn-secondary" id="firstRunPickBtn">
+                            Anderen Ordner wählen…
+                        </button>
+                    </div>
+
+                    <p class="setup-note">
+                        Du kannst den Ort jederzeit über <strong>Datei → Speicherort ändern…</strong> anpassen.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Setup Section (Token eingeben) -->
+            <section class="setup-section" id="setupSection" hidden>
+                <div class="setup-card">
+                    <div class="setup-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                    </div>
+                    <h2>Einrichtung</h2>
+                    <p class="setup-description">
+                        Für die Sprechererkennung wird ein kostenloser HuggingFace-Token benötigt.
+                    </p>
+
+                    <div class="setup-steps">
+                        <div class="setup-step">
+                            <span class="step-num">1</span>
+                            <a href="https://huggingface.co/join" target="_blank">Account erstellen</a>
+                        </div>
+                        <div class="setup-step">
+                            <span class="step-num">2</span>
+                            <a href="https://huggingface.co/pyannote/speaker-diarization-3.1" target="_blank">Lizenz akzeptieren</a>
+                        </div>
+                        <div class="setup-step">
+                            <span class="step-num">3</span>
+                            <a href="https://huggingface.co/settings/tokens" target="_blank">Token erstellen</a>
+                        </div>
+                    </div>
+
+                    <div class="token-input-group">
+                        <input type="password" id="tokenInput" placeholder="hf_xxxxxxxxxxxx" autocomplete="off">
+                        <button class="btn-show-token" id="toggleToken" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button class="btn-primary" id="saveTokenBtn">
+                        Token speichern & starten
+                    </button>
+
+                    <p class="setup-note">
+                        Der Token wird lokal gespeichert. Alle Daten bleiben auf deinem Mac.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Upload Form -->
+            <section class="upload-section" id="uploadSection" hidden>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <p>Audio-Dateien hierher ziehen</p>
+                        <p class="drop-zone-hint">oder klicken zum Auswählen (mehrere möglich)</p>
+                        <p class="formats">MP3, WAV, M4A, OGG, FLAC</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.ogg,.flac,.webm" multiple hidden>
+                </div>
+
+                <div class="options">
+                    <div class="option-group">
+                        <label for="modelSelect">Whisper Modell</label>
+                        <select id="modelSelect">
+                            <option value="medium" selected>Medium (empfohlen)</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="languageSelect">Sprache</label>
+                        <select id="languageSelect">
+                            <option value="de" selected>Deutsch</option>
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="it">Italiano</option>
+                            <option value="es">Español</option>
+                            <option value="auto">Auto-detect</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group" id="speakerRangeGroup">
+                        <label for="speakerRange">Sprecher</label>
+                        <select id="speakerRange">
+                            <option value="auto" selected>Automatisch</option>
+                            <option value="2-2">Genau 2</option>
+                            <option value="2-4">2-4</option>
+                            <option value="4-6">4-6</option>
+                            <option value="5-8">5-8</option>
+                            <option value="6-10">6-10</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="diarize-toggle">
+                    <label class="diarize-toggle-label" for="diarizeCheckbox">
+                        <input type="checkbox" id="diarizeCheckbox" checked>
+                        <span>Sprechererkennung aktivieren</span>
+                    </label>
+                </div>
+
+                <div class="options">
+                    <div class="option-group" id="clusterThresholdGroup">
+                        <label for="clusterThreshold">Sprecher-Trennung</label>
+                        <select id="clusterThreshold">
+                            <option value="0.7">Locker (ähnliche Stimmen zusammen)</option>
+                            <option value="0.5" selected>Normal</option>
+                            <option value="0.35">Streng (mehr Trennung)</option>
+                            <option value="0.25">Sehr streng</option>
+                        </select>
+                    </div>
+                </div>
+
+                <ul class="file-list" id="fileList" hidden></ul>
+
+                <button class="btn-primary" id="startBtn" disabled>
+                    Transkription starten
+                </button>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section" id="progressSection" hidden>
+                <div class="batch-indicator" id="batchIndicator" hidden></div>
+                <div class="progress-header">
+                    <h2 id="progressTitle">Verarbeite...</h2>
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-details">
+                    <p class="progress-message" id="progressMessage">Starte...</p>
+                    <div class="progress-time">
+                        <span class="time-elapsed" id="timeElapsed">00:00</span>
+                        <span class="time-separator">/</span>
+                        <span class="time-estimate" id="timeEstimate">--:--</span>
+                    </div>
+                </div>
+                <div class="progress-steps">
+                    <div class="step" id="step1">
+                        <div class="step-icon">1</div>
+                        <span>Upload</span>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-icon">2</div>
+                        <span>Sprecher</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-icon">3</div>
+                        <span>Transkript</span>
+                    </div>
+                    <div class="step" id="step4">
+                        <div class="step-icon">4</div>
+                        <span>Merge</span>
+                    </div>
+                </div>
+                <div class="live-transcript" id="liveTranscript" hidden>
+                    <div class="transcript-text" id="transcriptText"></div>
+                </div>
+                <button class="btn-cancel" id="cancelBtn">Abbrechen</button>
+            </section>
+
+            <!-- Result Section -->
+            <section class="result-section" id="resultSection" hidden>
+                <div class="result-header">
+                    <h2 id="resultTitle">Transkription fertig!</h2>
+                    <p class="result-subtitle" id="resultSubtitle" hidden></p>
+                </div>
+                <ul class="result-list" id="resultList" hidden></ul>
+                <div class="result-actions">
+                    <button class="btn-primary" id="showRunBtn" hidden>
+                        Transkripte zeigen
+                    </button>
+                    <button class="btn-secondary" id="newBtn">
+                        Neue Dateien
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section" id="errorSection" hidden>
+                <div class="error-content">
+                    <h2>Fehler</h2>
+                    <p id="errorMessage"></p>
+                    <button class="btn-secondary" id="retryBtn">Erneut versuchen</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Läuft 100% lokal auf deinem Mac</p>
+        </footer>
+    </div>
+
+    <!-- Info Modal -->
+    <div class="modal-overlay" id="infoModal" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>LocalTranscript</h2>
+                <button class="modal-close" id="closeInfoBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="infoContent">
+                <div class="loading">Lade Informationen...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

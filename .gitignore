@@ -1,0 +1,51 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Local Python venvs (built fresh by electron/scripts/build-python-runtime.mjs)
+venv/
+venv.broken/
+
+# Node
+electron/node_modules/
+
+# Electron build artifacts
+electron/resources/
+electron/dist/
+
+# Runtime data
+uploads/
+outputs/
+server.log
+
+# Bundled binaries / models — produced by build scripts or downloaded separately
+bin/
+models/
+
+# Legacy py2app / PyWebView artifacts (kept locally, not part of this repo)
+/build/
+/dist/
+Whisper Web.app/
+WhisperWeb-Complete/
+WhisperWeb-v1.0.zip
+app.py
+setup.py
+run.sh
+setup-new-mac.sh
+whisper-web.sh
+uninstall.sh
+
+# Secrets
+.env
+
+# Editor / OS / tooling
+.vscode/
+.idea/
+.claude/
+*.pid
+
