@@ -226,6 +226,10 @@ async def get_info(request: Request):
                 "POST /api/jobs/{id}/save-vtt": "VTT in Downloads-Ordner speichern",
                 "POST /api/jobs/{id}/save-csv": "CSV in Downloads-Ordner speichern",
                 "POST /api/jobs/{id}/save-txt": "TXT in Downloads-Ordner speichern",
+                "GET /api/jobs/{id}/speaker/{label}/sample": "Audio-Probe eines Sprechers (Loop, 10s)",
+                "POST /api/jobs/{id}/rename-speakers": "Sprecher-Labels umbenennen",
+                "GET /api/jobs/{id}/glossary": "Begriffs-Kandidaten extrahieren",
+                "POST /api/jobs/{id}/rename-terms": "Begriffe in VTT/TXT/CSV ersetzen",
                 "DELETE /api/jobs/{id}": "Job abbrechen / löschen",
                 "GET /api/models": "Verfügbare Whisper-Modelle",
                 "GET /api/info": "Diese Informationen"
@@ -244,14 +248,19 @@ async def get_info(request: Request):
                 "available": True,
                 "license": "Apache 2.0 (SpeechBrain) + MIT (silero)"
             },
+            "glossary": {
+                "name": "spaCy de_core_news_sm (NER + POS)",
+                "available": True,
+                "license": "MIT (spaCy)"
+            },
             "backend": {
                 "framework": "FastAPI + Uvicorn",
-                "language": "Python 3.11+",
+                "language": "Python 3.13 (standalone, gebündelt)",
                 "license": "MIT"
             },
             "frontend": {
                 "type": "HTML/CSS/JavaScript",
-                "native_wrapper": "PyWebView",
+                "native_wrapper": "Electron",
                 "license": "MIT"
             }
         },
@@ -1016,6 +1025,102 @@ async def rename_speakers(job_id: str, request: RenameSpeakersRequest):
         "output_path": str(vtt_path),
         "csv_path": str(csv_path) if csv_path else None,
         "txt_path": str(txt_path) if txt_path else None,
+    }
+
+
+@app.get("/api/jobs/{job_id}/glossary")
+async def get_glossary(job_id: str):
+    """
+    Return frequency-sorted candidate terms (proper nouns, named entities,
+    rare capitalised tokens) extracted from the job's transcript.
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    if job.get("status") != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job not completed yet")
+
+    txt_path = Path(job.get("txt_path", ""))
+    if not txt_path.exists():
+        raise HTTPException(status_code=404, detail="Transcript not found")
+
+    text = txt_path.read_text(encoding="utf-8")
+    try:
+        from .glossary import extract_candidates
+        candidates = await asyncio.to_thread(extract_candidates, text, 100)
+    except Exception as e:
+        # spaCy / model missing — return empty list rather than 500.
+        print(f"Glossary extraction failed: {e}")
+        candidates = []
+    return {"candidates": candidates}
+
+
+def _sanitize_term(value: str) -> str:
+    cleaned = "".join(c for c in (value or "") if c.isprintable() and c not in "\r\n\t")
+    return cleaned.strip()[:100]
+
+
+class RenameTermsRequest(BaseModel):
+    renames: dict[str, str]
+
+
+@app.post("/api/jobs/{job_id}/rename-terms")
+async def rename_terms(job_id: str, request: RenameTermsRequest):
+    """
+    Replace `old -> new` for each entry in `renames` across the job's VTT,
+    TXT and CSV files. Whole-word match only (`\\bold\\b`), case-sensitive.
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    if job.get("status") != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job not completed yet")
+
+    pairs: list[tuple[str, str]] = []
+    for old, new in (request.renames or {}).items():
+        old_clean = _sanitize_term(old)
+        new_clean = _sanitize_term(new)
+        if old_clean and new_clean and old_clean != new_clean:
+            pairs.append((old_clean, new_clean))
+
+    if not pairs:
+        return {"status": "ok", "renamed": {}}
+
+    import re
+
+    # Build a single combined regex once for efficiency. Sort by length
+    # descending so longer terms ("Stadt Bern") match before shorter ones
+    # ("Stadt") inside the same pass.
+    pairs.sort(key=lambda p: -len(p[0]))
+    pattern = re.compile(
+        r"\b(" + "|".join(re.escape(old) for old, _ in pairs) + r")\b"
+    )
+    replacement_map = {old: new for old, new in pairs}
+
+    def apply(text: str) -> str:
+        return pattern.sub(lambda m: replacement_map[m.group(1)], text)
+
+    for path_attr in ("output_path", "txt_path"):
+        path = Path(job.get(path_attr, ""))
+        if path and path.exists():
+            text = path.read_text(encoding="utf-8")
+            path.write_text(apply(text), encoding="utf-8")
+
+    csv_path = Path(job.get("csv_path", ""))
+    if csv_path and csv_path.exists():
+        # CSV is also plain text; the regex is safe across cell boundaries
+        # because word boundaries don't match commas or quotes.
+        text = csv_path.read_text(encoding="utf-8")
+        csv_path.write_text(apply(text), encoding="utf-8")
+
+    return {
+        "status": "ok",
+        "renamed": replacement_map,
+        "output_path": job.get("output_path"),
+        "csv_path": job.get("csv_path"),
+        "txt_path": job.get("txt_path"),
     }
 
 
