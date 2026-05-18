@@ -118,6 +118,9 @@ function runtimePython() {
 async function ensureVenv() {
   if (existsSync(VENV_DIR) && !force) {
     console.log(`venv already present at ${VENV_DIR}, skipping creation`);
+    // Idempotent: always re-run the symlink fixup so a venv built before
+    // the relativize step gets repaired without a full rebuild.
+    await relativizeVenvLinks();
     return;
   }
   if (existsSync(VENV_DIR)) {
@@ -128,8 +131,33 @@ async function ensureVenv() {
   // strips that rpath and the venv binary fails to load libpython. With
   // symlinks the rpath is preserved and resolves back into the runtime.
   // Both runtime and venv ship in the same Resources directory in the
-  // bundle, so symlinks remain valid.
+  // bundle, so symlinks remain valid — *as long as they're relative*.
+  // `python -m venv` creates absolute symlinks; we relativize them below
+  // so the bundle works regardless of where the .app is installed.
   await run(runtimePython(), ['-m', 'venv', VENV_DIR]);
+  await relativizeVenvLinks();
+}
+
+async function relativizeVenvLinks() {
+  const { readdir, readlink, unlink, symlink } = await import('node:fs/promises');
+  const venvBin = path.join(VENV_DIR, 'bin');
+  const entries = await readdir(venvBin);
+  let fixed = 0;
+  for (const name of entries) {
+    const full = path.join(venvBin, name);
+    let target;
+    try {
+      target = await readlink(full);
+    } catch {
+      continue; // not a symlink
+    }
+    if (!path.isAbsolute(target)) continue;
+    const rel = path.relative(venvBin, target);
+    await unlink(full);
+    await symlink(rel, full);
+    fixed++;
+  }
+  if (fixed > 0) console.log(`Relativized ${fixed} venv symlink(s).`);
 }
 
 async function installDeps() {

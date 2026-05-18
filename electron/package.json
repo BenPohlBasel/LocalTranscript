@@ -1,7 +1,7 @@
 {
   "name": "localtranscript",
   "productName": "LocalTranscript",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Native macOS shell for LocalTranscript (FastAPI backend + Chromium frontend)",
   "author": "BIAS.City",
   "main": "main.js",

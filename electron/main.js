@@ -469,7 +469,44 @@ function createWindow(port) {
 
 // --- App lifecycle ----------------------------------------------------------
 
+function fixupBundledVenv() {
+  // electron-builder copies our pre-built venv into Resources/venv, but the
+  // venv was created at build time with absolute paths baked into pyvenv.cfg
+  // (and originally absolute symlinks too — those are fixed in build-time
+  // via relativizeVenvLinks). Each install of the .app lives at a different
+  // absolute path, so we rewrite pyvenv.cfg here every launch.
+  if (!app.isPackaged) return;
+  try {
+    const venvDir = path.join(process.resourcesPath, 'venv');
+    const cfgPath = path.join(venvDir, 'pyvenv.cfg');
+    const runtimeBin = path.join(process.resourcesPath, 'python-runtime', 'bin');
+    if (!fs.existsSync(cfgPath) || !fs.existsSync(runtimeBin)) return;
+
+    let version = '3.13.13';
+    try {
+      const current = fs.readFileSync(cfgPath, 'utf-8');
+      const m = current.match(/version\s*=\s*(\S+)/);
+      if (m) version = m[1];
+    } catch {}
+
+    const updated =
+      `home = ${runtimeBin}\n` +
+      `include-system-site-packages = false\n` +
+      `version = ${version}\n` +
+      `executable = ${path.join(runtimeBin, 'python3.13')}\n`;
+    const existing = fs.existsSync(cfgPath) ? fs.readFileSync(cfgPath, 'utf-8') : '';
+    if (existing !== updated) {
+      fs.writeFileSync(cfgPath, updated, 'utf-8');
+      console.log('[electron] rewrote venv pyvenv.cfg for current install path');
+    }
+  } catch (err) {
+    console.error('[electron] could not fix pyvenv.cfg:', err);
+  }
+}
+
 async function bootstrap() {
+  fixupBundledVenv();
+
   if (!pythonExists()) {
     const where = app.isPackaged
       ? 'Das Bundle ist beschädigt — Python-Runtime fehlt in den Resources.'
