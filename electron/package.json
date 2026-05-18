@@ -1,7 +1,7 @@
 {
   "name": "localtranscript",
   "productName": "LocalTranscript",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Native macOS shell for LocalTranscript (FastAPI backend + Chromium frontend)",
   "author": "BIAS.City",
   "main": "main.js",
@@ -14,7 +14,7 @@
     "build:resources": "node scripts/sync-resources.mjs",
     "build:binaries": "node scripts/build-binaries.mjs",
     "build:bundle": "npm run build:python-runtime && npm run build:binaries && npm run build:resources",
-    "dist": "npm run build:bundle && electron-builder --mac",
+    "dist": "npm run build:bundle && electron-builder --mac && node scripts/codesign-and-dmg.mjs",
     "dist:dir": "npm run build:bundle && electron-builder --mac --dir"
   },
   "devDependencies": {
@@ -95,9 +95,10 @@
       ],
       "icon": "build/icon.icns",
       "category": "public.app-category.productivity",
-      "identity": null,
+      "identity": "-",
       "hardenedRuntime": false,
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "type": "distribution"
     },
     "dmg": {
       "title": "${productName} ${version}"
