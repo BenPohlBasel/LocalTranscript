@@ -196,6 +196,27 @@ function registerIpc() {
     return { copied };
   });
 
+  ipcMain.handle('editor:export', async (_event, payload) => {
+    const { destDir, files } = payload || {};
+    if (!destDir || !Array.isArray(files)) {
+      throw new Error('Ungültige Export-Anfrage');
+    }
+    if (!fs.existsSync(destDir) || !fs.statSync(destDir).isDirectory()) {
+      throw new Error('Zielordner existiert nicht: ' + destDir);
+    }
+    const written = [];
+    for (const item of files) {
+      if (!item || !item.src || !item.name) continue;
+      if (!fs.existsSync(item.src)) continue;
+      const destName = safeName(item.name);
+      const dest = path.join(destDir, destName);
+      // Overwrite the "_bearbeitet" copies so re-saving updates them in place.
+      await fsp.copyFile(item.src, dest);
+      written.push(destName);
+    }
+    return { dir: destDir, written };
+  });
+
   ipcMain.handle('shell:open-folder', async (_event, folderPath) => {
     if (!folderPath || !fs.existsSync(folderPath)) {
       throw new Error('Ordner nicht gefunden');

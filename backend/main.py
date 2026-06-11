@@ -1124,6 +1124,249 @@ async def rename_terms(job_id: str, request: RenameTermsRequest):
     }
 
 
+# ---------------------------------------------------------------------------
+# Transcript editor + external VTT import
+# ---------------------------------------------------------------------------
+
+class EditSegment(BaseModel):
+    start: float
+    end: float
+    speaker: Optional[str] = None
+    text: str
+
+
+class EditSegmentsRequest(BaseModel):
+    segments: list[EditSegment]
+
+
+_AUDIO_MEDIA_TYPES = {
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".m4a": "audio/mp4",
+    ".ogg": "audio/ogg",
+    ".flac": "audio/flac",
+    ".webm": "audio/webm",
+}
+
+
+def _known_speaker_names(job: dict) -> set[str]:
+    """
+    The set of speaker display names that may appear as `Name:` prefixes in the
+    job's VTT. Prefers an explicit rename map / import-detected list, falling
+    back to the default `Speaker N` labels.
+    """
+    from .merge import format_speaker_name as _default_name
+
+    names: set[str] = set()
+    speaker_names = job.get("speaker_names")
+    if isinstance(speaker_names, dict) and speaker_names:
+        names.update(v for v in speaker_names.values() if v)
+    for sp in job.get("speakers", []) or []:
+        names.add(_default_name(sp))
+    for n in job.get("import_speakers", []) or []:
+        names.add(n)
+    return {n for n in names if n}
+
+
+@app.get("/api/jobs/{job_id}/audio")
+async def get_job_audio(job_id: str):
+    """Stream the job's source audio (supports range requests for seeking)."""
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    audio_src = job.get("upload_path")
+    if not audio_src or not Path(audio_src).exists():
+        raise HTTPException(status_code=404, detail="Audio not available")
+
+    ext = Path(audio_src).suffix.lower()
+    media_type = _AUDIO_MEDIA_TYPES.get(ext, "application/octet-stream")
+    return FileResponse(audio_src, media_type=media_type)
+
+
+@app.get("/api/jobs/{job_id}/segments")
+async def get_segments(job_id: str):
+    """
+    Return the job's VTT parsed into editable cues. The VTT on disk is the
+    source of truth (segments aren't kept on the job record).
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    if job.get("status") != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job not completed yet")
+
+    vtt_path = Path(job.get("output_path", ""))
+    if not vtt_path.exists():
+        raise HTTPException(status_code=404, detail="VTT file not found")
+
+    from .merge import vtt_to_flat_cues
+
+    known = _known_speaker_names(job)
+    text = vtt_path.read_text(encoding="utf-8")
+    cues = vtt_to_flat_cues(text, known if known else None)
+
+    # Speakers actually present, in first-seen order, unioned with known labels.
+    seen: list[str] = []
+    for c in cues:
+        sp = c.get("speaker")
+        if sp and sp not in seen:
+            seen.append(sp)
+    for n in sorted(known):
+        if n not in seen:
+            seen.append(n)
+
+    audio_src = job.get("upload_path")
+    has_audio = bool(audio_src and Path(audio_src).exists())
+
+    return {
+        "job_id": job_id,
+        "filename": job.get("filename"),
+        "segments": cues,
+        "speakers": seen,
+        "diarized": bool(job.get("diarize", True)) and bool(seen),
+        "has_audio": has_audio,
+    }
+
+
+@app.post("/api/jobs/{job_id}/edit-segments")
+async def edit_segments(job_id: str, request: EditSegmentsRequest):
+    """
+    Persist edited cues: rebuild VTT, TXT and CSV from the supplied flat cue
+    list. Text and per-segment speaker may change; timestamps are preserved as
+    sent by the client.
+    """
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job = jobs[job_id]
+    if job.get("status") != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job not completed yet")
+
+    from .merge import (
+        build_vtt_from_flat_cues,
+        build_txt_from_flat_cues,
+        build_csv_from_flat_cues,
+    )
+
+    cues = [
+        {
+            "start": s.start,
+            "end": s.end,
+            "speaker": (s.speaker or "").strip() or None,
+            "text": s.text,
+        }
+        for s in request.segments
+    ]
+
+    vtt_path = Path(job["output_path"])
+    txt_path = Path(job.get("txt_path") or vtt_path.with_suffix(".txt"))
+    csv_path = Path(job.get("csv_path") or vtt_path.with_suffix(".csv"))
+
+    vtt_path.write_text(build_vtt_from_flat_cues(cues), encoding="utf-8")
+    txt_path.write_text(build_txt_from_flat_cues(cues), encoding="utf-8")
+    csv_path.write_text(build_csv_from_flat_cues(cues), encoding="utf-8")
+    job["txt_path"] = str(txt_path)
+    job["csv_path"] = str(csv_path)
+
+    # Keep the known-speaker set in sync so re-opening the editor recognises any
+    # newly-assigned labels as prefixes.
+    present = []
+    for c in cues:
+        sp = c.get("speaker")
+        if sp and sp not in present:
+            present.append(sp)
+    job["import_speakers"] = sorted(set(job.get("import_speakers", []) or []) | set(present))
+
+    return {
+        "status": "ok",
+        "segment_count": len([c for c in cues if (c["text"] or "").strip()]),
+        "speakers": present,
+        "output_path": str(vtt_path),
+        "txt_path": str(txt_path),
+        "csv_path": str(csv_path),
+    }
+
+
+@app.post("/api/import")
+async def import_transcript(
+    vtt: UploadFile = File(...),
+    audio: Optional[UploadFile] = File(None),
+):
+    """
+    Import an externally-authored VTT (and optionally its audio) as a completed
+    job, so the editor and exporters can operate on it. The VTT is re-emitted in
+    the app's canonical form and TXT/CSV are generated from it.
+    """
+    if not vtt.filename:
+        raise HTTPException(status_code=400, detail="No VTT filename provided")
+    if Path(vtt.filename).suffix.lower() not in (".vtt", ".webvtt"):
+        raise HTTPException(status_code=400, detail="Please select a .vtt file")
+
+    raw = (await vtt.read()).decode("utf-8", errors="replace")
+
+    from .merge import (
+        vtt_to_flat_cues,
+        detect_speaker_labels,
+        parse_vtt_cues,
+        build_vtt_from_flat_cues,
+        build_txt_from_flat_cues,
+        build_csv_from_flat_cues,
+    )
+
+    detected = detect_speaker_labels(parse_vtt_cues(raw))
+    cues = vtt_to_flat_cues(raw, set(detected) if detected else None)
+    if not cues:
+        raise HTTPException(status_code=400, detail="No cues found in the VTT file")
+
+    job_id = str(uuid.uuid4())[:8]
+    vtt_path = OUTPUTS_DIR / f"{job_id}.vtt"
+    txt_path = OUTPUTS_DIR / f"{job_id}.txt"
+    csv_path = OUTPUTS_DIR / f"{job_id}.csv"
+    vtt_path.write_text(build_vtt_from_flat_cues(cues), encoding="utf-8")
+    txt_path.write_text(build_txt_from_flat_cues(cues), encoding="utf-8")
+    csv_path.write_text(build_csv_from_flat_cues(cues), encoding="utf-8")
+
+    # Optional audio: store alongside so it can be played / autosaved.
+    upload_path = None
+    base_name = Path(vtt.filename).stem
+    if audio is not None and audio.filename:
+        a_ext = Path(audio.filename).suffix.lower()
+        if a_ext not in _AUDIO_MEDIA_TYPES:
+            raise HTTPException(status_code=400, detail=f"Unsupported audio format: {a_ext}")
+        upload_path = UPLOADS_DIR / f"{job_id}{a_ext}"
+        upload_path.write_bytes(await audio.read())
+        base_name = Path(audio.filename).stem
+
+    jobs[job_id] = {
+        "id": job_id,
+        "filename": f"{base_name}{Path(audio.filename).suffix if (audio and audio.filename) else '.vtt'}",
+        "imported": True,
+        "diarize": bool(detected),
+        "status": JobStatus.COMPLETED,
+        "progress": 100,
+        "message": "Imported",
+        "created_at": datetime.now().isoformat(),
+        "upload_path": str(upload_path) if upload_path else None,
+        "output_path": str(vtt_path),
+        "txt_path": str(txt_path),
+        "csv_path": str(csv_path),
+        "speakers": [],
+        "import_speakers": detected,
+        "error": None,
+        "partial_text": "",
+    }
+
+    return {
+        "job_id": job_id,
+        "filename": jobs[job_id]["filename"],
+        "speakers": detected,
+        "has_audio": upload_path is not None,
+        "segment_count": len(cues),
+    }
+
+
 @app.delete("/api/jobs/{job_id}")
 async def delete_job(job_id: str):
     """Delete a job and its files"""

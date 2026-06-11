@@ -1265,3 +1265,255 @@ def build_csv_from_speaker_transcript_segments(all_segments: list[dict]) -> str:
         ])
 
     return output.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Transcript editor / external VTT import
+#
+# These helpers parse an existing VTT file (the source of truth on disk) into a
+# flat list of editable cues and re-emit VTT/TXT/CSV from edited cues. They work
+# in "display name" space (the speaker string already shown in the file), so they
+# compose with rename-speakers and rename-terms without extra mapping.
+# ---------------------------------------------------------------------------
+
+_VTT_TS_RE = re.compile(
+    r"(\d{1,2}):(\d{2}):(\d{2})[.,](\d{1,3})|(\d{1,2}):(\d{2})[.,](\d{1,3})"
+)
+_VTT_CUE_TIMING_RE = re.compile(
+    r"^\s*(?P<start>\d{1,2}:\d{2}(?::\d{2})?[.,]\d{1,3})\s*-->\s*"
+    r"(?P<end>\d{1,2}:\d{2}(?::\d{2})?[.,]\d{1,3})"
+)
+# Leading "<v Speaker Name>" WebVTT voice tag.
+_VTT_VOICE_RE = re.compile(r"^<v\s+([^>]+?)>\s*")
+# Leading "Name: " prefix (short, no inner colon/newline).
+_VTT_LABEL_RE = re.compile(r"^([^:<>\n]{1,40}):\s+(.*)$", re.DOTALL)
+
+
+def parse_vtt_timestamp(ts: str) -> float:
+    """Parse a VTT timestamp (HH:MM:SS.mmm or MM:SS.mmm) into seconds."""
+    ts = ts.strip().replace(",", ".")
+    parts = ts.split(":")
+    try:
+        if len(parts) == 3:
+            h, m, s = parts
+            return int(h) * 3600 + int(m) * 60 + float(s)
+        if len(parts) == 2:
+            m, s = parts
+            return int(m) * 60 + float(s)
+        return float(ts)
+    except ValueError:
+        return 0.0
+
+
+def parse_vtt_cues(text: str) -> list[dict]:
+    """
+    Tolerant WebVTT parser. Returns a list of raw cues:
+        [{"start": float, "end": float, "raw_text": str}, ...]
+
+    Handles optional cue-id lines, cue settings after the timestamps, and
+    multi-line cue text (joined with spaces). Ignores WEBVTT header, NOTE and
+    STYLE blocks.
+    """
+    cues: list[dict] = []
+    # Normalise newlines, split into blocks separated by blank lines.
+    blocks = re.split(r"\n\s*\n", text.replace("\r\n", "\n").replace("\r", "\n"))
+    for block in blocks:
+        lines = [ln for ln in block.split("\n")]
+        # Locate the timing line within the block (id line may precede it).
+        timing_idx = None
+        timing = None
+        for i, ln in enumerate(lines):
+            m = _VTT_CUE_TIMING_RE.match(ln)
+            if m:
+                timing_idx = i
+                timing = m
+                break
+        if timing is None:
+            continue
+        start = parse_vtt_timestamp(timing.group("start"))
+        end = parse_vtt_timestamp(timing.group("end"))
+        text_lines = [ln.strip() for ln in lines[timing_idx + 1:] if ln.strip()]
+        raw_text = " ".join(text_lines).strip()
+        if not raw_text:
+            continue
+        cues.append({"start": start, "end": end, "raw_text": raw_text})
+    return cues
+
+
+def _strip_voice_or_label(raw: str, known_names: set[str] | None):
+    """
+    If `raw` starts with a recognised speaker marker, return (speaker, rest).
+    Otherwise return (None, raw). A `<v Name>` voice tag is always honoured.
+    A `Name: ` prefix is only honoured when Name is in known_names (or
+    known_names is None, meaning "detection mode": accept any short label).
+    """
+    mv = _VTT_VOICE_RE.match(raw)
+    if mv:
+        name = mv.group(1).strip()
+        rest = raw[mv.end():].strip()
+        # A closing </v> may trail the text.
+        rest = re.sub(r"</v>\s*$", "", rest).strip()
+        return name, rest
+    ml = _VTT_LABEL_RE.match(raw)
+    if ml:
+        name = ml.group(1).strip()
+        rest = ml.group(2).strip()
+        if known_names is None or name in known_names:
+            return name, rest
+    return None, raw
+
+
+def detect_speaker_labels(cues: list[dict]) -> list[str]:
+    """
+    Heuristically detect speaker labels in an externally-authored VTT.
+
+    A label is accepted if it appears via a `<v Name>` voice tag, matches a
+    Speaker/SPEAKER pattern, or occurs as a leading `Name: ` prefix on at least
+    two cues (filters one-off sentences like "Achtung: ..."). Returns labels in
+    first-seen order.
+    """
+    counts: dict[str, int] = {}
+    order: list[str] = []
+    forced: set[str] = set()
+    for cue in cues:
+        name, _ = _strip_voice_or_label(cue["raw_text"], known_names=None)
+        if not name:
+            continue
+        if name not in counts:
+            counts[name] = 0
+            order.append(name)
+        counts[name] += 1
+        raw = cue["raw_text"]
+        if _VTT_VOICE_RE.match(raw) or re.match(r"^(Speaker|SPEAKER)[ _]?\d+$", name):
+            forced.add(name)
+    return [n for n in order if counts[n] >= 2 or n in forced]
+
+
+def vtt_to_flat_cues(text: str, known_names: set[str] | None) -> list[dict]:
+    """
+    Parse a VTT into editable cues with a carried-forward speaker:
+        [{"start": float, "end": float, "speaker": str | None, "text": str}, ...]
+
+    Speaker labels in app-authored VTTs only appear at speaker changes, so the
+    last seen speaker is carried forward across unlabelled cues.
+    """
+    raw_cues = parse_vtt_cues(text)
+    flat: list[dict] = []
+    current_speaker = None
+    for cue in raw_cues:
+        speaker, clean = _strip_voice_or_label(cue["raw_text"], known_names)
+        if speaker is not None:
+            current_speaker = speaker
+        flat.append({
+            "start": cue["start"],
+            "end": cue["end"],
+            "speaker": current_speaker,
+            "text": clean,
+        })
+    return flat
+
+
+def build_vtt_from_flat_cues(cues: list[dict]) -> str:
+    """
+    Re-emit VTT from edited flat cues. Speaker label is written only when it
+    changes (matching the app's native VTT style). Cues are kept 1:1 — no
+    re-normalisation — so edited segment boundaries are preserved.
+    """
+    vtt_lines = ["WEBVTT", ""]
+    cue_number = 1
+    current_speaker = None
+    for cue in cues:
+        text = (cue.get("text") or "").strip()
+        if not text:
+            continue
+        speaker = cue.get("speaker")
+        if speaker and speaker != current_speaker:
+            text = f"{speaker}: {text}"
+            current_speaker = speaker
+        elif not speaker:
+            current_speaker = None
+        vtt_lines.append(str(cue_number))
+        vtt_lines.append(
+            f"{format_vtt_timestamp(float(cue['start']))} --> "
+            f"{format_vtt_timestamp(float(cue['end']))}"
+        )
+        vtt_lines.append(text)
+        vtt_lines.append("")
+        cue_number += 1
+    return "\n".join(vtt_lines)
+
+
+def build_txt_from_flat_cues(cues: list[dict]) -> str:
+    """
+    Plain-text export from flat cues: consecutive cues from the same speaker are
+    merged into one paragraph, prefixed with the speaker label when present.
+    """
+    paragraphs: list[str] = []
+    cur_speaker = "\0"  # sentinel distinct from None
+    buf: list[str] = []
+
+    def flush():
+        if not buf:
+            return
+        body = " ".join(" ".join(buf).split())
+        if not body:
+            return
+        if cur_speaker and cur_speaker != "\0":
+            paragraphs.append(f"{cur_speaker}: {body}")
+        else:
+            paragraphs.append(body)
+
+    for cue in cues:
+        text = (cue.get("text") or "").strip()
+        if not text:
+            continue
+        speaker = cue.get("speaker")
+        if speaker != cur_speaker and buf:
+            flush()
+            buf = []
+        cur_speaker = speaker
+        buf.append(text)
+    flush()
+    return "\n\n".join(paragraphs) + "\n" if paragraphs else ""
+
+
+def build_csv_from_flat_cues(cues: list[dict]) -> str:
+    """
+    CSV export from flat cues: consecutive cues from the same speaker are merged
+    into one row (Time-in/Time-out span the group). Keeps the 4-column schema.
+    """
+    import csv
+    from io import StringIO
+
+    output = StringIO()
+    writer = csv.writer(output, quoting=csv.QUOTE_ALL)
+    writer.writerow(["Time-in", "Time-out", "Speaker", "Text"])
+
+    group: list[dict] = []
+    cur_speaker = "\0"
+
+    def flush():
+        if not group:
+            return
+        texts = [(c.get("text") or "").strip() for c in group]
+        texts = [t for t in texts if t]
+        if not texts:
+            return
+        writer.writerow([
+            format_csv_timestamp(float(group[0]["start"])),
+            format_csv_timestamp(float(group[-1]["end"])),
+            cur_speaker if cur_speaker and cur_speaker != "\0" else "",
+            " ".join(texts),
+        ])
+
+    for cue in cues:
+        if not (cue.get("text") or "").strip():
+            continue
+        speaker = cue.get("speaker")
+        if speaker != cur_speaker and group:
+            flush()
+            group = []
+        cur_speaker = speaker
+        group.append(cue)
+    flush()
+    return output.getvalue()
