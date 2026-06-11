@@ -25,6 +25,11 @@
             </div>
         </header>
 
+        <nav class="mode-tabs" id="modeTabs" hidden>
+            <button class="mode-tab active" id="tabTranscribe" type="button" data-mode="transcribe">Transkribieren</button>
+            <button class="mode-tab" id="tabEditor" type="button" data-mode="editor">Editor</button>
+        </nav>
+
         <main>
             <!-- First Run: Speicherort wählen (nur in Electron) -->
             <section class="setup-section" id="firstRunSection" hidden>
@@ -241,6 +246,41 @@
                 </div>
             </section>
 
+            <!-- Import Section (Editor tab) -->
+            <section class="import-section" id="importSection" hidden>
+                <div class="import-card">
+                    <div class="setup-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <polyline points="9 15 12 12 15 15"/>
+                        </svg>
+                    </div>
+                    <h2>Transkript bearbeiten</h2>
+                    <p class="setup-description">
+                        Öffne eine vorhandene <strong>VTT-Datei</strong> direkt im Editor —
+                        auch wenn sie nicht mit dieser App erstellt wurde.
+                        Eine Audiodatei kannst du optional dazuwählen, um beim Korrigieren mitzuhören.
+                    </p>
+
+                    <div class="import-picker">
+                        <button class="btn-secondary" id="importVttBtn" type="button">VTT-Datei wählen…</button>
+                        <span class="import-filename" id="importVttName">Keine Datei gewählt</span>
+                    </div>
+                    <div class="import-picker">
+                        <button class="btn-secondary" id="importAudioBtn" type="button">Audio wählen… <span class="import-optional">(optional)</span></button>
+                        <span class="import-filename" id="importAudioName">Keine Datei gewählt</span>
+                    </div>
+
+                    <input type="file" id="importVttInput" accept=".vtt,.webvtt" hidden>
+                    <input type="file" id="importAudioInput" accept=".mp3,.wav,.m4a,.ogg,.flac,.webm" hidden>
+
+                    <button class="btn-primary" id="importOpenBtn" disabled>Im Editor öffnen</button>
+                    <p class="import-error" id="importError" hidden></p>
+                </div>
+            </section>
+
             <!-- Error Section -->
             <section class="error-section" id="errorSection" hidden>
                 <div class="error-content">
@@ -255,6 +295,36 @@
             <p>Läuft 100% lokal auf deinem Mac</p>
         </footer>
     </div>
+
+    <!-- Full-screen Transcript Editor -->
+    <section class="editor-section" id="editorSection" hidden>
+        <div class="editor-toolbar">
+            <button class="editor-back" id="editorBackBtn" type="button">‹ Zurück</button>
+            <div class="editor-titlewrap">
+                <span class="editor-title" id="editorTitle">Transkript</span>
+                <span class="editor-status" id="editorStatus"></span>
+            </div>
+            <button class="btn-primary editor-save" id="editorSaveBtn" type="button">Speichern</button>
+        </div>
+        <div class="editor-bulkbar">
+            <span class="bulkbar-label">Sprecher für alle Segmente:</span>
+            <input class="bulk-speaker-input" id="bulkSpeakerInput" list="editorSpeakerList" placeholder="Name eingeben…" autocomplete="off">
+            <button class="playbar-btn" id="bulkSpeakerBtn" type="button">Allen zuweisen</button>
+            <button class="playbar-btn bulk-empty-btn" id="bulkSpeakerEmptyBtn" type="button" title="Nur Segmente ohne Sprecher setzen">Nur leere</button>
+        </div>
+        <div class="editor-rows" id="editorRows"></div>
+        <div class="editor-playbar" id="editorPlaybar" hidden>
+            <span class="playbar-time"><span id="playbarCurrent">00:00</span> / <span id="playbarTotal">00:00</span></span>
+            <div class="playbar-controls">
+                <button class="playbar-btn" id="playbarBack" type="button" title="5 Sek. zurück (Ctrl+←)">« 5s</button>
+                <button class="playbar-btn playbar-play" id="playbarPlay" type="button" title="Play/Pause (Shift+Space)">▶ Play</button>
+                <button class="playbar-btn" id="playbarFwd" type="button" title="5 Sek. vor (Ctrl+→)">5s »</button>
+                <button class="playbar-btn playbar-loop" id="playbarLoop" type="button" title="Zeile in Schleife wiederholen (Ctrl+L)">↻ Loop</button>
+                <button class="playbar-btn" id="playbarSpeed" type="button" title="Geschwindigkeit (Ctrl+X)">1.0×</button>
+            </div>
+        </div>
+        <audio id="editorAudio" preload="metadata"></audio>
+    </section>
 
     <!-- Glossary / Term Rename Modal -->
     <div class="modal-overlay" id="glossaryModal" hidden>

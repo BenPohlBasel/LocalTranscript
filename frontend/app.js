@@ -77,6 +77,42 @@ const steps = {
     step4: document.getElementById('step4')
 };
 
+// DOM Elements - Mode tabs
+const modeTabs = document.getElementById('modeTabs');
+const tabTranscribe = document.getElementById('tabTranscribe');
+const tabEditor = document.getElementById('tabEditor');
+
+// DOM Elements - Import
+const importSection = document.getElementById('importSection');
+const importVttBtn = document.getElementById('importVttBtn');
+const importVttInput = document.getElementById('importVttInput');
+const importVttName = document.getElementById('importVttName');
+const importAudioBtn = document.getElementById('importAudioBtn');
+const importAudioInput = document.getElementById('importAudioInput');
+const importAudioName = document.getElementById('importAudioName');
+const importOpenBtn = document.getElementById('importOpenBtn');
+const importError = document.getElementById('importError');
+
+// DOM Elements - Editor
+const editorSection = document.getElementById('editorSection');
+const editorBackBtn = document.getElementById('editorBackBtn');
+const editorTitle = document.getElementById('editorTitle');
+const editorStatus = document.getElementById('editorStatus');
+const editorSaveBtn = document.getElementById('editorSaveBtn');
+const editorRows = document.getElementById('editorRows');
+const bulkSpeakerInput = document.getElementById('bulkSpeakerInput');
+const bulkSpeakerBtn = document.getElementById('bulkSpeakerBtn');
+const bulkSpeakerEmptyBtn = document.getElementById('bulkSpeakerEmptyBtn');
+const editorPlaybar = document.getElementById('editorPlaybar');
+const editorAudio = document.getElementById('editorAudio');
+const playbarCurrent = document.getElementById('playbarCurrent');
+const playbarTotal = document.getElementById('playbarTotal');
+const playbarBack = document.getElementById('playbarBack');
+const playbarPlay = document.getElementById('playbarPlay');
+const playbarFwd = document.getElementById('playbarFwd');
+const playbarLoop = document.getElementById('playbarLoop');
+const playbarSpeed = document.getElementById('playbarSpeed');
+
 // State
 let selectedFiles = [];
 let currentJobId = null;
@@ -91,6 +127,14 @@ let currentRunFolder = null; // Electron run folder path for the current batch
 let transcriptsRoot = null;  // Cached config from Electron
 let renameContext = null;    // {jobId, audio, currentRow} while modal is open
 let glossaryContext = null;  // {jobId, candidates, result} while modal is open
+let currentMode = 'transcribe';   // 'transcribe' | 'editor'
+let importVttFile = null;    // File chosen for import
+let importAudioFile = null;  // optional File chosen for import
+let importVttPath = null;    // absolute path of the chosen VTT (Electron)
+let editorContext = null;    // {jobId, segments, speakers, diarized, hasAudio, returnTo, dirty}
+let editorActiveIndex = -1;  // currently highlighted/played segment row
+let editorLoop = false;      // loop the active line vs. continuous play
+const SPEED_STEPS = [1, 1.25, 1.5, 1.75, 2];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -121,10 +165,24 @@ function hideAllSections() {
     progressSection.hidden = true;
     resultSection.hidden = true;
     errorSection.hidden = true;
+    if (importSection) importSection.hidden = true;
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    if (tabTranscribe) tabTranscribe.classList.toggle('active', mode === 'transcribe');
+    if (tabEditor) tabEditor.classList.toggle('active', mode === 'editor');
+    hideAllSections();
+    if (mode === 'editor') {
+        if (importSection) importSection.hidden = false;
+    } else {
+        uploadSection.hidden = false;
+    }
 }
 
 function showFirstRun() {
     hideAllSections();
+    if (modeTabs) modeTabs.hidden = true;
     firstRunSection.hidden = false;
     if (firstRunDefaultPath) {
         firstRunDefaultPath.textContent = '~/Documents/LocalTranscript';
@@ -135,6 +193,10 @@ async function checkSetup() {
     // SpeechBrain-based diarization needs no HuggingFace token, so the legacy
     // setup-section is bypassed. Kept in HTML for graceful degradation only.
     hideAllSections();
+    if (modeTabs) modeTabs.hidden = false;
+    currentMode = 'transcribe';
+    if (tabTranscribe) tabTranscribe.classList.add('active');
+    if (tabEditor) tabEditor.classList.remove('active');
     uploadSection.hidden = false;
     try {
         await loadModels();
@@ -183,6 +245,46 @@ async function loadModels() {
 }
 
 function setupEventListeners() {
+    // Mode tabs
+    if (tabTranscribe) tabTranscribe.addEventListener('click', () => setMode('transcribe'));
+    if (tabEditor) tabEditor.addEventListener('click', () => setMode('editor'));
+
+    // Import (Editor tab)
+    if (importVttBtn) importVttBtn.addEventListener('click', () => importVttInput.click());
+    if (importAudioBtn) importAudioBtn.addEventListener('click', () => importAudioInput.click());
+    if (importVttInput) importVttInput.addEventListener('change', (e) => handleImportPick(e, 'vtt'));
+    if (importAudioInput) importAudioInput.addEventListener('change', (e) => handleImportPick(e, 'audio'));
+    if (importOpenBtn) importOpenBtn.addEventListener('click', openImportedTranscript);
+
+    // Editor controls
+    if (editorBackBtn) editorBackBtn.addEventListener('click', closeEditor);
+    if (editorSaveBtn) editorSaveBtn.addEventListener('click', saveEditor);
+    if (bulkSpeakerBtn) bulkSpeakerBtn.addEventListener('click', () => bulkAssignSpeaker(false));
+    if (bulkSpeakerEmptyBtn) bulkSpeakerEmptyBtn.addEventListener('click', () => bulkAssignSpeaker(true));
+    if (bulkSpeakerInput) bulkSpeakerInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); bulkAssignSpeaker(false); }
+    });
+    if (editorStatus) editorStatus.addEventListener('click', () => {
+        const dir = editorContext && editorContext.lastSavedDir;
+        if (dir && electronBridge && electronBridge.openFolder) {
+            electronBridge.openFolder(dir).catch(() => {});
+        }
+    });
+    if (playbarPlay) playbarPlay.addEventListener('click', togglePlay);
+    if (playbarBack) playbarBack.addEventListener('click', () => seekBy(-5));
+    if (playbarFwd) playbarFwd.addEventListener('click', () => seekBy(5));
+    if (playbarLoop) playbarLoop.addEventListener('click', toggleLoop);
+    if (playbarSpeed) playbarSpeed.addEventListener('click', cycleSpeed);
+    if (editorAudio) {
+        editorAudio.addEventListener('timeupdate', onAudioTimeUpdate);
+        editorAudio.addEventListener('loadedmetadata', () => {
+            if (playbarTotal) playbarTotal.textContent = formatClock(editorAudio.duration || 0);
+        });
+        editorAudio.addEventListener('play', () => updatePlayButton(true));
+        editorAudio.addEventListener('pause', () => updatePlayButton(false));
+    }
+    document.addEventListener('keydown', handleEditorKeys);
+
     // First-run (Electron only)
     if (firstRunDefaultBtn) {
         firstRunDefaultBtn.addEventListener('click', () => pickTranscriptsRoot('default'));
@@ -919,8 +1021,15 @@ function renderResults() {
         if (res.status === 'completed') {
             const actions = document.createElement('span');
             actions.className = 'result-downloads';
-            // Show "Korrigieren" only when speakers exist (skip diarize=off jobs)
-            if (res.speakerCount && res.speakerCount >= 1) {
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.className = 'btn-correct btn-edit';
+            edit.textContent = 'Bearbeiten';
+            edit.addEventListener('click', () => openEditor(res.jobId, 'result'));
+            actions.appendChild(edit);
+            // Show speaker-rename only when speakers exist and diarization data is
+            // present (imported transcripts have no audio-sample data to play).
+            if (res.speakerCount && res.speakerCount >= 1 && !res.imported) {
                 const correct = document.createElement('button');
                 correct.type = 'button';
                 correct.className = 'btn-correct';
@@ -928,12 +1037,6 @@ function renderResults() {
                 correct.addEventListener('click', () => openRenameModal(res));
                 actions.appendChild(correct);
             }
-            const terms = document.createElement('button');
-            terms.type = 'button';
-            terms.className = 'btn-correct';
-            terms.textContent = 'Begriffe';
-            terms.addEventListener('click', () => openGlossaryModal(res));
-            actions.appendChild(terms);
             li.appendChild(actions);
             // In Electron mode the files are already in the run folder, so
             // skip per-file VTT/CSV/TXT download buttons. Browser-mode keeps them.
@@ -1233,6 +1336,10 @@ function resetUI() {
     progressSection.hidden = true;
     resultSection.hidden = true;
     errorSection.hidden = true;
+    if (importSection) importSection.hidden = true;
+    currentMode = 'transcribe';
+    if (tabTranscribe) tabTranscribe.classList.add('active');
+    if (tabEditor) tabEditor.classList.remove('active');
 
     renderFileList();
     if (batchIndicator) {
@@ -1523,4 +1630,484 @@ function renderInfoContent(info, config) {
             }
         });
     }
+}
+
+
+// ===========================================================================
+// Transcript Editor + external VTT import
+// ===========================================================================
+
+function handleImportPick(e, kind) {
+    const file = e.target.files && e.target.files[0];
+    if (kind === 'vtt') {
+        importVttFile = file || null;
+        importVttName.textContent = file ? file.name : 'Keine Datei gewählt';
+        importVttPath = (file && isElectron && electronBridge.getPathForFile)
+            ? electronBridge.getPathForFile(file) : null;
+    } else {
+        importAudioFile = file || null;
+        importAudioName.textContent = file ? file.name : 'Keine Datei gewählt';
+    }
+    if (importError) importError.hidden = true;
+    if (importOpenBtn) importOpenBtn.disabled = !importVttFile;
+}
+
+async function openImportedTranscript() {
+    if (!importVttFile) return;
+    importOpenBtn.disabled = true;
+    importOpenBtn.textContent = 'Lade…';
+    if (importError) importError.hidden = true;
+    try {
+        const fd = new FormData();
+        fd.append('vtt', importVttFile, importVttFile.name);
+        if (importAudioFile) fd.append('audio', importAudioFile, importAudioFile.name);
+
+        const resp = await fetch(`${API_BASE}/import`, { method: 'POST', body: fd });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || 'Import fehlgeschlagen');
+        }
+        const data = await resp.json();
+
+        // Represent the import as a single completed result, so the result
+        // screen (downloads, Begriffe, Bearbeiten) works uniformly.
+        currentRunFolder = null;
+        batchResults = [{
+            filename: data.filename,
+            jobId: data.job_id,
+            status: 'completed',
+            speakerCount: (data.speakers || []).length,
+            imported: true,
+            hasAudio: !!data.has_audio,
+        }];
+        batchIndex = 0;
+
+        // Save target: next to the original imported VTT (Electron only).
+        let exportTarget = null;
+        if (importVttPath) {
+            const dir = importVttPath.replace(/[/\\][^/\\]*$/, '');
+            const fname = importVttPath.split(/[/\\]/).pop() || 'transkript.vtt';
+            const base = fname.replace(/\.[^.]+$/, '');
+            exportTarget = { dir, base };
+        }
+
+        await openEditor(data.job_id, 'result', exportTarget);
+    } catch (error) {
+        if (importError) {
+            importError.textContent = 'Fehler: ' + (error.message || error);
+            importError.hidden = false;
+        }
+    } finally {
+        importOpenBtn.disabled = !importVttFile;
+        importOpenBtn.textContent = 'Im Editor öffnen';
+    }
+}
+
+async function openEditor(jobId, returnTo, exportTarget) {
+    editorRows.innerHTML = '<div class="editor-loading">Lade Transkript…</div>';
+    editorSection.hidden = false;
+    setEditorStatus('');
+    try {
+        const resp = await fetch(`${API_BASE}/jobs/${jobId}/segments`);
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || 'Segmente konnten nicht geladen werden');
+        }
+        const data = await resp.json();
+        editorContext = {
+            jobId,
+            segments: data.segments || [],
+            speakers: data.speakers || [],
+            diarized: !!data.diarized,
+            hasAudio: !!data.has_audio,
+            returnTo: returnTo || 'result',
+            exportTarget: exportTarget || null,
+            lastSavedDir: null,
+            dirty: false,
+        };
+        editorActiveIndex = -1;
+        editorTitle.textContent = data.filename || 'Transkript';
+
+        // Audio wiring
+        if (editorContext.hasAudio) {
+            editorAudio.src = `${API_BASE}/jobs/${jobId}/audio`;
+            editorAudio.load();
+            editorPlaybar.hidden = false;
+            editorAudio.playbackRate = 1;
+            if (playbarSpeed) playbarSpeed.textContent = '1.0×';
+        } else {
+            editorAudio.removeAttribute('src');
+            editorPlaybar.hidden = true;
+        }
+
+        renderEditorRows();
+    } catch (error) {
+        editorRows.innerHTML = `<div class="editor-loading">Fehler: ${escapeHtml(error.message || String(error))}</div>`;
+    }
+}
+
+function renderEditorRows() {
+    const ctx = editorContext;
+    editorRows.innerHTML = '';
+
+    // Shared datalist for speaker autocomplete.
+    const datalist = document.createElement('datalist');
+    datalist.id = 'editorSpeakerList';
+    refreshSpeakerDatalist(datalist);
+    editorRows.appendChild(datalist);
+
+    ctx.segments.forEach((seg, i) => {
+        const row = document.createElement('div');
+        row.className = 'seg-row';
+        row.dataset.index = String(i);
+        row.dataset.start = String(seg.start);
+        row.dataset.end = String(seg.end);
+
+        // Left: play button + timecode
+        const left = document.createElement('div');
+        left.className = 'seg-left';
+        const play = document.createElement('button');
+        play.type = 'button';
+        play.className = 'seg-play';
+        play.title = 'Ab hier abspielen';
+        play.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        play.disabled = !ctx.hasAudio;
+        play.addEventListener('click', () => playSegment(i));
+        const time = document.createElement('span');
+        time.className = 'seg-time';
+        time.textContent = formatClock(seg.start);
+        left.appendChild(play);
+        left.appendChild(time);
+
+        // Middle: editable speaker
+        const speaker = document.createElement('input');
+        speaker.className = 'seg-speaker-input';
+        speaker.type = 'text';
+        speaker.setAttribute('list', 'editorSpeakerList');
+        speaker.placeholder = 'Sprecher';
+        speaker.value = seg.speaker || '';
+        speaker.addEventListener('change', () => {
+            ctx.dirty = true;
+            const v = speaker.value.trim();
+            if (v && !ctx.speakers.includes(v)) {
+                ctx.speakers.push(v);
+                refreshSpeakerDatalist(document.getElementById('editorSpeakerList'));
+            }
+        });
+
+        // Right: editable text
+        const text = document.createElement('div');
+        text.className = 'seg-text';
+        text.contentEditable = 'true';
+        text.spellcheck = false;
+        text.textContent = seg.text || '';
+        text.addEventListener('input', () => { ctx.dirty = true; });
+
+        // Far right: delete this segment (e.g. a filler "Ja." / breath).
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'seg-delete';
+        del.title = 'Zeile löschen';
+        del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+        del.addEventListener('click', () => {
+            if (editorActiveIndex === i) { try { editorAudio.pause(); } catch (_) {} }
+            // Absorb this segment's time so the timeline stays gap-free: extend
+            // the previous row's end to this row's end, or (if it's the first
+            // row) pull the next row's start back to this row's start.
+            const prev = row.previousElementSibling;
+            const next = row.nextElementSibling;
+            if (prev && prev.classList.contains('seg-row')) {
+                prev.dataset.end = row.dataset.end;
+            } else if (next && next.classList.contains('seg-row')) {
+                next.dataset.start = row.dataset.start;
+            }
+            row.remove();
+            ctx.dirty = true;
+            setEditorStatus('Zeile gelöscht – mit „Speichern" übernehmen');
+        });
+
+        row.appendChild(left);
+        row.appendChild(speaker);
+        row.appendChild(text);
+        row.appendChild(del);
+        editorRows.appendChild(row);
+    });
+
+    if (!ctx.segments.length) {
+        editorRows.appendChild(Object.assign(document.createElement('div'),
+            { className: 'editor-loading', textContent: 'Keine Segmente vorhanden.' }));
+    }
+}
+
+function refreshSpeakerDatalist(datalist) {
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    (editorContext ? editorContext.speakers : []).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        datalist.appendChild(opt);
+    });
+}
+
+function bulkAssignSpeaker(onlyEmpty) {
+    if (!editorContext) return;
+    const name = (bulkSpeakerInput ? bulkSpeakerInput.value : '').trim();
+    if (!name) {
+        setEditorStatus('Bitte zuerst einen Sprechernamen eingeben.', true);
+        if (bulkSpeakerInput) bulkSpeakerInput.focus();
+        return;
+    }
+    const inputs = editorRows.querySelectorAll('.seg-speaker-input');
+    let changed = 0;
+    inputs.forEach(inp => {
+        if (onlyEmpty && inp.value.trim()) return;
+        if (inp.value !== name) { inp.value = name; changed++; }
+    });
+    if (changed > 0) {
+        editorContext.dirty = true;
+        if (!editorContext.speakers.includes(name)) {
+            editorContext.speakers.push(name);
+            refreshSpeakerDatalist(document.getElementById('editorSpeakerList'));
+        }
+    }
+    const scope = onlyEmpty ? 'leere Segmente' : 'alle Segmente';
+    setEditorStatus(`„${name}" ${changed} ${scope === 'leere Segmente' ? 'leeren Segmenten' : 'Segmenten'} zugewiesen – mit „Speichern" übernehmen`);
+    if (editorStatus) editorStatus.classList.remove('clickable');
+}
+
+// --- Playback ---------------------------------------------------------------
+
+function rowByIndex(index) {
+    return editorRows.querySelector(`.seg-row[data-index="${index}"]`);
+}
+
+function playSegment(index) {
+    if (!editorContext || !editorContext.hasAudio) return;
+    const row = rowByIndex(index);
+    if (!row) return;
+    editorActiveIndex = index;
+    setActiveRow(index, true);
+    editorAudio.currentTime = Number(row.dataset.start);
+    editorAudio.play().catch(() => {});
+}
+
+function togglePlay() {
+    if (!editorContext || !editorContext.hasAudio) return;
+    if (editorAudio.paused) {
+        if (editorActiveIndex < 0) editorActiveIndex = 0;
+        editorAudio.play().catch(() => {});
+    } else {
+        editorAudio.pause();
+    }
+}
+
+function seekBy(seconds) {
+    if (!editorContext || !editorContext.hasAudio) return;
+    editorAudio.currentTime = Math.max(0, Math.min(
+        (editorAudio.duration || 0), editorAudio.currentTime + seconds));
+}
+
+function toggleLoop() {
+    editorLoop = !editorLoop;
+    if (playbarLoop) playbarLoop.classList.toggle('active', editorLoop);
+}
+
+function cycleSpeed() {
+    if (!editorContext) return;
+    const cur = editorAudio.playbackRate || 1;
+    let idx = SPEED_STEPS.findIndex(s => Math.abs(s - cur) < 0.01);
+    idx = (idx + 1) % SPEED_STEPS.length;
+    const next = SPEED_STEPS[idx];
+    editorAudio.playbackRate = next;
+    if (playbarSpeed) playbarSpeed.textContent = next.toFixed(2).replace(/0$/, '') + '×';
+}
+
+function onAudioTimeUpdate() {
+    if (!editorContext) return;
+    const t = editorAudio.currentTime;
+    if (playbarCurrent) playbarCurrent.textContent = formatClock(t);
+
+    // Loop the active line (timing read from the DOM so deletes/edits apply).
+    if (editorLoop && editorActiveIndex >= 0) {
+        const row = rowByIndex(editorActiveIndex);
+        if (row && t >= Number(row.dataset.end) - 0.04) {
+            editorAudio.currentTime = Number(row.dataset.start);
+            return;
+        }
+    }
+
+    // Highlight the line under the playhead (continuous play advances rows).
+    const idx = segmentIndexAt(t);
+    if (idx !== -1 && idx !== editorActiveIndex) {
+        editorActiveIndex = idx;
+        setActiveRow(idx, !editorAudio.paused);
+    }
+}
+
+function segmentIndexAt(t) {
+    // Iterate the live rows (deleted rows are gone) and return the data-index of
+    // the last row whose start is at/under the playhead.
+    let found = -1;
+    editorRows.querySelectorAll('.seg-row').forEach(r => {
+        if (Number(r.dataset.start) <= t + 0.001) found = Number(r.dataset.index);
+    });
+    return found;
+}
+
+function setActiveRow(index, scrollTo) {
+    const rows = editorRows.querySelectorAll('.seg-row');
+    rows.forEach(r => r.classList.toggle('active', Number(r.dataset.index) === index));
+    if (scrollTo) {
+        const el = editorRows.querySelector(`.seg-row[data-index="${index}"]`);
+        if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+}
+
+function updatePlayButton(playing) {
+    if (!playbarPlay) return;
+    playbarPlay.textContent = playing ? '❚❚ Pause' : '▶ Play';
+    playbarPlay.classList.toggle('playing', playing);
+}
+
+function handleEditorKeys(e) {
+    if (editorSection.hidden) return;
+    // Use Ctrl only (matching the reference bindings) and deliberately NOT Cmd,
+    // so native macOS text editing (Cmd+←/→ line nav, Cmd+X cut) keeps working
+    // while typing in the speaker/text fields.
+    const mod = e.ctrlKey;
+    if (e.shiftKey && e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+    } else if (mod && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        seekBy(-5);
+    } else if (mod && e.key === 'ArrowRight') {
+        e.preventDefault();
+        seekBy(5);
+    } else if (mod && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault();
+        cycleSpeed();
+    } else if (mod && (e.key === 'l' || e.key === 'L')) {
+        e.preventDefault();
+        toggleLoop();
+    }
+}
+
+// --- Save / close -----------------------------------------------------------
+
+async function saveEditor() {
+    if (!editorContext) return;
+    const rows = editorRows.querySelectorAll('.seg-row');
+    const segments = [];
+    rows.forEach(row => {
+        const text = row.querySelector('.seg-text').textContent.trim();
+        const speaker = row.querySelector('.seg-speaker-input').value.trim();
+        segments.push({
+            start: Number(row.dataset.start),
+            end: Number(row.dataset.end),
+            speaker: speaker || null,
+            text,
+        });
+    });
+
+    editorSaveBtn.disabled = true;
+    editorSaveBtn.textContent = 'Speichere…';
+    setEditorStatus('');
+    try {
+        const resp = await fetch(`${API_BASE}/jobs/${editorContext.jobId}/edit-segments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ segments }),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || 'Speichern fehlgeschlagen');
+        }
+
+        const res = batchResults.find(r => r.jobId === editorContext.jobId);
+        const job = await fetch(`${API_BASE}/jobs/${editorContext.jobId}`).then(r => r.json());
+        let savedMsg = 'Gespeichert ✓';
+        editorContext.lastSavedDir = null;
+
+        if (isElectron && editorContext.exportTarget && electronBridge.exportEdited) {
+            // Imported transcript: write edited copies next to the original file.
+            const t = editorContext.exportTarget;
+            const files = [];
+            if (job.output_path) files.push({ src: job.output_path, name: `${t.base}_bearbeitet.vtt` });
+            if (job.txt_path) files.push({ src: job.txt_path, name: `${t.base}_bearbeitet.txt` });
+            if (job.csv_path) files.push({ src: job.csv_path, name: `${t.base}_bearbeitet.csv` });
+            try {
+                await electronBridge.exportEdited(t.dir, files);
+                editorContext.lastSavedDir = t.dir;
+                savedMsg = `Gespeichert: ${t.dir}/${t.base}_bearbeitet.vtt (+ .txt, .csv) — klicken zum Öffnen`;
+            } catch (err) {
+                savedMsg = 'Intern gespeichert, aber Export neben Original fehlgeschlagen: ' + (err.message || err);
+            }
+        } else if (currentRunFolder && isElectron && res && !res.imported) {
+            // App transcription: refresh the autosaved copies in the run folder.
+            try {
+                await autosaveJob(job, currentRunFolder);
+                editorContext.lastSavedDir = currentRunFolder;
+                savedMsg = `Gespeichert: ${currentRunFolder} — klicken zum Öffnen`;
+            } catch (err) {
+                console.warn('Re-copy after edit failed:', err);
+                savedMsg = 'Gespeichert ✓ (Run-Ordner-Kopie fehlgeschlagen)';
+            }
+        } else if (isElectron) {
+            // No visible target known: point the user at the export buttons.
+            savedMsg = 'Gespeichert ✓ — Export über „‹ Zurück" → TXT/VTT/CSV (Downloads)';
+        }
+
+        editorContext.dirty = false;
+        setEditorStatus(savedMsg);
+        if (editorStatus) editorStatus.classList.toggle('clickable', !!editorContext.lastSavedDir);
+    } catch (error) {
+        setEditorStatus('Fehler: ' + (error.message || error), true);
+    } finally {
+        editorSaveBtn.disabled = false;
+        editorSaveBtn.textContent = 'Speichern';
+    }
+}
+
+function closeEditor() {
+    if (editorContext && editorContext.dirty) {
+        if (!confirm('Ungespeicherte Änderungen verwerfen?')) return;
+    }
+    try { editorAudio.pause(); } catch (_) {}
+    editorAudio.removeAttribute('src');
+    const returnTo = editorContext ? editorContext.returnTo : 'result';
+    editorContext = null;
+    editorActiveIndex = -1;
+    editorSection.hidden = true;
+
+    if (returnTo === 'result') {
+        hideAllSections();
+        if (modeTabs) modeTabs.hidden = false;
+        renderResults();
+        resultSection.hidden = false;
+    } else {
+        setMode('editor');
+    }
+}
+
+function setEditorStatus(msg, isError) {
+    if (!editorStatus) return;
+    editorStatus.textContent = msg || '';
+    editorStatus.classList.toggle('error', !!isError);
+}
+
+function formatClock(seconds) {
+    seconds = Math.max(0, Math.floor(seconds || 0));
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    const mm = String(m).padStart(2, '0');
+    const ss = String(s).padStart(2, '0');
+    return h > 0 ? `${String(h).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
