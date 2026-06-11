@@ -69,12 +69,15 @@ async function main() {
   await cp(APP_PATH, path.join(stage, 'LocalTranscript.app'), { recursive: true });
   await symlink('/Applications', path.join(stage, 'Applications'));
 
+  // LZFSE (ULFO) compresses noticeably better than zlib (UDZO) and keeps the
+  // ~2 GB bundle under GitHub's 2 GiB per-asset release limit. Mountable on
+  // macOS 10.11+ (we target 14+).
   await run('hdiutil', [
     'create',
     '-volname', `LocalTranscript ${version}`,
     '-srcfolder', stage,
     '-ov',
-    '-format', 'UDZO',
+    '-format', 'ULFO',
     dmgPath,
   ]);
 
