@@ -66,7 +66,13 @@ async function main() {
   const stage = path.join(DIST_DIR, '.dmg-stage');
   await rm(stage, { recursive: true, force: true });
   await mkdir(stage, { recursive: true });
-  await cp(APP_PATH, path.join(stage, 'LocalTranscript.app'), { recursive: true });
+  // Use `ditto`, not fs.cp: fs.cp({recursive:true}) rewrites the Electron
+  // Framework's internal relative symlinks (Versions/Current, Resources, …)
+  // into ABSOLUTE paths pointing back at the build dir. That breaks the
+  // framework on the target machine (icudtl.dat not found, GPU process exits 5)
+  // and invalidates the code signature. ditto preserves symlinks, hard links
+  // and the signature byte-for-byte.
+  await run('ditto', [APP_PATH, path.join(stage, 'LocalTranscript.app')]);
   await symlink('/Applications', path.join(stage, 'Applications'));
 
   // LZFSE (ULFO) compresses noticeably better than zlib (UDZO) and keeps the
