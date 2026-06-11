@@ -1,6 +1,6 @@
 'use strict';
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronApi', {
   isElectron: true,
@@ -17,6 +17,13 @@ contextBridge.exposeInMainWorld('electronApi', {
   // Per-run folder + autosave
   createRunFolder: (folderName) => ipcRenderer.invoke('run:create-folder', folderName),
   copyToRun: (runFolder, files) => ipcRenderer.invoke('run:copy', { runFolder, files }),
+
+  // Editor: resolve a picked File's absolute path, and export edited outputs
+  // next to the original imported file.
+  getPathForFile: (file) => {
+    try { return webUtils.getPathForFile(file) || null; } catch (_) { return null; }
+  },
+  exportEdited: (destDir, files) => ipcRenderer.invoke('editor:export', { destDir, files }),
 
   // Misc
   openFolder: (folderPath) => ipcRenderer.invoke('shell:open-folder', folderPath),
