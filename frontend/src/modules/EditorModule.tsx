@@ -63,24 +63,41 @@ export default function EditorModule({ id, onExit }: {
   const speichere = useCallback(async () => {
     setSpeichert(true);
     try {
-      const r = await apiSend<{ updated: string }>(
+      await apiSend<{ updated: string }>(
         `/api/transcripts/${id}`,
         { sprecher: zustand.current.sprecher,
           segmente: zustand.current.segmente }, "PUT");
-      setGespeichert(r.updated.slice(11, 16));
+      // Lokalzeit, hh:mm:ss (Review: UTC-Slice zeigte falsche Uhrzeit)
+      setGespeichert(new Date().toLocaleTimeString([], {
+        hour: "2-digit", minute: "2-digit", second: "2-digit" }));
       setFehler("");
     } catch (e) {
       setFehler(tr("ed.speicherfehler", { e: errMsg(e) }));
     } finally { setSpeichert(false); }
   }, [id, tr]);
 
+  const ausstehend = useRef(false);
+  const speichereRef = useRef(speichere);
+  speichereRef.current = speichere;
   const dirty = useCallback(() => {
+    ausstehend.current = true;
     window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => {
+      ausstehend.current = false;
       void speichere();
     }, 1200);
   }, [speichere]);
-  useEffect(() => () => window.clearTimeout(saveTimer.current), []);
+  // Review-Befund (HOCH): der Unmount-Cleanup verwarf den anstehenden
+  // Save — Zurück/Tab-Wechsel innerhalb der Debounce verlor den
+  // letzten Edit still. Jetzt: ausstehenden Save FLUSHEN (speichere
+  // liest zustand.current und ist damit unmount-sicher).
+  useEffect(() => () => {
+    window.clearTimeout(saveTimer.current);
+    if (ausstehend.current) {
+      ausstehend.current = false;
+      void speichereRef.current();
+    }
+  }, []);
 
   // ---------- Segment-Ops ----------
   const textAendern = useCallback((sid: string, text: string) => {
@@ -207,7 +224,7 @@ export default function EditorModule({ id, onExit }: {
     const a = audioRef.current;
     if (a) a.playbackRate = speed;
     lset(KEYS.editorSpeed, String(speed));
-  }, [speed]);
+  }, [speed, hatAudio]);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -300,20 +317,21 @@ export default function EditorModule({ id, onExit }: {
               <audio ref={audioRef}
                      src={`${API_BASE}/api/transcripts/${id}/audio`}
                      onTimeUpdate={onTime}
-                     onPlay={() => setLaeuft(true)}
+                     onPlay={(e) => { setLaeuft(true);
+                       e.currentTarget.playbackRate = speed; }}
                      onPause={() => setLaeuft(false)} />
-              <IconButton title="-5s" onClick={() => {
+              <IconButton title={tr("ed.rueck5")} onClick={() => {
                 if (audioRef.current)
                   audioRef.current.currentTime -= 5;
               }}><Icon name="rewind" size={15} /></IconButton>
-              <IconButton title={laeuft ? "Pause" : "Play"}
+              <IconButton title={laeuft ? tr("ed.pause") : tr("ed.play")}
                           onClick={() => {
                 const a = audioRef.current;
                 if (!a) return;
                 if (a.paused) void a.play(); else a.pause();
               }}><Icon name={laeuft ? "pause" : "play"} size={17} />
               </IconButton>
-              <IconButton title="+5s" onClick={() => {
+              <IconButton title={tr("ed.vor5")} onClick={() => {
                 if (audioRef.current)
                   audioRef.current.currentTime += 5;
               }}><Icon name="forward" size={15} /></IconButton>
@@ -321,7 +339,7 @@ export default function EditorModule({ id, onExit }: {
                 const i = SPEEDS.indexOf(speed);
                 setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
               }}>{speed.toFixed(2).replace(/0$/, "")}×</Button>
-              <IconButton title="Loop" onClick={() => setLoop(!loop)}>
+              <IconButton title={tr("ed.loop")} onClick={() => setLoop(!loop)}>
                 <span style={{ opacity: loop ? 1 : 0.4 }}>
                   <Icon name="loop" size={15} /></span>
               </IconButton>

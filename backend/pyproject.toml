@@ -39,6 +39,7 @@ line-length = 79
 # Gevendorte enrich-Bausteine bleiben BYTE-IDENTISCH zur Quelle
 # (Drift-Guard-Test) — ruff darf sie nie "fixen".
 exclude = ["src/localtranscript/enrich_export/textsatz.py",
+           "src/localtranscript/enrich_export/schrift.py",
            "src/localtranscript/enrich_export/turns.py"]
 
 [tool.pytest.ini_options]

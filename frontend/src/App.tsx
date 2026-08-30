@@ -68,7 +68,10 @@ export default function App() {
             style={{ borderBottom: "1px solid var(--gray-a5)" }}>
         <Heading size="4">{tr("app.titel")}</Heading>
         <div style={{ flex: 1 }} />
-        <SegTabs value={editorId ? "bibliothek" : tab}
+        {/* im Editor-Drilldown ist KEIN Tab aktiv — so feuert der
+            Klick auf „Bibliothek" ein onChange und verlässt den Editor
+            (Review-Befund: aktiver Tab schluckte den Klick) */}
+        <SegTabs value={editorId ? "" : tab}
                  onChange={(v) => { setEditorId(null);
                    setTab(v as "bibliothek" | "einstellungen"); }}
                  options={[

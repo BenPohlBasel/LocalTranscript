@@ -72,3 +72,14 @@ def test_csv_import(client):
     d = client.get(f"/api/transcripts/{r.json()['eintrag']}").json()
     assert d["segmente"][0]["sprecher"] is not None
     assert d["segmente"][1]["sprecher"] is None
+
+
+def test_host_wache_weist_fremde_hosts_ab(client):
+    r = client.get("/api/health", headers={"Host": "boese.example.com"})
+    assert r.status_code == 421
+
+
+def test_put_malformed_422(client, eintrag):
+    r = client.put(f"/api/transcripts/{eintrag}",
+                   json={"sprecher": [], "segmente": [{"kaputt": True}]})
+    assert r.status_code == 422

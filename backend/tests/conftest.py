@@ -15,7 +15,9 @@ def client(tmp_path, monkeypatch):
     lib = tmp_path / "bibliothek"
     lib.mkdir()
     config.write_config({"library_root": str(lib)})
-    return TestClient(app)
+    # Host-Wache: nur 127.0.0.1/localhost — der TestClient-Default
+    # "testserver" würde zu Recht abgewiesen
+    return TestClient(app, base_url="http://127.0.0.1")
 
 
 VTT = """WEBVTT

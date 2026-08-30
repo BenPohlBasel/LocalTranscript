@@ -37,6 +37,19 @@ app.add_middleware(
                    "http://localhost:1421"],
     allow_methods=["*"], allow_headers=["*"])
 
+
+@app.middleware("http")
+async def host_wache(request, call_next):
+    """DNS-Rebinding-Schutz (Review-Befund): eine fremde Domain, die
+    per Rebinding auf 127.0.0.1 zeigt, trägt ihren eigenen Host-Header
+    — nur echte lokale Hosts kommen durch."""
+    host = (request.headers.get("host") or "").split(":")[0]
+    if host not in ("127.0.0.1", "localhost", "tauri.localhost"):
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=421,
+                            content={"detail": f"Host nicht erlaubt: {host}"})
+    return await call_next(request)
+
 AUDIO_MEDIA = {".mp3": "audio/mpeg", ".m4a": "audio/mp4",
                ".aac": "audio/aac", ".wav": "audio/wav",
                ".ogg": "audio/ogg", ".flac": "audio/flac",
@@ -45,6 +58,15 @@ AUDIO_MEDIA = {".mp3": "audio/mpeg", ".m4a": "audio/mp4",
 
 class ApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+def _tmpdatei(suffix: str, prefix: str) -> Path:
+    """mkstemp OHNE fd-Leck (Review-Befund: der fd wurde nie
+    geschlossen — drei Aufrufstellen)."""
+    import os
+    fd, name = tempfile.mkstemp(suffix=suffix, prefix=prefix)
+    os.close(fd)
+    return Path(name)
 
 
 def _err(e: Exception) -> HTTPException:
@@ -124,7 +146,7 @@ async def transcribe_upload(file: UploadFile = File(...),
     if endung not in bibliothek.AUDIO_ENDUNGEN:
         raise HTTPException(status_code=400,
                             detail=f"Nicht unterstützt: {endung}")
-    tmp = Path(tempfile.mkstemp(suffix=endung, prefix="lt-up-")[1])
+    tmp = _tmpdatei(endung, "lt-up-")
     with tmp.open("wb") as f:
         while chunk := await file.read(1 << 20):
             f.write(chunk)
@@ -163,7 +185,7 @@ def transcribe_path(req: TranscribePathReq) -> dict:
 
 @app.get("/api/jobs")
 def jobs_liste() -> dict:
-    return {"jobs": [jobs.sicht(j) for j in jobs.JOBS.values()]}
+    return {"jobs": [jobs.sicht(j) for j in list(jobs.JOBS.values())]}
 
 
 @app.get("/api/jobs/{job_id}")
@@ -227,8 +249,7 @@ async def import_upload(datei: UploadFile = File(...),
         if audio is not None and audio.filename:
             endung = Path(audio.filename).suffix.lower()
             if endung in bibliothek.AUDIO_ENDUNGEN:
-                audio_tmp = Path(tempfile.mkstemp(suffix=endung,
-                                                  prefix="lt-imp-")[1])
+                audio_tmp = _tmpdatei(endung, "lt-imp-")
                 audio_tmp.write_bytes(await audio.read())
         return _import_turns(turns, name.stem,
                              f"import-{name.suffix.lstrip('.')}",
@@ -280,9 +301,22 @@ def transcript_get(eid: str) -> dict:
         raise _err(e) from e
 
 
+class SprecherReq(ApiModel):
+    id: str
+    name: str
+
+
+class SegmentReq(ApiModel):
+    id: str = ""
+    start: float
+    end: float
+    sprecher: str | None = None
+    text: str
+
+
 class SaveReq(ApiModel):
-    sprecher: list[dict]
-    segmente: list[dict]
+    sprecher: list[SprecherReq]
+    segmente: list[SegmentReq]
 
 
 @app.put("/api/transcripts/{eid}")
@@ -291,14 +325,14 @@ def transcript_put(eid: str, req: SaveReq) -> dict:
         d = bibliothek.lese(eid)
     except BibliothekFehler as e:
         raise _err(e) from e
-    ids = {s.get("id") for s in req.sprecher}
+    ids = {s.id for s in req.sprecher}
     for seg in req.segmente:
-        if seg.get("sprecher") and seg["sprecher"] not in ids:
+        if seg.sprecher and seg.sprecher not in ids:
             raise HTTPException(status_code=422,
                                 detail=f"Unbekannter Sprecher: "
-                                       f"{seg['sprecher']}")
-    d["sprecher"] = req.sprecher
-    d["segmente"] = req.segmente
+                                       f"{seg.sprecher}")
+    d["sprecher"] = [s.model_dump() for s in req.sprecher]
+    d["segmente"] = [s.model_dump() for s in req.segmente]
     d = bibliothek.schreibe(eid, d)
     return {"status": "saved", "updated": d["updated"]}
 
@@ -364,7 +398,7 @@ def sprecher_sample(eid: str, sid: str, tasks: BackgroundTasks):
         raise HTTPException(status_code=404, detail="Sprecher leer")
     seg = max(kandidaten, key=lambda s: s["end"] - s["start"])
     dauer = min(8.0, max(seg["end"] - seg["start"], 1.0))
-    tmp = Path(tempfile.mkstemp(suffix=".wav", prefix="lt-sample-")[1])
+    tmp = _tmpdatei(".wav", "lt-sample-")
     r = subprocess.run(
         [get_ffmpeg_cli(), "-y", "-ss", f"{seg['start']:.3f}",
          "-t", f"{dauer:.3f}", "-i", str(audio), "-ar", "16000",
@@ -402,10 +436,18 @@ def export_datei(eid: str, req: ExportReq) -> dict:
         inhalt, _name, _media = exporte.export_bytes(eid, req.format)
     except (BibliothekFehler, ValueError) as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
-    ziel = Path(req.path).expanduser()
+    ziel = Path(req.path).expanduser().resolve()
     if not ziel.parent.is_dir():
         raise HTTPException(status_code=409,
                             detail=f"Ordner fehlt: {ziel.parent}")
+    # Review-Befund: beliebige Pfade konnten JEDE User-Datei
+    # überschreiben (~/.zshrc, LaunchAgents) — die Endung muss zum
+    # Format passen, mehr Constraint erlaubt der freie Save-Dialog nicht
+    erlaubt = {"vtt": ".vtt", "csv": ".csv", "txt": ".txt",
+               "enrich": ".zip"}[req.format]
+    if ziel.suffix.lower() != erlaubt:
+        raise HTTPException(status_code=409,
+                            detail=f"Zieldatei muss auf {erlaubt} enden")
     ziel.write_bytes(inhalt)
     return {"status": "exported", "path": str(ziel)}
 

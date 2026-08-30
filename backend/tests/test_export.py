@@ -66,3 +66,10 @@ def test_export_in_datei(client, eintrag, tmp_path):
                     json={"format": "vtt", "path": str(ziel)})
     assert r.status_code == 200
     assert ziel.read_text("utf-8").startswith("WEBVTT")
+
+
+def test_export_endung_muss_passen(client, eintrag, tmp_path):
+    ziel = tmp_path / "zshrc"  # falsche Endung fürs Format
+    r = client.post(f"/api/transcripts/{eintrag}/export",
+                    json={"format": "txt", "path": str(ziel)})
+    assert r.status_code == 409 and "enden" in r.json()["detail"]
