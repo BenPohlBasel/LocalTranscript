@@ -239,10 +239,22 @@ const W: Record<string, Eintrag> = {
   "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
     it: "Licenze" },
   "st.lizenzen.text": {
-    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive-Schrift im enrich-Export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL-Build).",
-    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive typeface in enrich export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL build).",
-    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · police Recursive dans l'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL).",
-    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · carattere Recursive nell'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL)." },
+    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive-Schrift im enrich-Export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) — LocalTranscript selbst: GPL-3.0-or-later.",
+    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive typeface in enrich export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) — LocalTranscript itself: GPL-3.0-or-later.",
+    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · police Recursive dans l'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript : GPL-3.0-or-later.",
+    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · carattere Recursive nell'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript: GPL-3.0-or-later." },
+  "st.app": { de: "LocalTranscript", en: "LocalTranscript",
+    fr: "LocalTranscript", it: "LocalTranscript" },
+  "st.app.sub": {
+    de: "Freie Software — GPL-3.0-or-later · BIAS.City",
+    en: "Free software — GPL-3.0-or-later · BIAS.City",
+    fr: "Logiciel libre — GPL-3.0-or-later · BIAS.City",
+    it: "Software libero — GPL-3.0-or-later · BIAS.City" },
+  "st.app.text": {
+    de: "Quellcode, Lizenztext und Releases auf GitHub. Die App übernimmt die GPL bewusst als eigene Lizenz — das strengste mitgelieferte Werkzeug (ffmpeg, GPL-Build) setzt den Takt.",
+    en: "Source code, license text and releases on GitHub. The app deliberately adopts the GPL as its own license — the strictest bundled tool (ffmpeg, GPL build) sets the pace.",
+    fr: "Code source, licence et versions sur GitHub. L'application adopte délibérément la GPL — l'outil embarqué le plus strict (ffmpeg, build GPL) donne le ton.",
+    it: "Codice sorgente, licenza e release su GitHub. L'app adotta deliberatamente la GPL — lo strumento incluso più restrittivo (ffmpeg, build GPL) detta il passo." },
   "st.modelle": { de: "Modelle in {d}", en: "Models in {d}",
     fr: "Modèles dans {d}", it: "Modelli in {d}" },
 

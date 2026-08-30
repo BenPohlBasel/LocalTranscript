@@ -68,7 +68,9 @@ ffmpeg und Modelle aus einem daneben liegenden v1-Checkout
 
 ## Lizenz
 
-MIT (BIAS.City). Mitgeliefert u. a.: whisper.cpp (MIT), silero-vad
+**GPL-3.0-or-later** (BIAS.City) — die App übernimmt bewusst die
+Lizenz des strengsten mitgelieferten Werkzeugs (ffmpeg, GPL-Build);
+alle übrigen Bausteine (MIT/Apache/ISC/OFL/BSD) sind GPL-kompatibel. Mitgeliefert u. a.: whisper.cpp (MIT), silero-vad
 (MIT), SpeechBrain (Apache-2.0), Recursive-Schrift (SIL OFL 1.1,
 `backend/src/localtranscript/enrich_export/fonts/LICENSE-OFL.txt`),
 ffmpeg (LGPL/GPL-Build) — vollständige Liste in den Einstellungen.
