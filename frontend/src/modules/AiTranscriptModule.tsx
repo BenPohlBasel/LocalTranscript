@@ -1,35 +1,31 @@
-// Bibliothek (Ebene 1): Drop → Transkriptions-Job → Eintrag; Liste der
-// Transkripte; Import VTT/CSV. Jobs sind flüchtig — die Liste ist die
-// Wahrheit (Backend-Bibliothek).
+// AI-Transcript (Default-Tab, User 2026-08-30): Dropzone + offene
+// Optionen + BATCH-Liste der Läufe (auch fertige, mit Sprung in den
+// Human-Editor). Die Bibliotheks-Liste lebt im Human-Editor-Tab.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Badge, Button, Checkbox, Disclosure, EmptyState, ErrorNote, Flex,
-  IconButton, Karte, LabeledSelect, ListRow, ModalDialog, Progress,
-  Text, TextField,
+  Badge, Button, Checkbox, Disclosure, ErrorNote, Flex, Karte,
+  LabeledSelect, Progress, Text,
 } from "../components/ui";
 import { Icon } from "../components/icons";
 import {
-  apiGet, apiSend, apiUpload, errMsg, hms, kuerze,
-  type EintragMeta, type Job,
+  apiGet, apiSend, apiUpload, errMsg, kuerze, type Job,
   type ModellInfo, type Settings,
 } from "../lib/api";
 import { jobText, useT } from "../lib/i18n";
-import { isTauri, onFileDrop, pickAudio, pickTranskript } from "../lib/tauri";
+import { isTauri, onFileDrop, pickAudio } from "../lib/tauri";
 
 const AUDIO_EXT = [".mp3", ".m4a", ".aac", ".wav", ".ogg", ".flac",
   ".webm"];
 
-export default function BibliothekModule({ settings, onOpen }: {
+export default function AiTranscriptModule({ settings, onEdit }: {
   settings: Settings | null;
-  onOpen: (id: string) => void;
+  onEdit: (id: string) => void;
 }) {
   const tr = useT();
-  const [eintraege, setEintraege] = useState<EintragMeta[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [fehler, setFehler] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const importRef = useRef<HTMLInputElement>(null);
 
   const [model, setModel] = useState(settings?.model ?? "large-v3-turbo");
   const [modelle, setModelle] = useState<ModellInfo[]>([]);
@@ -39,35 +35,22 @@ export default function BibliothekModule({ settings, onOpen }: {
   const [threshold, setThreshold] = useState(
     String(settings?.cluster_threshold ?? 0.5));
 
-  const lade = useCallback(async () => {
-    try {
-      const r = await apiGet<{ transcripts: EintragMeta[] }>(
-        "/api/transcripts");
-      setEintraege(r.transcripts);
-    } catch (e) { setFehler(errMsg(e)); }
-  }, []);
-  useEffect(() => { void lade(); }, [lade]);
   useEffect(() => {
     void apiGet<{ models: ModellInfo[] }>("/api/models")
       .then((r) => setModelle(r.models)).catch(() => undefined);
+    void apiGet<{ jobs: Job[] }>("/api/jobs")
+      .then((r) => setJobs(r.jobs)).catch(() => undefined);
   }, []);
 
-  // Job-Poll (1 s) solange etwas läuft; frische Liste bei Abschluss
   const aktiveJobs = jobs.some((j) =>
     !["completed", "failed", "cancelled"].includes(j.status));
   useEffect(() => {
     const t = window.setInterval(() => {
-      void apiGet<{ jobs: Job[] }>("/api/jobs").then((r) => {
-        setJobs((alt) => {
-          const fertigNeu = r.jobs.some((j) => j.status === "completed"
-            && alt.find((a) => a.id === j.id)?.status !== "completed");
-          if (fertigNeu) void lade();
-          return r.jobs;
-        });
-      }).catch(() => undefined);
+      void apiGet<{ jobs: Job[] }>("/api/jobs")
+        .then((r) => setJobs(r.jobs)).catch(() => undefined);
     }, aktiveJobs ? 1000 : 5000);
     return () => window.clearInterval(t);
-  }, [aktiveJobs, lade]);
+  }, [aktiveJobs]);
 
   const starteDateien = useCallback(async (pfade: string[]) => {
     setFehler("");
@@ -84,10 +67,6 @@ export default function BibliothekModule({ settings, onOpen }: {
     setJobs(r.jobs);
   }, [model, language, range, threshold, diarize]);
 
-  // Nativer Tauri-Drop (Pfade — kein Upload großer Audios).
-  // EIN Abo, Race-frei (Review-Befund: Re-Subscribe je Options-
-  // Änderung verlor Unsubscriber → doppelte Jobs je Drop);
-  // die aktuelle Optionen-Fassung kommt über die Ref.
   const starteRef = useRef(starteDateien);
   starteRef.current = starteDateien;
   useEffect(() => {
@@ -115,20 +94,6 @@ export default function BibliothekModule({ settings, onOpen }: {
     const r = await apiGet<{ jobs: Job[] }>("/api/jobs");
     setJobs(r.jobs);
   }, [model, language, range, threshold, diarize]);
-
-  const importiere = useCallback(async () => {
-    setFehler("");
-    try {
-      if (isTauri()) {
-        const p = await pickTranskript();
-        if (!p) return;
-        await apiSend("/api/import-path", { path: p });
-        void lade();
-      } else {
-        importRef.current?.click();
-      }
-    } catch (e) { setFehler(errMsg(e)); }
-  }, [lade]);
 
   return (
     <Flex direction="column" gap="3" p="4"
@@ -162,28 +127,12 @@ export default function BibliothekModule({ settings, onOpen }: {
                  e.target.value = ""; }} />
       </div>
 
-      <Flex gap="3" align="center" wrap="wrap">
-        <Button variant="soft" onClick={() => void importiere()}>
-          <Icon name="text" /> {tr("bib.import")}</Button>
-        <input ref={importRef} type="file" hidden accept=".vtt,.csv"
-               onChange={(e) => {
-                 const f = e.target.files?.[0];
-                 e.target.value = "";
-                 if (!f) return;
-                 const fd = new FormData();
-                 fd.append("datei", f);
-                 void apiUpload("/api/import", fd)
-                   .then(() => lade())
-                   .catch((err) => setFehler(errMsg(err)));
-               }} />
-      </Flex>
-
-      <Disclosure label={tr("bib.optionen")}>
+      <Disclosure label={tr("bib.optionen")} defaultOpen>
         <Flex gap="4" wrap="wrap" py="2">
           <LabeledSelect label={tr("bib.modell")} value={model}
             onChange={setModel}
             options={(modelle.length ? modelle.map((m) => m.name)
-              : [model]).map((n) => n)} />
+              : [model])} />
           <LabeledSelect label={tr("bib.sprache")} value={language}
             onChange={setLanguage}
             options={["de", "en", "fr", "it", "es", "auto"]} />
@@ -210,25 +159,20 @@ export default function BibliothekModule({ settings, onOpen }: {
 
       {fehler && <ErrorNote>{fehler}</ErrorNote>}
 
-      {jobs.filter((j) => j.status !== "completed").length > 0 && (
-        <Karte titel={tr("job.transkribiere")}>
-          {jobs.filter((j) => j.status !== "completed").map((j) => (
-            <JobZeile key={j.id} job={j} />
+      {jobs.length > 0 && (
+        <Karte titel={tr("ai.batch")}>
+          {jobs.map((j) => (
+            <JobZeile key={j.id} job={j} onEdit={onEdit} />
           ))}
         </Karte>
       )}
-
-      {eintraege.length === 0
-        ? <EmptyState>{tr("bib.leer")}</EmptyState>
-        : eintraege.map((e) => (
-            <EintragZeile key={e.id} e={e} onOpen={onOpen}
-                          onChanged={() => void lade()} />
-          ))}
     </Flex>
   );
 }
 
-function JobZeile({ job }: { job: Job }) {
+function JobZeile({ job, onEdit }: {
+  job: Job; onEdit: (id: string) => void;
+}) {
   const tr = useT();
   const fertig = ["completed", "failed", "cancelled"]
     .includes(job.status);
@@ -238,9 +182,16 @@ function JobZeile({ job }: { job: Job }) {
       <Flex align="center" gap="2">
         <Text size="2" weight="medium" truncate
               style={{ minWidth: 0 }}>{kuerze(job.filename, 72)}</Text>
-        <Badge color={job.status === "failed" ? "red" : "indigo"}>
+        <Badge color={job.status === "failed" ? "red"
+          : job.status === "completed" ? "green" : "indigo"}>
           {jobText(tr, job.status, job.message)}</Badge>
         <div style={{ flex: 1 }} />
+        {job.status === "completed" && job.eintrag && (
+          <Button size="1" variant="soft"
+                  onClick={() => onEdit(job.eintrag!)}>
+            <Icon name="edit" size={13} /> {tr("allg.bearbeiten")}
+          </Button>
+        )}
         {!fertig && (
           <Button size="1" variant="soft" color="red"
                   onClick={() => void apiSend(
@@ -255,70 +206,9 @@ function JobZeile({ job }: { job: Job }) {
       )}
       {!fertig && job.partial_text && (
         <Text size="1" color="gray" style={{
-          maxHeight: 60, overflow: "hidden", fontStyle: "normal" }}>
+          maxHeight: 60, overflow: "hidden" }}>
           {job.partial_text.slice(-300)}</Text>
       )}
     </Flex>
-  );
-}
-
-function EintragZeile({ e, onOpen, onChanged }: {
-  e: EintragMeta; onOpen: (id: string) => void;
-  onChanged: () => void;
-}) {
-  const tr = useT();
-  const [frage, setFrage] = useState<"umbenennen" | "loeschen" | null>(
-    null);
-  const [name, setName] = useState(e.name);
-  const [dialogFehler, setDialogFehler] = useState("");
-  return (
-    <>
-      <ListRow
-        leading={<Icon name="text" size={18} />}
-        title={kuerze(e.name, 72)}
-        meta={`${hms(e.dauer)} · ${tr("bib.sprecher.n",
-          { n: e.sprecher })} · ${tr("bib.segmente.n",
-          { n: e.segmente })}`}
-        onClick={() => onOpen(e.id)}
-        trailing={
-          <Flex gap="1" onClick={(ev) => ev.stopPropagation()}>
-            <IconButton title={tr("bib.umbenennen")}
-                        onClick={() => setFrage("umbenennen")}>
-              <Icon name="edit" size={14} /></IconButton>
-            <IconButton title={tr("bib.loeschen")}
-                        onClick={() => setFrage("loeschen")}>
-              <Icon name="trash" size={14} /></IconButton>
-          </Flex>
-        } />
-      <ModalDialog open={frage === "umbenennen"}
-                   onOpenChange={(o) => !o && setFrage(null)}
-                   title={tr("bib.umbenennen")}
-                   footer={
-                     <Button onClick={() => {
-                       void apiSend(`/api/transcripts/${e.id}/rename`,
-                                    { name })
-                         .then(() => { setFrage(null); onChanged(); })
-                         .catch((err) => setDialogFehler(errMsg(err)));
-                     }}>{tr("allg.ok")}</Button>}>
-        <TextField.Root value={name}
-                        onChange={(ev) => setName(ev.target.value)} />
-        {dialogFehler && (
-          <Text size="1" color="red">{dialogFehler}</Text>)}
-      </ModalDialog>
-      <ModalDialog open={frage === "loeschen"}
-                   onOpenChange={(o) => !o && setFrage(null)}
-                   title={tr("bib.loeschen")}
-                   footer={
-                     <Button color="red" onClick={() => {
-                       void apiSend(`/api/transcripts/${e.id}/delete`,
-                                    { confirm: e.id })
-                         .then(() => { setFrage(null); onChanged(); })
-                         .catch((err) => setDialogFehler(errMsg(err)));
-                     }}>{tr("bib.loeschen")}</Button>}>
-        <Text size="2">{tr("bib.loeschen.text", { name: e.name })}</Text>
-        {dialogFehler && (
-          <Text size="1" color="red">{dialogFehler}</Text>)}
-      </ModalDialog>
-    </>
   );
 }

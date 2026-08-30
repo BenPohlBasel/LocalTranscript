@@ -22,9 +22,11 @@ export async function savePath(defaultName: string,
   });
 }
 
-export async function pickAudio(): Promise<string[] | null> {
+export async function pickAudio(title?: string,
+                                multiple = true):
+    Promise<string[] | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
-  const r = await open({ multiple: true, filters: [{
+  const r = await open({ multiple, title, filters: [{
     name: "Audio",
     extensions: ["mp3", "m4a", "aac", "wav", "ogg", "flac", "webm"] }] });
   if (r == null) return null;
