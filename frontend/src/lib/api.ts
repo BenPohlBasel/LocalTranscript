@@ -88,6 +88,15 @@ export function sprecherFarbe(sprecher: Sprecher[], sid: string | null):
   return i < 0 ? "gray" : SPRECHER_FARBEN[i % SPRECHER_FARBEN.length];
 }
 
+/** Lange Namen MITTIG kürzen — die Endung bleibt sichtbar
+    (User 2026-08-30: „abc…lmn.mp3"). */
+export function kuerze(name: string, max = 56): string {
+  if (name.length <= max) return name;
+  const kopf = Math.ceil((max - 1) * 0.6);
+  const fuss = max - 1 - kopf;
+  return `${name.slice(0, kopf)}…${name.slice(-fuss)}`;
+}
+
 /** IMMER hh:mm:ss (User-Regel). */
 export function hms(sekunden: number): string {
   const s = Math.max(0, Math.floor(sekunden));
