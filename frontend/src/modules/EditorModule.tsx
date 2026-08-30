@@ -105,8 +105,11 @@ export default function EditorModule({ id, onExit }: {
       if (!a || !b) return s;
       const anteil = a.length / (a.length + b.length);
       const mitte = seg.start + (seg.end - seg.start) * anteil;
+      // beide Hälften mit NEUER id — unkontrollierte Textareas
+      // (defaultValue) zeigen neuen Text nur nach Remount
       const neu: Segment[] = [
-        { ...seg, end: Math.round(mitte * 1000) / 1000, text: a },
+        { ...seg, id: neueId(),
+          end: Math.round(mitte * 1000) / 1000, text: a },
         { id: neueId(), start: Math.round(mitte * 1000) / 1000,
           end: seg.end, sprecher: seg.sprecher, text: b }];
       return [...s.slice(0, i), ...neu, ...s.slice(i + 1)];
@@ -119,7 +122,9 @@ export default function EditorModule({ id, onExit }: {
       const i = s.findIndex((x) => x.id === sid);
       if (i < 1) return s;
       const prev = s[i - 1], seg = s[i];
-      const zusammen = { ...prev, end: seg.end,
+      // NEUE id: die Textarea ist unkontrolliert (defaultValue) und
+      // zeigt den zusammengeführten Text nur nach Remount
+      const zusammen = { ...prev, id: neueId(), end: seg.end,
         text: `${prev.text} ${seg.text}`.trim() };
       return [...s.slice(0, i - 1), zusammen, ...s.slice(i + 1)];
     });
