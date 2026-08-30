@@ -78,6 +78,10 @@ export default function EinstellungenModule({ settings, onChange }: {
         )}
       </Karte>
 
+      <Karte titel={tr("st.datenschutz")}>
+        <Text size="1" color="gray">{tr("st.datenschutz.text")}</Text>
+      </Karte>
+
       <Karte titel={tr("st.lizenzen")}>
         <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
       </Karte>
