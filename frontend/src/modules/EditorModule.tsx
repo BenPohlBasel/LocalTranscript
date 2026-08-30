@@ -10,7 +10,7 @@ import {
 } from "../components/ui";
 import { Icon } from "../components/icons";
 import {
-  API_BASE, apiGet, apiSend, errMsg, hms, sprecherFarbe,
+  API_BASE, apiGet, apiSend, errMsg, hms, kuerze, sprecherFarbe,
   type Segment, type Sprecher, type Transkript,
 } from "../lib/api";
 import { useT } from "../lib/i18n";
@@ -277,7 +277,7 @@ export default function EditorModule({ id, onExit }: {
           <Button size="1" variant="ghost" onClick={onExit}>
             <Icon name="back" /> {tr("ed.zurueck")}</Button>
           <Text size="2" weight="medium" truncate
-                style={{ flex: 1 }}>{name}</Text>
+                style={{ flex: 1, minWidth: 0 }}>{kuerze(name, 80)}</Text>
           <Text size="1" color="gray">
             {speichert ? tr("ed.speichert")
               : gespeichert

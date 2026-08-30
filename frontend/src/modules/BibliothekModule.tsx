@@ -9,7 +9,8 @@ import {
 } from "../components/ui";
 import { Icon } from "../components/icons";
 import {
-  apiGet, apiSend, apiUpload, errMsg, hms, type EintragMeta, type Job,
+  apiGet, apiSend, apiUpload, errMsg, hms, kuerze,
+  type EintragMeta, type Job,
   type ModellInfo, type Settings,
 } from "../lib/api";
 import { jobText, useT } from "../lib/i18n";
@@ -235,7 +236,8 @@ function JobZeile({ job }: { job: Job }) {
     <Flex direction="column" gap="1" py="2"
           style={{ borderBottom: "1px solid var(--gray-a4)" }}>
       <Flex align="center" gap="2">
-        <Text size="2" weight="medium">{job.filename}</Text>
+        <Text size="2" weight="medium" truncate
+              style={{ minWidth: 0 }}>{kuerze(job.filename, 72)}</Text>
         <Badge color={job.status === "failed" ? "red" : "indigo"}>
           {jobText(tr, job.status, job.message)}</Badge>
         <div style={{ flex: 1 }} />
@@ -273,7 +275,7 @@ function EintragZeile({ e, onOpen, onChanged }: {
     <>
       <ListRow
         leading={<Icon name="text" size={18} />}
-        title={e.name}
+        title={kuerze(e.name, 72)}
         meta={`${hms(e.dauer)} · ${tr("bib.sprecher.n",
           { n: e.sprecher })} · ${tr("bib.segmente.n",
           { n: e.segmente })}`}

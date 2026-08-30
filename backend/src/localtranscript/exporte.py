@@ -53,6 +53,20 @@ def _enrich_zip(eid: str, daten: dict, seg: list[dict],
     struktur, zeiten = turns_zu_struktur(turns)
     audio = bibliothek.audio_pfad(eid)
     with tempfile.TemporaryDirectory() as td:
+        # User-Regel 2026-08-30: im .enrich-Dossier liegt IMMER mp3
+        # (nie wav — enrich-Dossiers sollen nicht aufgebläht sein);
+        # schlägt ffmpeg fehl, geht das Original ehrlich mit.
+        if audio is not None and audio.suffix.lower() != ".mp3":
+            import subprocess
+
+            from .config import get_ffmpeg_cli
+            mp3 = Path(td) / "audio.mp3"
+            r = subprocess.run(
+                [get_ffmpeg_cli(), "-y", "-i", str(audio),
+                 "-c:a", "libmp3lame", "-q:a", "2", str(mp3)],
+                capture_output=True)
+            if r.returncode == 0 and mp3.is_file():
+                audio = mp3
         dp = Path(td) / f"{stamm}.enrich"
         d, _bericht = baue_struktur_dossier(
             dp, struktur, quelle=daten["name"], user="localtranscript",
