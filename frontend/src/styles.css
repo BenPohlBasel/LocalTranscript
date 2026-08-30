@@ -574,3 +574,31 @@ body { margin: 0; background: var(--gray-1); }
 .cb-modal-scroll::-webkit-scrollbar-thumb {
   background: var(--gray-a7); border-radius: 4px; }
 .cb-modal-scroll::-webkit-scrollbar-track { background: transparent; }
+
+
+/* ---------- LocalTranscript: Segment-Textfeld ----------
+   Im Fokus MUSS das Feld als editierbar erkennbar sein (User
+   2026-08-30): Rahmen + Grund; solange der Cursor drin ist, gelten
+   die Pfeiltasten im Text (der Player-Handler lässt Textfelder in
+   Ruhe). */
+.seg-text {
+  resize: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+  padding: 3px 6px;
+  color: var(--gray-12);
+}
+.seg-text:hover {
+  border-color: var(--gray-a5);
+}
+.seg-text:focus {
+  border-color: var(--accent-8);
+  background: var(--color-panel-solid);
+  box-shadow: 0 0 0 2px var(--accent-a4);
+}
