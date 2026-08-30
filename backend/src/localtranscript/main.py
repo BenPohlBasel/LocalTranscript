@@ -402,10 +402,21 @@ def export_datei(eid: str, req: ExportReq) -> dict:
 
 _DIST = Path(__file__).resolve().parent.parent.parent.parent \
     / "frontend" / "dist"
-_BUNDLE_DIST = config.get_app_root() / "frontend"
-for kandidat in (_BUNDLE_DIST, _DIST):
+# Im Bundle liegt das GEBAUTE Frontend unter Resources/frontend; im
+# Dev-Repo ist frontend/ der QUELL-Ordner (eigene index.html!) — dort
+# zählt nur dist/.
+_KANDIDATEN = ([config.get_app_root() / "frontend"]
+               if config.is_bundled() else []) + [_DIST]
+for kandidat in _KANDIDATEN:
     if (kandidat / "index.html").is_file():
+        import mimetypes
+
         from fastapi.staticfiles import StaticFiles
+
+        # macOS-Python kennt .js teils nur als octet-stream —
+        # Strict-MIME-Checking bricht dann jedes ES-Modul
+        mimetypes.add_type("text/javascript", ".js")
+        mimetypes.add_type("text/css", ".css")
         app.mount("/", StaticFiles(directory=kandidat, html=True),
                   name="static")
         break

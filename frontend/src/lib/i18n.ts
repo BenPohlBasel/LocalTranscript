@@ -1,0 +1,257 @@
+// UI-Sprache (enrich-Mechanik): EINE Wörterbuch-Quelle, Umschaltung ohne
+// Reload via useSyncExternalStore; fehlende Schlüssel fallen LAUT auf
+// den Schlüsselnamen zurück. de/en/fr/it (fr/it-Lücke → en, nie still
+// deutsch).
+import { useSyncExternalStore } from "react";
+import { KEYS, lget, lset } from "./storage";
+
+export type Sprache = "de" | "en" | "fr" | "it";
+
+const _GUELTIG = new Set(["de", "en", "fr", "it"]);
+let aktuelle: Sprache = (_GUELTIG.has(lget(KEYS.sprache) ?? "")
+  ? (lget(KEYS.sprache) as Sprache) : "de");
+const hoerer = new Set<() => void>();
+
+export function setSprache(s: Sprache): void {
+  aktuelle = s;
+  lset(KEYS.sprache, s);
+  hoerer.forEach((h) => h());
+}
+export function getSprache(): Sprache { return aktuelle; }
+export function useSprache(): Sprache {
+  return useSyncExternalStore(
+    (cb) => { hoerer.add(cb); return () => hoerer.delete(cb); },
+    () => aktuelle);
+}
+
+type Eintrag = { de: string; en: string; fr?: string; it?: string };
+
+const W: Record<string, Eintrag> = {
+  "app.titel": { de: "LocalTranscript", en: "LocalTranscript",
+    fr: "LocalTranscript", it: "LocalTranscript" },
+  "app.untertitel": { de: "Offline-Transkription mit Sprechererkennung",
+    en: "Offline transcription with speaker detection",
+    fr: "Transcription hors ligne avec détection des locuteurs",
+    it: "Trascrizione offline con riconoscimento dei parlanti" },
+  "app.boot": { de: "Backend startet …", en: "Backend starting …",
+    fr: "Démarrage du backend …", it: "Avvio del backend …" },
+  "app.bootfehler": { de: "Backend nicht erreichbar",
+    en: "Backend unreachable", fr: "Backend inaccessible",
+    it: "Backend non raggiungibile" },
+  "app.nochmal": { de: "Erneut versuchen", en: "Try again",
+    fr: "Réessayer", it: "Riprova" },
+  "tab.bibliothek": { de: "Bibliothek", en: "Library",
+    fr: "Bibliothèque", it: "Biblioteca" },
+  "tab.einstellungen": { de: "Einstellungen", en: "Settings",
+    fr: "Réglages", it: "Impostazioni" },
+
+  // First-Run
+  "firstrun.titel": { de: "Speicherort wählen", en: "Choose storage",
+    fr: "Choisir l'emplacement", it: "Scegli la posizione" },
+  "firstrun.text": {
+    de: "Wo sollen deine Transkripte liegen? Je Transkript entsteht ein Ordner mit Audio, Text und Verlauf.",
+    en: "Where should your transcripts live? Each transcript gets a folder with audio, text and history.",
+    fr: "Où placer vos transcriptions ? Chaque transcription reçoit un dossier avec audio, texte et historique.",
+    it: "Dove salvare le trascrizioni? Ogni trascrizione ha una cartella con audio, testo e cronologia." },
+  "firstrun.standard": { de: "Empfohlenen Ort verwenden",
+    en: "Use recommended location", fr: "Utiliser l'emplacement recommandé",
+    it: "Usa la posizione consigliata" },
+  "firstrun.waehlen": { de: "Anderen Ordner wählen …",
+    en: "Choose another folder …", fr: "Choisir un autre dossier …",
+    it: "Scegli un'altra cartella …" },
+
+  // Bibliothek
+  "bib.drop": { de: "Audio-Dateien hierher ziehen",
+    en: "Drop audio files here", fr: "Déposez les fichiers audio ici",
+    it: "Trascina qui i file audio" },
+  "bib.dropsub": { de: "oder klicken zum Auswählen — MP3, WAV, M4A, OGG, FLAC",
+    en: "or click to choose — MP3, WAV, M4A, OGG, FLAC",
+    fr: "ou cliquez pour choisir — MP3, WAV, M4A, OGG, FLAC",
+    it: "o fai clic per scegliere — MP3, WAV, M4A, OGG, FLAC" },
+  "bib.import": { de: "Transkript importieren (VTT/CSV) …",
+    en: "Import transcript (VTT/CSV) …",
+    fr: "Importer une transcription (VTT/CSV) …",
+    it: "Importa trascrizione (VTT/CSV) …" },
+  "bib.optionen": { de: "Optionen", en: "Options", fr: "Options",
+    it: "Opzioni" },
+  "bib.modell": { de: "Whisper-Modell", en: "Whisper model",
+    fr: "Modèle Whisper", it: "Modello Whisper" },
+  "bib.sprache": { de: "Sprache", en: "Language", fr: "Langue",
+    it: "Lingua" },
+  "bib.diarize": { de: "Sprechererkennung", en: "Speaker detection",
+    fr: "Détection des locuteurs", it: "Riconoscimento parlanti" },
+  "bib.sprecherzahl": { de: "Sprecher", en: "Speakers",
+    fr: "Locuteurs", it: "Parlanti" },
+  "bib.auto": { de: "Automatisch", en: "Automatic", fr: "Automatique",
+    it: "Automatico" },
+  "bib.trennung": { de: "Trennung", en: "Separation", fr: "Séparation",
+    it: "Separazione" },
+  "bib.trennung.locker": { de: "Locker", en: "Loose", fr: "Souple",
+    it: "Ampia" },
+  "bib.trennung.normal": { de: "Normal", en: "Normal", fr: "Normale",
+    it: "Normale" },
+  "bib.trennung.streng": { de: "Streng", en: "Strict", fr: "Stricte",
+    it: "Rigida" },
+  "bib.trennung.sehr": { de: "Sehr streng", en: "Very strict",
+    fr: "Très stricte", it: "Molto rigida" },
+  "bib.leer": { de: "Noch keine Transkripte — Audio hierher ziehen.",
+    en: "No transcripts yet — drop audio here.",
+    fr: "Pas encore de transcriptions — déposez un audio ici.",
+    it: "Ancora nessuna trascrizione — trascina qui un audio." },
+  "bib.dauer": { de: "Dauer", en: "Duration", fr: "Durée",
+    it: "Durata" },
+  "bib.sprecher.n": { de: "{n} Sprecher", en: "{n} speakers",
+    fr: "{n} locuteurs", it: "{n} parlanti" },
+  "bib.segmente.n": { de: "{n} Segmente", en: "{n} segments",
+    fr: "{n} segments", it: "{n} segmenti" },
+  "bib.umbenennen": { de: "Umbenennen …", en: "Rename …",
+    fr: "Renommer …", it: "Rinomina …" },
+  "bib.loeschen": { de: "Löschen …", en: "Delete …", fr: "Supprimer …",
+    it: "Elimina …" },
+  "bib.loeschen.text": {
+    de: "„{name}“ in den Papierkorb der Bibliothek verschieben?",
+    en: "Move “{name}” to the library trash?",
+    fr: "Déplacer « {name} » vers la corbeille ?",
+    it: "Spostare “{name}” nel cestino?" },
+  "bib.ordner": { de: "Im Finder zeigen", en: "Show in Finder",
+    fr: "Afficher dans le Finder", it: "Mostra nel Finder" },
+  "bib.jobfehler": { de: "Fehlgeschlagen: {e}", en: "Failed: {e}",
+    fr: "Échec : {e}", it: "Non riuscito: {e}" },
+  "bib.abbrechen": { de: "Abbrechen", en: "Cancel", fr: "Annuler",
+    it: "Annulla" },
+  "job.konvertiere": { de: "Konvertiere Audio …", en: "Converting audio …",
+    fr: "Conversion audio …", it: "Conversione audio …" },
+  "job.sprecher": { de: "Erkenne Sprecher …", en: "Detecting speakers …",
+    fr: "Détection des locuteurs …", it: "Riconoscimento parlanti …" },
+  "job.transkribiere": { de: "Transkribiere …", en: "Transcribing …",
+    fr: "Transcription …", it: "Trascrizione …" },
+  "job.transkribiere.n": { de: "Transkribiere Block {a}/{b} …",
+    en: "Transcribing block {a}/{b} …",
+    fr: "Transcription du bloc {a}/{b} …",
+    it: "Trascrizione blocco {a}/{b} …" },
+  "job.speichere": { de: "Speichere …", en: "Saving …",
+    fr: "Enregistrement …", it: "Salvataggio …" },
+  "job.fertig": { de: "Fertig", en: "Done", fr: "Terminé", it: "Fatto" },
+  "job.abgebrochen": { de: "Abgebrochen", en: "Cancelled", fr: "Annulé",
+    it: "Annullato" },
+  "job.warte": { de: "Wartet …", en: "Waiting …", fr: "En attente …",
+    it: "In attesa …" },
+
+  // Editor
+  "ed.zurueck": { de: "Bibliothek", en: "Library", fr: "Bibliothèque",
+    it: "Biblioteca" },
+  "ed.gespeichert": { de: "Gespeichert {t}", en: "Saved {t}",
+    fr: "Enregistré {t}", it: "Salvato {t}" },
+  "ed.speichert": { de: "Speichert …", en: "Saving …",
+    fr: "Enregistrement …", it: "Salvataggio …" },
+  "ed.speicherfehler": { de: "Speichern fehlgeschlagen: {e}",
+    en: "Save failed: {e}", fr: "Échec de l'enregistrement : {e}",
+    it: "Salvataggio non riuscito: {e}" },
+  "ed.export": { de: "Export", en: "Export", fr: "Export",
+    it: "Esporta" },
+  "ed.export.enrich": { de: "enrich-Dossier (.enrich.zip)",
+    en: "enrich dossier (.enrich.zip)",
+    fr: "Dossier enrich (.enrich.zip)",
+    it: "Dossier enrich (.enrich.zip)" },
+  "ed.exportiert": { de: "Exportiert: {p}", en: "Exported: {p}",
+    fr: "Exporté : {p}", it: "Esportato: {p}" },
+  "ed.exportfehler": { de: "Export fehlgeschlagen: {e}",
+    en: "Export failed: {e}", fr: "Échec de l'export : {e}",
+    it: "Esportazione non riuscita: {e}" },
+  "ed.sprecher": { de: "Sprecher", en: "Speakers", fr: "Locuteurs",
+    it: "Parlanti" },
+  "ed.sprecher.neu": { de: "Neuer Sprecher", en: "New speaker",
+    fr: "Nouveau locuteur", it: "Nuovo parlante" },
+  "ed.sprecher.ohne": { de: "ohne Sprecher", en: "no speaker",
+    fr: "sans locuteur", it: "senza parlante" },
+  "ed.sprecher.probe": { de: "Hörprobe", en: "Sample", fr: "Extrait",
+    it: "Campione" },
+  "ed.sprecher.merge": { de: "Zusammenführen in …", en: "Merge into …",
+    fr: "Fusionner dans …", it: "Unisci in …" },
+  "ed.sprecher.leere": { de: "Allen ohne Sprecher zuweisen",
+    en: "Assign to all without speaker",
+    fr: "Attribuer à tous sans locuteur",
+    it: "Assegna a tutti senza parlante" },
+  "ed.sprecher.n": { de: "{n} Segmente", en: "{n} segments",
+    fr: "{n} segments", it: "{n} segmenti" },
+  "ed.teilen": { de: "Am Cursor teilen", en: "Split at cursor",
+    fr: "Scinder au curseur", it: "Dividi al cursore" },
+  "ed.verbinden": { de: "Mit vorigem verbinden", en: "Merge with previous",
+    fr: "Fusionner avec le précédent", it: "Unisci al precedente" },
+  "ed.zeile.loeschen": { de: "Segment löschen", en: "Delete segment",
+    fr: "Supprimer le segment", it: "Elimina segmento" },
+  "ed.folgen": { de: "Folgen", en: "Follow", fr: "Suivre", it: "Segui" },
+  "ed.abhier": { de: "Ab hier", en: "From here", fr: "À partir d'ici",
+    it: "Da qui" },
+  "ed.keinaudio": { de: "Kein Audio verknüpft", en: "No audio attached",
+    fr: "Aucun audio associé", it: "Nessun audio collegato" },
+  "ed.leer": { de: "Keine Segmente.", en: "No segments.",
+    fr: "Aucun segment.", it: "Nessun segmento." },
+
+  // Einstellungen
+  "st.speicherort": { de: "Speicherort", en: "Storage", fr: "Emplacement",
+    it: "Posizione" },
+  "st.speicherort.text": {
+    de: "Bibliotheks-Ordner — je Transkript ein Unterordner.",
+    en: "Library folder — one subfolder per transcript.",
+    fr: "Dossier bibliothèque — un sous-dossier par transcription.",
+    it: "Cartella biblioteca — una sottocartella per trascrizione." },
+  "st.aendern": { de: "Ändern …", en: "Change …", fr: "Modifier …",
+    it: "Modifica …" },
+  "st.standards": { de: "Standard-Optionen", en: "Default options",
+    fr: "Options par défaut", it: "Opzioni predefinite" },
+  "st.uisprache": { de: "Oberflächen-Sprache", en: "Interface language",
+    fr: "Langue de l'interface", it: "Lingua dell'interfaccia" },
+  "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
+    it: "Licenze" },
+  "st.lizenzen.text": {
+    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive-Schrift im enrich-Export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL-Build).",
+    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · Recursive typeface in enrich export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL build).",
+    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · police Recursive dans l'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL).",
+    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · carattere Recursive nell'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (LGPL/GPL)." },
+  "st.modelle": { de: "Modelle in {d}", en: "Models in {d}",
+    fr: "Modèles dans {d}", it: "Modelli in {d}" },
+
+  "allg.ok": { de: "OK", en: "OK", fr: "OK", it: "OK" },
+  "allg.abbrechen": { de: "Abbrechen", en: "Cancel", fr: "Annuler",
+    it: "Annulla" },
+  "allg.name": { de: "Name", en: "Name", fr: "Nom", it: "Nome" },
+  "allg.fehler": { de: "Fehler: {e}", en: "Error: {e}",
+    fr: "Erreur : {e}", it: "Errore: {e}" },
+};
+
+export function uebersetze(key: string, sprache: Sprache,
+    params?: Record<string, string | number>): string {
+  const e = W[key];
+  let text = e ? (e[sprache] ?? e.en) : key;
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      text = text.replace(`{${k}}`, String(v));
+    }
+  }
+  return text;
+}
+
+export function useT(): (key: string,
+    params?: Record<string, string | number>) => string {
+  const s = useSprache();
+  return (key, params) => uebersetze(key, s, params);
+}
+
+/** Job-Statuszeile aus den neutralen Backend-Tokens übersetzen. */
+export function jobText(tr: (k: string,
+    p?: Record<string, string | number>) => string,
+    status: string, message: string): string {
+  if (message.startsWith("transkribiere:")) {
+    const [a, b] = message.slice(14).split("/");
+    return tr("job.transkribiere.n", { a, b });
+  }
+  const map: Record<string, string> = {
+    konvertiere: "job.konvertiere", sprecher: "job.sprecher",
+    transkribiere: "job.transkribiere", speichere: "job.speichere",
+    fertig: "job.fertig", abgebrochen: "job.abgebrochen",
+  };
+  if (map[message]) return tr(map[message]);
+  if (status === "pending") return tr("job.warte");
+  return message;
+}
