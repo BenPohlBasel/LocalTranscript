@@ -228,25 +228,46 @@ export default function EditorModule({ id, onExit }: {
   }, [speed, hatAudio]);
 
   useEffect(() => {
+    // Tastatur-Schema v2 (User 2026-08-30 — Ctrl+Pfeile frisst
+    // macOS/Mission Control!): J/K/L-Shuttle wie Audition; mit ⌥
+    // auch MITTEN IM TIPPEN (e.code, weil ⌥+Taste auf macOS das
+    // komponierte Zeichen in e.key legt); außerhalb der Textfelder
+    // zusätzlich pur J/K/L, ←/→ und Leertaste wie QuickTime.
     const h = (e: KeyboardEvent) => {
       const ziel = e.target as HTMLElement | null;
       const tippt = ziel?.tagName === "TEXTAREA"
         || ziel?.tagName === "INPUT";
       const a = audioRef.current;
       if (!a) return;
-      if (e.key === " " && e.shiftKey && !tippt) {
-        e.preventDefault();
+      const toggle = () => {
         if (a.paused) void a.play(); else a.pause();
-      } else if (e.ctrlKey && e.key === "ArrowLeft") {
+      };
+      if (e.altKey && !e.metaKey && !e.ctrlKey) {
+        if (e.code === "KeyJ") { e.preventDefault(); a.currentTime -= 5; }
+        else if (e.code === "KeyL") {
+          e.preventDefault(); a.currentTime += 5;
+        } else if (e.code === "KeyK") { e.preventDefault(); toggle(); }
+        return;
+      }
+      if (e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.code === "KeyL") { e.preventDefault(); setLoop((l) => !l); }
+        else if (e.code === "KeyX") {
+          e.preventDefault();
+          setSpeed((s) => SPEEDS[(SPEEDS.indexOf(s) + 1)
+            % SPEEDS.length]);
+        }
+        return;
+      }
+      if (tippt || e.metaKey) {
+        // Shift+Space als Alt-Weg außerhalb der Felder (v1-Erbe)
+        return;
+      }
+      if (e.code === "KeyJ" || e.key === "ArrowLeft") {
         e.preventDefault(); a.currentTime -= 5;
-      } else if (e.ctrlKey && e.key === "ArrowRight") {
+      } else if (e.code === "KeyL" || e.key === "ArrowRight") {
         e.preventDefault(); a.currentTime += 5;
-      } else if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
-        e.preventDefault(); setLoop((l) => !l);
-      } else if (e.ctrlKey && (e.key === "x" || e.key === "X")) {
-        e.preventDefault();
-        setSpeed((s) => SPEEDS[(SPEEDS.indexOf(s) + 1)
-          % SPEEDS.length]);
+      } else if (e.code === "KeyK" || e.key === " ") {
+        e.preventDefault(); toggle();
       }
     };
     document.addEventListener("keydown", h);
