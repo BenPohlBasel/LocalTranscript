@@ -45,9 +45,12 @@ def _enrich_zip(eid: str, daten: dict, seg: list[dict],
     from .enrich_export.textsatz import baue_struktur_dossier
     from .enrich_export.turns import turns_zu_struktur
 
-    turns = [{"t0_s": s["start"], "t1_s": s["end"],
-              "speaker": s["sprecher"], "text": s["text"]}
-             for s in seg if s["text"].strip()]
+    # User 2026-08-30: ins Dossier gehen die ZUSAMMENGEFASSTEN
+    # Sprecher-Blöcke (wie im CSV), nie einzelne VTT-Zeilen — ein Turn
+    # = ein Absatz reiner Rede mit EINER Label-Zeile darüber
+    turns = [{"t0_s": t["start"], "t1_s": t["end"],
+              "speaker": t["sprecher"], "text": t["text"]}
+             for t in ausgabe._turns(seg)]
     if not turns:
         raise ValueError("Leeres Transkript — nichts zu exportieren")
     struktur, zeiten = turns_zu_struktur(turns)

@@ -1,4 +1,4 @@
-# VENDORED-Extrakt aus enrich@3d2b131 —
+# VENDORED-Extrakt aus enrich@c2f4358 —
 # packages/enrich-serve/src/enrich_serve/textimport.py (die puren
 # Transkript-Funktionen, VERBATIM-Slice; Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude)).
@@ -113,45 +113,57 @@ def _tc(sekunden: float) -> str:
 
 
 def turns_zu_struktur(turns: list[dict]) -> tuple[dict, list[dict]]:
-    """Turns -> (Struktur fuers Setzen, Zeit-Spannen in T0-Offsets).
+    """Turns -> (Struktur fuers Setzen, Zeit-Spannen in MAIN-Offsets).
 
-    Absatz = "Sprecher [00:02]: Text" (User 2026-08-30: Timecode
-    hinter den Sprecher) — Sprecher fett, Timecode dezent grau; die
-    Offsets werden deterministisch mitgerechnet (Absatz-Trenner ist
-    das Newline, das der Setzer schreibt)."""
-    absaetze = []
-    zeiten = []
-    pos = 0
-
+    UMBAU 2026-08-30 (User: "Sprecher und Timecode gehoeren nicht in
+    den Textstrom"): aufeinanderfolgende Turns desselben Sprechers
+    werden zu EINEM Block verschmolzen (wie im CSV-Export), und
+    Sprecher+Timecode werden als eigene LABEL-ZEILE ueber dem Absatz
+    gesetzt (typ "sprecher" -> Block speaker-label -> Strom other) —
+    sichtbar im PDF, aber main traegt REINE REDE. Die Zeitkarte
+    referenziert die Rede-Offsets; Attribution fuer die Analyse kommt
+    strukturiert aus ihr (kette.mit_sprecher_marken), nie aus dem
+    Text."""
     def run(text: str, *, fett: bool = False,
             farbe: str = "") -> dict:
         return {"text": text, "fett": fett, "kursiv": False,
                 "farbe": farbe, "groesse": 0.0, "mono": False}
 
-    for i, t in enumerate(turns):
+    # 1. Verschmelzen: gleicher Sprecher hintereinander = EIN Block
+    bloecke: list[dict] = []
+    for t in turns:
+        text = " ".join(t["text"].split())
+        if not text:
+            continue
+        if bloecke and bloecke[-1]["speaker"] == t["speaker"]:
+            bloecke[-1]["text"] += " " + text
+            bloecke[-1]["t1_s"] = max(bloecke[-1]["t1_s"], t["t1_s"])
+        else:
+            bloecke.append({"t0_s": t["t0_s"], "t1_s": t["t1_s"],
+                            "speaker": t["speaker"], "text": text})
+
+    absaetze = []
+    zeiten = []
+    pos = 0  # NUR main-Offsets — Label-Zeilen leben im other-Strom
+    for i, b in enumerate(bloecke):
+        tc = f"[{_tc(b['t0_s'])}]" if (b["t0_s"] or b["t1_s"]) else ""
+        label_runs = []
+        if b["speaker"]:
+            label_runs.append(run(b["speaker"], fett=True))
+        if tc:
+            label_runs.append(run(tc, farbe="#8a8a8a"))
+        if label_runs:
+            absaetze.append({"typ": "sprecher", "runs": label_runs,
+                             "noten": []})
         if i:
-            pos += 1  # Absatz-Trenner
-        runs = []
+            pos += 1  # Absatz-Trenner in main
         start = pos
-        tc = f"[{_tc(t['t0_s'])}]" if (t["t0_s"] or t["t1_s"]) else ""
-        if t["speaker"] and tc:
-            runs += [run(f"{t['speaker']} ", fett=True),
-                     run(tc, farbe="#8a8a8a"),
-                     run(": ", fett=True)]
-            pos += len(t["speaker"]) + 1 + len(tc) + 2
-        elif t["speaker"]:
-            runs.append(run(f"{t['speaker']}: ", fett=True))
-            pos += len(t["speaker"]) + 2
-        elif tc:
-            runs.append(run(f"{tc} ", farbe="#8a8a8a"))
-            pos += len(tc) + 1
-        runs.append(run(t["text"]))
-        pos += len(t["text"])
-        absaetze.append({"typ": "paragraph", "runs": runs,
+        absaetze.append({"typ": "paragraph", "runs": [run(b["text"])],
                          "noten": []})
+        pos += len(b["text"])
         zeiten.append({"start": start, "end": pos,
-                       "t0_s": t["t0_s"], "t1_s": t["t1_s"],
-                       "speaker": t["speaker"]})
+                       "t0_s": b["t0_s"], "t1_s": b["t1_s"],
+                       "speaker": b["speaker"]})
     return ({"absaetze": absaetze, "fussnoten": [], "endnoten": []},
             zeiten)
 
@@ -169,4 +181,3 @@ def text_zu_struktur(text: str) -> dict:
     return {"absaetze": absaetze, "fussnoten": [], "endnoten": []}
 
 
-# ---------- Import ----------
