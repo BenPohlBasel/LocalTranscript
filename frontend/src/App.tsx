@@ -8,9 +8,10 @@ import { Icon } from "./components/icons";
 import { apiGet, apiSend, errMsg, type Settings } from "./lib/api";
 import { setSprache, useT, type Sprache } from "./lib/i18n";
 import { backendStarten, isTauri, pickOrdner } from "./lib/tauri";
-import BibliothekModule from "./modules/BibliothekModule";
+import AiTranscriptModule from "./modules/AiTranscriptModule";
 import EditorModule from "./modules/EditorModule";
 import EinstellungenModule from "./modules/EinstellungenModule";
+import HumanEditorModule from "./modules/HumanEditorModule";
 
 type Boot = "lade" | "bereit" | "fehler";
 
@@ -19,8 +20,11 @@ export default function App() {
   const [boot, setBoot] = useState<Boot>("lade");
   const [bootFehler, setBootFehler] = useState("");
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [tab, setTab] = useState<"bibliothek" | "einstellungen">(
-    "bibliothek");
+  // Drei Tabs (User 2026-08-30): AI-Transcript (Default) |
+  // Human-Editor (Bibliotheks-Spiegel + Import, Editor-Drilldown) |
+  // Einstellungen
+  const [tab, setTab] = useState<"ai" | "editor" | "einstellungen">(
+    "ai");
   const [editorId, setEditorId] = useState<string | null>(null);
 
   const starte = useCallback(async () => {
@@ -69,14 +73,16 @@ export default function App() {
         <Heading size="4">{tr("app.titel")}</Heading>
         <div style={{ flex: 1 }} />
         {/* im Editor-Drilldown ist KEIN Tab aktiv — so feuert der
-            Klick auf „Bibliothek" ein onChange und verlässt den Editor
-            (Review-Befund: aktiver Tab schluckte den Klick) */}
+            Klick auf „Human-Editor" ein onChange und verlässt den
+            Editor zur Liste (Review-Befund) */}
         <SegTabs value={editorId ? "" : tab}
                  onChange={(v) => { setEditorId(null);
-                   setTab(v as "bibliothek" | "einstellungen"); }}
+                   setTab(v as "ai" | "editor" | "einstellungen"); }}
                  options={[
-                   { value: "bibliothek", label: tr("tab.bibliothek"),
-                     icon: "library" },
+                   { value: "ai", label: tr("tab.ai"),
+                     icon: "sample" },
+                   { value: "editor", label: tr("tab.editor"),
+                     icon: "edit" },
                    { value: "einstellungen",
                      label: tr("tab.einstellungen"),
                      icon: "settings" }]} />
@@ -85,11 +91,15 @@ export default function App() {
         {editorId
           ? <EditorModule id={editorId}
                           onExit={() => setEditorId(null)} />
-          : tab === "bibliothek"
-            ? <BibliothekModule settings={settings}
-                                onOpen={(id) => setEditorId(id)} />
-            : <EinstellungenModule settings={settings}
-                                   onChange={setSettings} />}
+          : tab === "ai"
+            ? <AiTranscriptModule settings={settings}
+                onEdit={(id) => { setTab("editor");
+                  setEditorId(id); }} />
+            : tab === "editor"
+              ? <HumanEditorModule
+                  onOpen={(id) => setEditorId(id)} />
+              : <EinstellungenModule settings={settings}
+                                     onChange={setSettings} />}
       </div>
     </Flex>
   );
