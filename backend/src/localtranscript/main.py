@@ -25,6 +25,18 @@ from .bibliothek import BibliothekFehler
 
 app = FastAPI(title=config.APP_NAME, version=config.APP_VERSION)
 
+# Das Tauri-Fenster (Origin tauri://localhost) spricht 127.0.0.1:44100
+# CROSS-origin — ohne CORS blockt WebKit die Antwort („Load failed",
+# Live-Befund 2026-08-30). Allowlist statt "*": nur eigene Fenster;
+# der Browser-Betrieb ist same-origin und braucht keins.
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["tauri://localhost", "http://tauri.localhost",
+                   "http://localhost:1421"],
+    allow_methods=["*"], allow_headers=["*"])
+
 AUDIO_MEDIA = {".mp3": "audio/mpeg", ".m4a": "audio/mp4",
                ".aac": "audio/aac", ".wav": "audio/wav",
                ".ogg": "audio/ogg", ".flac": "audio/flac",

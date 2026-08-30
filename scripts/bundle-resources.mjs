@@ -77,7 +77,12 @@ if (forceVenv || leer(venv) || !fs.existsSync(path.join(venv, "bin/python3"))) {
     ["-c", "import localtranscript.main, enrich_core, fitz, torch, speechbrain, silero_vad, sklearn; print('venv ok')"],
     { stdio: "inherit" });
 } else {
-  console.log("✓ venv vorhanden (neu bauen: --force-venv)");
+  // venv steht — aber unser Backend-Code ändert sich laufend:
+  // localtranscript + enrich-core IMMER frisch einspielen (billig)
+  console.log("✓ venv vorhanden — aktualisiere localtranscript + enrich-core");
+  execFileSync(path.join(venv, "bin/pip"),
+    ["install", "--force-reinstall", "--no-deps", "-q",
+     ENRICH_CORE, path.join(ROOT, "backend")], { stdio: "inherit" });
 }
 
 // 3. Marker
