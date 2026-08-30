@@ -202,6 +202,13 @@ const W: Record<string, Eintrag> = {
     fr: "Options par défaut", it: "Opzioni predefinite" },
   "st.uisprache": { de: "Oberflächen-Sprache", en: "Interface language",
     fr: "Langue de l'interface", it: "Lingua dell'interfaccia" },
+  "st.datenschutz": { de: "Datenschutz", en: "Privacy",
+    fr: "Confidentialité", it: "Privacy" },
+  "st.datenschutz.text": {
+    de: "Läuft vollständig lokal (nur 127.0.0.1) — keine Cloud, keine Netzwerk-Übertragung. Audio und Transkripte liegen ausschließlich im Bibliotheks-Ordner, bis du sie löschst (Papierkorb der Bibliothek statt Löschen); temporäre Arbeitsdateien werden direkt nach jedem Lauf entfernt.",
+    en: "Runs fully local (127.0.0.1 only) — no cloud, no network transfer. Audio and transcripts live solely in the library folder until you delete them (library trash instead of deletion); temporary working files are removed right after each run.",
+    fr: "Fonctionne entièrement en local (127.0.0.1 uniquement) — pas de cloud, aucun transfert réseau. Audio et transcriptions restent dans le dossier bibliothèque jusqu'à leur suppression (corbeille de la bibliothèque) ; les fichiers temporaires sont supprimés après chaque traitement.",
+    it: "Funziona completamente in locale (solo 127.0.0.1) — nessun cloud, nessun trasferimento di rete. Audio e trascrizioni restano nella cartella biblioteca finché non li elimini (cestino della biblioteca); i file temporanei vengono rimossi subito dopo ogni elaborazione." },
   "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
     it: "Licenze" },
   "st.lizenzen.text": {
