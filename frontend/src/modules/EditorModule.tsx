@@ -18,7 +18,6 @@ import { KEYS, lget, lset } from "../lib/storage";
 import { isTauri, savePath } from "../lib/tauri";
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
-const OHNE = " ohne";  // Select-Sentinel für "kein Sprecher"
 
 let _seq = 0;
 function neueId(): string {
@@ -185,6 +184,8 @@ export default function EditorModule({ id, onExit }: {
   // ---------- Player ----------
   const starts = useMemo(() => segmente.map((s) => s.start),
                          [segmente]);
+  const sprecherName = useMemo(
+    () => new Map(sprecher.map((s) => [s.id, s.name])), [sprecher]);
   const indexBei = useCallback((t: number) => {
     let lo = 0, hi = starts.length - 1, aus = -1;
     while (lo <= hi) {
@@ -246,6 +247,31 @@ export default function EditorModule({ id, onExit }: {
     return () => document.removeEventListener("keydown", h);
   }, []);
 
+  // EIN geteiltes Sprecher-Menü für alle Zeilen (PERF-Umbau)
+  const [menue, setMenue] = useState<{ segId: string; x: number;
+    y: number } | null>(null);
+  const menueOeffnen = useCallback((segId: string, x: number,
+                                   y: number) => {
+    setMenue({ segId, x, y });
+  }, []);
+  useEffect(() => {
+    if (!menue) return;
+    const zu = (e: Event) => {
+      if ((e.target as HTMLElement | null)
+          ?.closest?.("[data-sprecher-menue]")) return;
+      setMenue(null);
+    };
+    document.addEventListener("pointerdown", zu, true);
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenue(null);
+    };
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("pointerdown", zu, true);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [menue]);
+
   // ---------- Export ----------
   const [exportNote, setExportNote] = useState("");
   const exportiere = useCallback(async (format: string) => {
@@ -299,11 +325,12 @@ export default function EditorModule({ id, onExit }: {
           )}
           {segmente.map((seg, i) => (
             <SegmentZeile key={seg.id} seg={seg} index={i}
-              aktiv={i === aktiv} sprecher={sprecher}
+              aktiv={i === aktiv}
+              name={sprecherName.get(seg.sprecher ?? "") ?? ""}
+              farbe={sprecherFarbe(sprecher, seg.sprecher)}
               hatAudio={hatAudio}
-              onPlay={() => springe(seg.start, true)}
-              onSeek={() => springe(seg.start)}
-              onText={textAendern} onSprecher={sprecherSetzen}
+              onSpringe={springe}
+              onText={textAendern} onMenue={menueOeffnen}
               onTeilen={teilen} onVerbinden={verbinden}
               onEntfernen={entfernen} />
           ))}
@@ -363,6 +390,26 @@ export default function EditorModule({ id, onExit }: {
         </Flex>
       </Flex>
 
+      {menue && (
+        <div data-sprecher-menue
+             style={{ position: "fixed", left: menue.x,
+                      top: Math.min(menue.y, window.innerHeight - 260),
+                      zIndex: 60, background: "var(--color-panel-solid)",
+                      border: "1px solid var(--gray-a6)",
+                      borderRadius: 8, boxShadow: "var(--shadow-4)",
+                      padding: 4, minWidth: 160, maxHeight: 250,
+                      overflowY: "auto" }}>
+          <MenueEintrag label={tr("ed.sprecher.ohne")} farbe="gray"
+                        onClick={() => { sprecherSetzen(menue.segId,
+                          null); setMenue(null); }} />
+          {sprecher.map((s) => (
+            <MenueEintrag key={s.id} label={s.name}
+                          farbe={sprecherFarbe(sprecher, s.id)}
+                          onClick={() => { sprecherSetzen(menue.segId,
+                            s.id); setMenue(null); }} />
+          ))}
+        </div>
+      )}
       <SidePanel side="right" title={tr("ed.sprecher")}
                  storageKey={KEYS.sidebarSprecher}
                  defaultWidth={260} resizable>
@@ -394,25 +441,50 @@ function ExportMenu({ onExport }: {
   );
 }
 
+function MenueEintrag({ label, farbe, onClick }: {
+  label: string; farbe: string; onClick: () => void;
+}) {
+  return (
+    <button type="button" onClick={onClick}
+            style={{ display: "block", width: "100%",
+                     textAlign: "left", background: "none",
+                     border: "none", padding: "5px 8px",
+                     borderRadius: 6, cursor: "pointer",
+                     font: "inherit", fontSize: 13 }}
+            onMouseEnter={(e) => e.currentTarget.style.background
+              = "var(--gray-a3)"}
+            onMouseLeave={(e) => e.currentTarget.style.background
+              = "none"}>
+      <Badge color={farbe as never} variant="soft">{label}</Badge>
+    </button>
+  );
+}
+
+// PERF (Live-Befund „jeder Buchstabe 2 s"): die Zeile ist memoisiert
+// mit EIGENEM Vergleich — Eltern-Renders (Tippen im Sprecher-Panel,
+// Autosave-Status, aktiv-Wechsel) erreichen nur Zeilen, deren
+// abgeleitete Props (seg/name/farbe/aktiv) sich wirklich ändern.
+// `liste` (Dropdown-Inhalt) ist BEWUSST vom Vergleich ausgenommen;
+// die Textarea misst ihre Höhe nur bei Mount + Eingabe (erzwungenes
+// Layout je Render war der Haupt-Kostenpunkt × 558 Zeilen).
 const SegmentZeile = memo(function SegmentZeile({
-  seg, index, aktiv, sprecher, hatAudio, onPlay, onSeek, onText,
-  onSprecher, onTeilen, onVerbinden, onEntfernen,
+  seg, index, aktiv, name, farbe, hatAudio, onSpringe, onText,
+  onMenue, onTeilen, onVerbinden, onEntfernen,
 }: {
-  seg: Segment; index: number; aktiv: boolean; sprecher: Sprecher[];
+  seg: Segment; index: number; aktiv: boolean; name: string;
+  farbe: ReturnType<typeof sprecherFarbe>;
   hatAudio: boolean;
-  onPlay: () => void; onSeek: () => void;
+  onSpringe: (t: number, abspielen?: boolean) => void;
   onText: (id: string, text: string) => void;
-  onSprecher: (id: string, wer: string | null) => void;
+  onMenue: (segId: string, x: number, y: number) => void;
   onTeilen: (id: string, cursor: number) => void;
   onVerbinden: (id: string) => void;
   onEntfernen: (id: string) => void;
 }) {
   const tr = useT();
-  const taRef = useRef<HTMLTextAreaElement>(null);
-  const farbe = sprecherFarbe(sprecher, seg.sprecher);
+  const taRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const wachsen = (el: HTMLTextAreaElement | null) => {
-    if (!el) return;
+  const wachsen = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   };
@@ -426,34 +498,38 @@ const SegmentZeile = memo(function SegmentZeile({
            borderRadius: 8,
            background: aktiv ? "var(--accent-a3)" : undefined,
          }}>
-      <IconButton title={tr("ed.abhier")} onClick={onPlay}>
+      <IconButton title={tr("ed.abhier")}
+                  onClick={() => onSpringe(seg.start, true)}>
         <span style={{ opacity: hatAudio ? 1 : 0.25 }}>
           <Icon name="play" size={14} /></span>
       </IconButton>
       <Text size="1" color="gray" style={{ paddingTop: 5,
         cursor: hatAudio ? "pointer" : undefined,
         fontVariantNumeric: "tabular-nums" }}
-            onClick={onSeek}>{hms(seg.start)}</Text>
-      <Select.Root value={seg.sprecher ?? OHNE}
-                   onValueChange={(v) => onSprecher(seg.id,
-                     v === OHNE ? null : v)}>
-        <Select.Trigger variant="ghost" style={{ maxWidth: 130 }}>
-          <Badge color={farbe} variant="soft">
-            {sprecher.find((s) => s.id === seg.sprecher)?.name
-              ?? tr("ed.sprecher.ohne")}
-          </Badge>
-        </Select.Trigger>
-        <Select.Content>
-          <Select.Item value={OHNE}>{tr("ed.sprecher.ohne")}
-          </Select.Item>
-          {sprecher.map((s) => (
-            <Select.Item key={s.id} value={s.id}>{s.name}
-            </Select.Item>))}
-        </Select.Content>
-      </Select.Root>
-      <textarea ref={(el) => { (taRef as
-                  React.MutableRefObject<HTMLTextAreaElement | null>)
-                  .current = el; wachsen(el); }}
+            onClick={() => onSpringe(seg.start)}>{hms(seg.start)}</Text>
+      {/* leichter Knopf statt Radix-Select je Zeile (PERF: ~6 ms ×
+          557 Zeilen je Render) — EIN geteiltes Menü im Parent */}
+      <button type="button"
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                onMenue(seg.id, r.left, r.bottom + 2);
+              }}
+              style={{ background: "none", border: "none", padding: 0,
+                       textAlign: "left", cursor: "pointer",
+                       maxWidth: 130, overflow: "hidden" }}>
+        <Badge color={farbe} variant="soft">
+          {name || tr("ed.sprecher.ohne")}
+        </Badge>
+      </button>
+      <textarea ref={(el) => {
+                  taRef.current = el;
+                  // Höhe NUR beim ersten Anhängen messen — je Render
+                  // wäre es ein erzwungenes Layout pro Zeile
+                  if (el && el.dataset.auto !== "1") {
+                    el.dataset.auto = "1";
+                    wachsen(el);
+                  }
+                }}
                 defaultValue={seg.text}
                 rows={1}
                 onInput={(e) => {
@@ -481,7 +557,41 @@ const SegmentZeile = memo(function SegmentZeile({
       </Flex>
     </div>
   );
-});
+}, (a, b) => a.seg === b.seg && a.aktiv === b.aktiv
+  && a.index === b.index && a.name === b.name && a.farbe === b.farbe
+  && a.hatAudio === b.hatAudio);
+
+// Tippen bleibt LOKAL (nur dieses Feld rendert), der Commit in den
+// globalen State läuft debounced — sonst rendert jeder Buchstabe alle
+// Zeilen des Sprechers neu (Live-Befund: 2 s je Taste bei 557 Zeilen).
+function NameFeld({ id, name, onRename }: {
+  id: string; name: string;
+  onRename: (id: string, name: string) => void;
+}) {
+  const [wert, setWert] = useState(name);
+  const timer = useRef<number | undefined>(undefined);
+  const letzte = useRef(name);
+  useEffect(() => {
+    if (name !== letzte.current) { setWert(name); letzte.current = name; }
+  }, [name]);
+  const commit = (v: string) => {
+    letzte.current = v;
+    onRename(id, v);
+  };
+  return (
+    <TextField.Root size="1" value={wert} style={{ flex: 1 }}
+      onChange={(e) => {
+        setWert(e.target.value);
+        window.clearTimeout(timer.current);
+        const v = e.target.value;
+        timer.current = window.setTimeout(() => commit(v), 500);
+      }}
+      onBlur={() => {
+        window.clearTimeout(timer.current);
+        if (wert !== letzte.current) commit(wert);
+      }} />
+  );
+}
 
 function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
                          onNeu, onMerge, onLeere }: {
@@ -510,10 +620,7 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
             <Flex align="center" gap="2">
               <Badge color={sprecherFarbe(sprecher, s.id)}
                      variant="solid" radius="full"> </Badge>
-              <TextField.Root size="1" value={s.name}
-                              style={{ flex: 1 }}
-                              onChange={(e) =>
-                                onRename(s.id, e.target.value)} />
+              <NameFeld id={s.id} name={s.name} onRename={onRename} />
             </Flex>
             <Flex align="center" gap="2">
               <Text size="1" color="gray">
