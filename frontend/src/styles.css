@@ -1,0 +1,576 @@
+/* enrich — Eigenanteile über Radix Themes: App-Raster, Panel-Gerüst,
+   Tab-Leiste, Kacheln. Farben/Radien kommen aus den Theme-Variablen. */
+
+/* Recursive Variable Font (OFL 1.1 — Lizenz liegt bei:
+   src/assets/fonts/Recursive-LICENSE.txt; Nennung in Einstellungen
+   und bei Veröffentlichung ist PFLICHT, Memory
+   enrich-recursive-font-lizenz). Label-Identität im Codebuch:
+   Achsen CASL/MONO/wght je Label (CorpusMind §10). */
+@font-face {
+  font-family: "Recursive";
+  src: url("./assets/fonts/Recursive_VF.woff2") format("woff2");
+  font-weight: 300 1000;
+  font-display: swap;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--gray-1); }
+
+/* ---------- App-Gerüst: Kopf + Inhalt, volle Höhe ---------- */
+.app { height: 100%; }
+.app-head {
+  padding: 10px 16px;
+  background: var(--color-panel-translucent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gray-a5);
+}
+.app-content { overflow: hidden; display: flex; flex-direction: column; }
+/* Marke auf Höhe der ERSTEN Tab-Zeile halten (Zeilenhöhe = Tab-Pille):
+   bei mehrzeiliger Leiste rutscht sie sonst in die vertikale Mitte. */
+.app-brand { line-height: 29px; }
+
+/* ---------- Modul-Fläche (Shell): randlos, volle Höhe ---------- */
+.module-body { display: flex; flex-direction: column; overflow: hidden; }
+/* Im Modul ist das Panel die Fläche selbst — kein Card-in-Card. */
+.module-body .ui-panel { border: 0; border-radius: 0; }
+
+/* ---------- Panel: Kopf / scrollender Körper / Fußleiste ---------- */
+/* Volle Breite des Content-Fensters (User-Vorgabe) — keine Max-Breite. */
+.ui-panel {
+  background: var(--color-panel-solid);
+  border: 1px solid var(--gray-a5);
+  border-radius: var(--radius-4);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+.ui-panel-head { padding: 12px 16px; border-bottom: 1px solid var(--gray-a5); }
+.ui-panel-body { flex: 1; min-height: 0; }
+/* Radix-ScrollArea spannt sein Viewport-Kind als display:table auf —
+   damit bestimmt der INHALT die Breite, Text-Truncation (ListRow) greift
+   nie und lange Zeilen schieben die Aktionen aus dem Fenster (Befund
+   Review-Inbox 2026-08-01). Block erzwingen: Zeilen truncaten, der
+   Panel-Körper scrollt nur vertikal. */
+.ui-panel-body [data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  max-width: 100%;
+}
+.ui-panel-foot {
+  padding: 10px 16px;
+  border-top: 1px solid var(--gray-a5);
+  background: var(--gray-a2);
+  /* Konstante Höhe (10 + 24 + 10): die Leiste wächst nicht, je nachdem
+     ob gerade ein Knopf da ist (User 2026-08-02). */
+  min-height: 44px;
+}
+/* CI-Regel: Bedienelemente in der Fußzeile IMMER im kompakten size-1-Maß
+   (24px) — volle Buttons/Felder machten die Leiste unterschiedlich hoch. */
+.ui-panel-foot .rt-Button {
+  height: 24px; padding: 0 10px;
+  font-size: 12px; border-radius: var(--radius-2);
+}
+.ui-panel-foot .rt-TextFieldRoot {
+  --text-field-height: 24px; font-size: 12px;
+}
+
+/* ---------- Tabelle (DataTable-Kit) ---------- */
+/* Kopf klebt beim Scrollen im Panel-Körper; Sortier-Köpfe sind echte
+   Buttons (tastaturfähig), Auswahl-Zeilen leicht getönt. */
+.ui-datatable th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--color-panel-solid);
+  box-shadow: inset 0 -1px var(--gray-a5);
+  white-space: nowrap;
+}
+.ui-datatable td { vertical-align: middle; }
+.ui-datatable tr.selected td { background: var(--accent-a2); }
+.ui-th-sort {
+  all: unset; cursor: pointer; font: inherit; white-space: nowrap;
+}
+.ui-th-sort:hover { color: var(--accent-11); }
+
+/* Link-artiger Button (z. B. Schicht-Datei → JSON-Rohansicht) */
+.ui-linklike {
+  all: unset; cursor: pointer; font: inherit; color: var(--accent-11);
+}
+.ui-linklike:hover { text-decoration: underline; }
+
+/* Markdown-Lite-Tabelle (Chat-Antworten, User 2026-08-03) */
+.md-table { border-collapse: collapse; margin: 2px 0; }
+.md-table th, .md-table td {
+  border: 1px solid var(--gray-a5); padding: 3px 8px; text-align: left;
+  vertical-align: top;
+}
+.md-table th { background: var(--gray-a2); font-weight: 600; }
+
+/* ---------- Listen ---------- */
+.ui-row { border-bottom: 1px solid var(--gray-a3); }
+.ui-row.clickable { cursor: pointer; }
+.ui-row.clickable:hover { background: var(--accent-a2); }
+.ui-row.selected { background: var(--accent-a3); }
+.ui-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+
+/* ---------- Tab-Leiste des Hubs ---------- */
+/* Bricht mehrzeilig um statt rechts zu verschwinden (User 2026-08-02);
+   keine graue Wanne — jeder Tab ist eine eigene, umrandete Pille,
+   der aktive trägt den Akzent. */
+.ui-tabbar {
+  display: flex; gap: 6px; align-items: center;
+  flex-wrap: wrap; min-width: 0;
+}
+.ui-tab {
+  display: flex; gap: 6px; align-items: center;
+  padding: 4px 12px; border-radius: var(--radius-3);
+  border: 1px solid var(--gray-a6); background: var(--color-panel-solid);
+  font-size: 12.5px; color: var(--gray-11); cursor: pointer;
+  white-space: nowrap; user-select: none;
+}
+.ui-tab:hover { border-color: var(--accent-8); }
+.ui-tab.active {
+  border-color: var(--accent-9); background: var(--accent-a3);
+  color: var(--gray-12);
+}
+/* Drag-Sortierung + abgelöste Fenster (User 2026-08-02) */
+.ui-tab.dragging { opacity: .4; }
+.ui-tab.dragover { border-style: dashed; border-color: var(--accent-8); }
+.ui-tab.detached { opacity: .55; }
+.ui-tab-icon { font-size: 11px; }
+.ui-tab-close {
+  margin-left: 2px; padding: 0 3px; border-radius: 4px; color: var(--gray-9);
+  border: 0; background: transparent; font: inherit; cursor: pointer;
+}
+.ui-tab-close:hover { background: var(--gray-a4); color: var(--gray-12); }
+
+/* Karten-Variante des Panels außerhalb von Modulen (Hub-Jobliste) */
+.ui-card { flex: 0 0 auto; }
+
+/* Einstellungs-Karte (User 2026-08-15): Einheit mit Titel + Subline im
+   responsiven Grid — Optik wie .ui-tile, aber Container statt Button. */
+.ui-karte {
+  border: 1px solid var(--gray-a5);
+  border-radius: var(--radius-4);
+  background: var(--color-panel-solid);
+  padding: 16px;
+  min-width: 0;
+}
+
+/* ---------- Hub-Kacheln (Raster kommt vom Grid der Bibliothek) ---------- */
+.ui-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 14px; border: 1px solid var(--gray-a5);
+  border-radius: var(--radius-4); background: var(--color-panel-solid);
+  cursor: pointer; font: inherit; text-align: left;
+}
+.ui-tile:hover:not(:disabled) {
+  border-color: var(--accent-8); box-shadow: 0 1px 6px var(--gray-a4);
+}
+.ui-tile.planned { opacity: .45; cursor: default; }
+.ui-tile-icon { font-size: 20px; margin-bottom: 4px; }
+/* Drag-Sortierung (User 2026-08-02): gezogene Kachel wird blass, das
+   Ablage-Ziel bekommt den Akzent-Rahmen. */
+.ui-tile[draggable="true"] { cursor: grab; }
+.ui-tile.dragging { opacity: .4; }
+.ui-tile.dragover { border-color: var(--accent-8); border-style: dashed; }
+
+/* ---------- Viewer: Mini-Pfeilknöpfe der Blockliste ---------- */
+.ui-mini {
+  border: 0; background: transparent; cursor: pointer; color: var(--gray-9);
+  font-size: 8px; line-height: 10px; padding: 1px 4px;
+}
+.ui-mini:hover { color: var(--accent-9); }
+
+/* ---------- Viewer: Typ-Pulldown direkt an der BBox ----------
+   Die Typ-Farbe kommt als --bbox-farbe (Kit setzt sie inline).
+   Seiten-Tausch (User 2026-08-13): Label oben RECHTS, das Lösch-×
+   oben LINKS — das Label verdeckte am Zeilenanfang den Lesebeginn;
+   damit ist die zwischenzeitliche Transparenz wieder raus (voll
+   deckend, die weiße Schrift sowieso). */
+.ui-bboxlabel.rt-SelectTrigger {
+  position: absolute; top: -1px; right: -1px;
+  height: 15px; min-height: 0; padding: 0 4px;
+  color: #fff; font-size: 10px; line-height: 15px;
+  border: 0; border-radius: 0 0 0 4px; box-shadow: none; gap: 2px;
+  background: var(--bbox-farbe);
+}
+.ui-bboxlabel.rt-SelectTrigger .rt-SelectTriggerInner { color: #fff; }
+.ui-bboxlabel.rt-SelectTrigger svg { width: 8px; height: 8px; color: #fff; }
+.ui-bboxchip {
+  position: absolute; top: -1px; right: -1px;
+  color: #fff; font-size: 10px; line-height: 14px;
+  padding: 0 5px; border-radius: 0 0 0 4px;
+  background: var(--bbox-farbe);
+}
+
+/* ---------- SidePanel: Handle, Streifen, Kopf ---------- */
+.ui-drag-handle {
+  width: 5px; cursor: col-resize; flex-shrink: 0;
+  background: var(--gray-a3);
+}
+.ui-drag-handle:hover { background: var(--accent-a5); }
+.ui-sidestrip {
+  width: 28px; flex-shrink: 0; display: flex; justify-content: center;
+  align-items: flex-start; padding-top: 6px; background: var(--gray-a2);
+}
+.ui-sidestrip.left { border-right: 1px solid var(--gray-a5); }
+.ui-sidestrip.right { border-left: 1px solid var(--gray-a5); }
+.ui-sidepanel { min-width: 0; }
+.ui-sidepanel.left { border-right: 1px solid var(--gray-a5); }
+.ui-sidepanel.right { border-left: 1px solid var(--gray-a5); }
+.ui-sidehead {
+  border-bottom: 1px solid var(--gray-a4); background: var(--gray-a2);
+}
+.ui-textel { border-bottom: 1px solid var(--gray-a3); }
+.ui-textel.selected { background: var(--accent-a2); }
+.ui-textel-head { cursor: pointer; }
+.ui-textel-head:hover { background: var(--gray-a2); }
+/* Aufklapp-Dreieck: global doppelt so groß (User-Vorgabe); auch als
+   <button> (Tastaturweg) ohne Browser-Chrome */
+.ui-caret {
+  width: 24px; flex-shrink: 0; text-align: center; user-select: none;
+  color: var(--gray-9); cursor: pointer; font-size: 20px; line-height: 1;
+  border: 0; background: transparent; padding: 0; font-family: inherit;
+}
+.ui-caret:hover { color: var(--accent-9); }
+.ui-caret.leaf { color: var(--gray-6); cursor: default; font-size: 14px; }
+.ui-typechip {
+  color: #fff; font-size: 10px; line-height: 16px; padding: 0 6px;
+  border-radius: 4px; white-space: nowrap;
+}
+.ui-textel-body { white-space: pre-wrap; color: var(--gray-12); }
+.ui-typefilter { cursor: pointer; }
+.ui-typefilter:hover { background: var(--gray-a2); }
+/* Analyse-Viewer: Code/Konzept-Karten + Belege */
+.ui-analysis-card { border-bottom: 1px solid var(--gray-a3); }
+.ui-analysis-card:hover { background: var(--gray-a2); }
+.ui-evidence { padding: 2px 0; }
+.ui-quote {
+  color: var(--gray-11); border-left: 2px solid var(--accent-a5);
+  padding-left: 8px; line-height: 1.45;
+}
+/* exakter, gegen T1 verifizierter Anker — im Satzkontext hervorgehoben */
+.ui-quote-anchor {
+  background: var(--accent-a4); color: var(--gray-12);
+  border-radius: 3px; padding: 0 2px; font-weight: 500;
+}
+/* Studio: markierte Belegstelle im PDF (Beleg-Klick → scroll + highlight).
+   Fläche ohne Rand, ohne Puls (das Scrollen zur Stelle lenkt den Blick);
+   die Transparenz sitzt auf der GRUPPE (Kinder deckend) — überlappende
+   Zeilen-Rechtecke doppeln sich so nie sichtbar. */
+.ui-anchor-group {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.32;
+}
+.ui-anchor-hl {
+  position: absolute; pointer-events: none; border-radius: 2px;
+  background: var(--accent-9);
+}
+/* Studio: Prädikat-Marker (Toggle „Prädikate" — relgraph-Erbe 2026-08-11):
+   ALLE Prädikationsstellen zugleich, dezenter als der Beleg-Fokus;
+   Deverbativa eigener Ton. Gruppen-Opacity wie beim Anker-Highlight. */
+.ui-praed-group {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+}
+.ui-praed-hl {
+  position: absolute; pointer-events: none; border-radius: 2px;
+  background: var(--amber-a8);
+}
+.ui-praed-hl--dev { background: var(--iris-a8); }
+/* Studio: Subtab „Übersetzung" (User 2026-08-14) — Fließtext in
+   Lesereihenfolge. LLM-Text aufrecht (KURSIV bleibt dem Original
+   vorbehalten), Absatz = Quell-Block; Captions/Fußnoten als eingerückte
+   graue Karten etwas kleiner. Seitenköpfe sind die Sync-Anker. */
+.ueb-fliess { padding: 2px 2px 24px; }
+.ueb-absatz { margin: 0 0 0.7em; line-height: 1.55; }
+.ueb-satz { cursor: pointer; border-radius: 2px; }
+.ueb-satz:hover { background: var(--accent-a3); }
+.ueb-karte {
+  margin: 0 0 0.7em 16px; padding: 6px 10px;
+  background: var(--gray-a3); border-radius: 6px;
+  font-size: 0.75rem; line-height: 1.5; color: var(--gray-12);
+}
+.ueb-karte-tag {
+  display: block; font-size: 0.625rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--gray-10); margin-bottom: 2px;
+}
+/* Tabellen-Karte (2026-08-14): Markdown-|-Struktur zeilentreu zeigen —
+   Umbrüche erhalten, horizontal scrollen statt umbrechen. */
+.ueb-karte--tab .ueb-satz {
+  white-space: pre; display: block; overflow-x: auto;
+  font-family: var(--code-font-family, monospace); font-size: 0.6875rem;
+}
+.ueb-seitenkopf {
+  margin: 10px 0 6px; font-size: 0.6875rem; color: var(--gray-10);
+  border-bottom: 1px solid var(--gray-a4); cursor: pointer;
+  padding-bottom: 2px;
+}
+.ueb-seitenkopf:hover { color: var(--gray-12); }
+.ueb-luecke { color: var(--amber-11); cursor: help; }
+/* Quellen-Marke in der belegten Summary (2026-08-15): kleines [n],
+   Klick scrollt im PDF an den Top-Beleg des zitierten Elements. */
+.ui-quellenmarke {
+  border: 0; background: none; padding: 0 2px; cursor: pointer;
+  color: var(--accent-11); font-size: 0.6875rem; vertical-align: super;
+  font-family: inherit;
+}
+.ui-quellenmarke:hover { text-decoration: underline; }
+.ui-quellenmarke:disabled { color: var(--gray-8); cursor: default; }
+/* User Codes (Tool 9): DAUERHAFTE Markierungen in Code-Farbe; Klick
+   selektiert (pointer-events an, anders als Fokus/Prädikate). Aktive
+   Passage hebt sich per Deckkraft + Unterkante ab. */
+.ui-ucode-group { position: absolute; inset: 0; pointer-events: none; }
+/* Text-Selektion im User-Codes-PDF in der ERSTEN Markierfarbe (User
+   2026-08-15) — statt System-Blau; die Farbe kommt als Var vom Modul. */
+.ucode-auswahl ::selection {
+  background: var(--ucode-selectfarbe, rgba(245, 217, 10, 0.55));
+}
+/* isolation BLEIBT (2026-08-12, Archäologie-Befund): der Neon-Zustand
+   vom 11.08. (Memory Neon-Marker) war backdrop-filter + GENAU diese
+   Regel — kein mix-blend-mode. Die Vormittags-Theorie „SDR-Puffer
+   schneidet EDR ab" war falsch; nicht wieder entfernen. */
+[data-page-num] { isolation: isolate; }
+.ui-ucode-hl {
+  position: absolute; border-radius: 2px;
+  /* Textmarker-Optik OHNE mix-blend-mode (User-Befund 2026-08-11:
+     WebKit blendet nicht über der GPU-Canvas — mal gar nicht, mal je
+     Seite). Stattdessen färbt backdrop-filter (inline je Marker:
+     sepia→hue-rotate→saturate) den Canvas-Ausschnitt SELBST um:
+     Papier wird Markerfarbe, Tinte bleibt dunkel — engine-unabhängig.
+     Klicks fängt der Container (der Text-Layer läge sonst darüber). */
+}
+.ui-ucode-hl--aktiv {
+  /* Farbe kommt inline vom Modul: Markerfarbe, abgedunkelt (User
+     2026-08-15 — Schwarz war zu hart). */
+  outline: 2px solid var(--gray-12); outline-offset: 1px;
+}
+/* Textlängenkarte (Studio): abstrakter Dokument-Streifen, auf Fensterhöhe
+   skaliert. Bewusst DUNKEL (CorpusMind-Look, User 2026-07-29) — die helle
+   PDF-Fläche daneben braucht den Kontrast; Belegstellen leuchten hellrot. */
+.ui-textmap {
+  position: relative; width: 26px; flex-shrink: 0; height: 100%;
+  overflow: hidden; background: #10101a;
+  border-right: 1px solid #26263a; cursor: pointer;
+}
+.ui-textmap-pageline {
+  position: absolute; left: 0; right: 0; pointer-events: none;
+  border-top: 1px dashed #2c2c40;
+}
+.ui-textmap-block {
+  position: absolute; border-radius: 1px; background: rgba(255, 255, 255, 0.26);
+}
+/* Gliederungs-Spur (2026-08-14): Kapitel-Bänder in voller Breite,
+   halbtransparent UNTER Silhouetten/Marks; aktiv = weißes Outline. */
+/* Kapitel-Bänder: nur bei aktivem Gliederungs-Subtab (User 2026-08-15)
+   — und dann DEUTLICH statt als Dauerschleier unter allen Ansichten. */
+.ui-textmap-sect {
+  position: absolute; left: 0; width: 100%; opacity: 0.6;
+  cursor: pointer;
+}
+.ui-textmap-sect.active { opacity: 0.85; outline: 1px solid #fff; }
+.ui-textmap-block:hover {background: rgba(255, 255, 255, 0.5); }
+.ui-textmap-mark {
+  position: absolute; border-radius: 1px; background: #ff5a6e;
+  z-index: 2;
+}
+.ui-textmap-mark.glow { box-shadow: 0 0 5px var(--pink-8); }
+.ui-textmap-mark.active { outline: 1.5px solid #fff; }
+.ui-textmap-flash {
+  position: absolute; border-radius: 1px; background: #ff93a1;
+  box-shadow: 0 0 5px #ff5a6e; z-index: 3; pointer-events: none;
+}
+.ui-textmap-view {
+  position: absolute; left: 0; right: 0; pointer-events: none; z-index: 4;
+  border: 1px dashed rgba(255, 255, 255, 0.75); border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.ui-relline { cursor: pointer; border-radius: 4px; padding: 2px 4px; }
+.ui-relline:hover { background: var(--accent-a3); }
+.ui-abstract { color: var(--gray-12); line-height: 1.5; }
+.ui-bboxdel {
+  position: absolute; top: -1px; left: -1px;
+  width: 15px; height: 15px; line-height: 14px; text-align: center;
+  color: #fff; background: var(--gray-a8); font-size: 11px;
+  border-radius: 0 0 4px 0; cursor: pointer; z-index: 7;
+  border: 0; padding: 0; font-family: inherit;
+}
+.ui-bboxdel:hover { background: var(--red-9); }
+
+/* Batchliste: aktives Gruppen-Icon pulsiert (User 2026-07-28) */
+@keyframes ui-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.ui-pulse { animation: ui-pulse 1.2s ease-in-out infinite; }
+
+/* Farb-Punkt der Typen-Legende (Diffraktion) */
+.ui-ifz-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+}
+.ui-node-reveal {
+  background: var(--accent-a3); border-radius: 4px;
+  transition: background 1.2s ease;
+}
+.ui-activity-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--accent-9);
+  animation: ui-act-pulse 1s ease-in-out infinite;
+}
+@keyframes ui-act-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* =====================================================================
+   EPISTEMIK-THEME (User 2026-08-06, Vorlage „Farbdrehung plus Helligkeit")
+
+   Drei Fragen, drei visuelle Kanäle — überall, wo Text erscheint:
+     1. Was ist BELEG?         → Serifenschrift + «…» + Tinte (.epi-quelle)
+     2. Was ist LLM-Text?      → Farbe, nie Tinte (.epi-s1 … .epi-s4)
+     3. Wie NAH am Original?   → Position auf der Rampe:
+          s1 wörtlich gedeckt   (Warrants, Code-Definitionen)
+          s2 abgeleitet         (Glossen, Memos, Richter-Notes)
+          s3 relational         (Konzepte/Aggregate, Relationen, Abstract)
+          s4 spekulativ         (Thesen, Spannungen, Fragen, ep. Dinge)
+     4. MENSCHLICHER Text      → kursiv, warmgrau (.epi-mensch)
+
+   Aktive Rampe: B — „Blau leuchtet": Nahes versinkt Richtung Tinte,
+   Fernes leuchtet auf. Die Aufmerksamkeit geht dorthin, wo die Deckung
+   am dünnsten ist. Varianten: NUR die vier --epi-s*-Werte tauschen.
+
+   Rampe A — Grün leuchtet, Blau versinkt (ruhiger; s4 fast Tinte):
+     #38801C  #106D60  #0D4F7C  #17296B
+   Rampe C — konstante Helligkeit, nur Farbdrehung (~6,5:1):
+     #256B45  #146E6E  #185E96  #1E4FBF
+   Rampe D — Rot → Blau über Beere und Violett:
+     #6E1420  #8E2A6E  #7B3ECB  #2469F2
+   Rampe E — Rot → Orange, kurzer Bogen:
+     #4E0E14  #7A1A20  #A03A10  #B85700
+   ===================================================================== */
+:root {
+  --epi-quelle: var(--gray-12);
+  --epi-quelle-font: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --epi-mensch: var(--gray-11);
+  /* Rampe B (12,3:1 → 4,8:1 auf Weiß) */
+  --epi-s1: #0B3D22;
+  --epi-s2: #0A5548;
+  --epi-s3: #0F6494;
+  --epi-s4: #2469F2;
+}
+/* Beleg: das Original spricht — Serife, Tinte, KURSIV; Lesbarkeit vor
+   Größe (User 2026-08-06): nur ~1pt über den Erklärtexten (12px → 13px),
+   enger Durchschuss. Nie Rampenfarbe. */
+.epi-quelle { font-family: var(--epi-quelle-font); color: var(--epi-quelle);
+  font-style: italic; font-size: var(--epi-quelle-size, 0.8125rem);
+  line-height: 1.4; }
+/* Menschlicher Text: kursiv, zurückhaltend — konkurriert nicht mit der Rampe. */
+.epi-mensch { font-style: italic; color: var(--epi-mensch); }
+/* LLM-Text nach Nähe zum Original (s1 nah … s4 weit). */
+.epi-s1 { color: var(--epi-s1); }
+.epi-s2 { color: var(--epi-s2); }
+.epi-s3 { color: var(--epi-s3); }
+.epi-s4 { color: var(--epi-s4); }
+/* Eigene Farbwerte (Einstellungen → Darstellung, Key ui_epi_farben):
+   werden zur Laufzeit als Inline-Properties auf <html> gesetzt
+   (applyEpiFarben, ui.tsx) und überschreiben damit die :root-Defaults.
+   Die Kommentar-Rampen oben dienen als Kopiervorlagen. */
+
+/* Baum-Typo-Hierarchie (User-Regel 2026-08-06): EINE Skala für alle
+   Baum-/Listen-Ansichten — Größen/Gewichte NUR hier justieren.
+     h1 Panel-/Modul-Kopf        h2 Sektionen (Begriffsarbeit (4), Summary)
+     h3 Knoten Grad 4/3          h4 Unter-Knoten (Codes, Aktanten …)
+     h5 Mini-Überschriften       li Beleg-/Listenzeilen
+   LLM-generierte Überschriften tragen ZUSÄTZLICH ihre Stufenfarbe
+   (epi-s*); extrahierte Wortlaute (Begriffe, Aktanten) bleiben Tinte. */
+:root {
+  --epi-h1-size: 1rem;      --epi-h1-weight: 650;
+  /* h2–h4 atmen mit der PANEL-Breite (Container-Query-Einheit cqi,
+     eng geklammert — web.dev/moderncss-Muster); h1/h5/P1/Zitat bleiben fest. */
+  --epi-h2-size: clamp(.875rem, .8rem + 0.4cqi, .9375rem);
+  --epi-h2-weight: 600;
+  --epi-h3-size: clamp(.8125rem, .75rem + 0.35cqi, .875rem);
+  --epi-h3-weight: 500;
+  --epi-h4-size: clamp(.78rem, .73rem + 0.3cqi, .8125rem);
+  --epi-h4-weight: 500;
+  --epi-h5-size: .75rem;    --epi-h5-weight: 600;
+  --epi-li-size: .8125rem;
+  /* P1 (User 2026-08-06): DER eine Absatz-Stil — alle Nicht-Zitat-Texte
+     (LLM-Fließtexte, Warrants, Notes) in derselben serifenlosen Schrift
+     und Größe; Zitate (.epi-quelle) sind gleich groß, aber Serife+kursiv. */
+  --epi-p1-size: .8125rem;
+}
+.epi-h1 { font-size: var(--epi-h1-size); font-weight: var(--epi-h1-weight); }
+.epi-h2 { font-size: var(--epi-h2-size); font-weight: var(--epi-h2-weight); }
+.epi-h3 { font-size: var(--epi-h3-size); font-weight: var(--epi-h3-weight); }
+.epi-h4 { font-size: var(--epi-h4-size); font-weight: var(--epi-h4-weight); }
+.epi-h5 { font-size: var(--epi-h5-size); font-weight: var(--epi-h5-weight);
+  letter-spacing: .02em; }
+.epi-li { font-size: var(--epi-li-size); }
+.epi-p1 { font-size: var(--epi-p1-size); line-height: 1.45; }
+
+/* Responsive Baum-Zeile (User 2026-08-06, Container-Query-Muster):
+   Das Panel ist der Container; die Zeile hat ZWEI DEFINIERTE Zustände
+   statt freiem Flex-Wrap —
+     breit:   Caret · Badge · Titel(1fr) · Meta   (eine Zeile)
+     schmal:  Caret · Badge · ......... · Meta    (Zeile 1, Meta kompakt)
+              ..... · Titel über volle Breite     (Zeile 2, am Badge-Einzug)
+   Lese-Reihenfolge und Einzug bleiben in jeder Breite stabil. */
+.epi-baum {
+  container-type: inline-size;
+  /* DIE Bezugslinie (User 2026-08-06): Caret-Spalte (24px, .ui-caret)
+     + Grid-Gap (6px) — Badges, Titel, Absätze und Beleg-Blöcke hängen
+     alle an dieser einen Linie (Body: calc(depth·16px + var(--epi-einzug))). */
+  --epi-einzug: 30px;
+}
+.epi-zeile {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  grid-template-areas: "caret badge title meta";
+  column-gap: 6px; row-gap: 2px;
+  align-items: start;
+}
+.epi-zeile > .epi-caret-slot { grid-area: caret; display: inline-flex; }
+.epi-zeile > .epi-badge-slot { grid-area: badge; display: inline-flex; }
+.epi-zeile > .epi-title-slot { grid-area: title; min-width: 0; }
+.epi-zeile > .epi-meta-slot  { grid-area: meta; justify-self: end;
+  white-space: nowrap; }
+/* Ohne Sorten-Badge (Register-/Listen-Zeilen, Sammel-Knoten) entfällt
+   die Badge-Spalte GANZ — sonst bleibt ihr Spalten-Gap als 6px-Versatz
+   und die Titel flattern gegen die Bezugslinie (User-Befund 2026-08-06). */
+.epi-zeile:not(.hat-badge) {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "caret title meta";
+}
+/* Gestapelt wird NUR, wenn es nötig ist (User-Befund 2026-08-06,
+   „verspringt auch ohne Not"): die Zeile trägt Meta UND der Titel ist
+   lang (.stapeln setzt die Komponente ab ~28 Zeichen). Kurze Titel
+   bleiben auch im engen Panel einzeilig.
+   Mit Badge:  Zeile 1 Caret·Badge·Meta / Zeile 2 Titel (volle Breite).
+   Ohne Badge: Zeile 1 Caret·Titel      / Zeile 2 Meta (rechts) —
+   sonst schwebt die Meta-Zeile über einer Leere. */
+@container (max-width: 30rem) {
+  .epi-zeile.stapeln.hat-badge {
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "caret badge meta"
+      ".     title title";
+  }
+  .epi-zeile.stapeln.hat-badge > .epi-meta-slot { align-self: center; }
+  .epi-zeile.stapeln:not(.hat-badge) {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "caret title"
+      ".     meta";
+  }
+  .epi-zeile.stapeln:not(.hat-badge) > .epi-meta-slot { justify-self: end; }
+}
+
+/* Stil-Modal (Codebuch): Scroll nur im schmalen Fenster — dann mit
+   SICHTBAREM Balken (User 2026-08-27; Overlay-Scrollbars von macOS
+   verstecken sich sonst). */
+.cb-modal-scroll { scrollbar-width: thin; }
+.cb-modal-scroll::-webkit-scrollbar { width: 8px; }
+.cb-modal-scroll::-webkit-scrollbar-thumb {
+  background: var(--gray-a7); border-radius: 4px; }
+.cb-modal-scroll::-webkit-scrollbar-track { background: transparent; }
