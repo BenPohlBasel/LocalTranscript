@@ -580,13 +580,7 @@ const SegmentZeile = memo(function SegmentZeile({
                   wachsen(e.currentTarget);
                   onText(seg.id, e.currentTarget.value);
                 }}
-                style={{
-                  resize: "none", border: "none",
-                  background: "transparent", width: "100%",
-                  font: "inherit", fontSize: 13, lineHeight: 1.5,
-                  outline: "none", padding: "3px 2px",
-                  color: "var(--gray-12)",
-                }} />
+                className="seg-text" />
       <Flex gap="1" style={{ paddingTop: 3 }}>
         <IconButton title={tr("ed.teilen")} onClick={() => {
           const pos = taRef.current?.selectionStart ?? 0;
