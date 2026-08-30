@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+backend/.venv/
+# Node / Frontend
+node_modules/
+frontend/dist/
+# Tauri / Rust
+frontend/src-tauri/target/
+frontend/src-tauri/gen/
+# Bundle-Artefakte (groß, werden aus Quellen gebaut)
+resources/
+models/*.bin
+bin/
+dist/
+*.dmg
+# lokal
+.DS_Store
+*.log
