@@ -65,6 +65,13 @@ if (forceVenv || leer(venv) || !fs.existsSync(path.join(venv, "bin/python3"))) {
   execFileSync(pip, ["install", "--upgrade", "pip"], { stdio: "inherit" });
   execFileSync(pip, ["install", ENRICH_CORE, path.join(ROOT, "backend")],
                { stdio: "inherit" });
+  // Tauris Resource-Bundler DEREFERENZIERT Symlinks: venv/bin/python3
+  // wird im .app eine echte Datei, deren @rpath libpython3.13.dylib in
+  // venv/lib/ sucht (Live-Befund 2026-08-30) — die dylib liegt deshalb
+  // zusätzlich dort.
+  fs.mkdirSync(path.join(venv, "lib"), { recursive: true });
+  fs.copyFileSync(path.join(RES, "python-runtime/lib/libpython3.13.dylib"),
+                  path.join(venv, "lib/libpython3.13.dylib"));
   // Smoke-Test
   execFileSync(path.join(venv, "bin/python3"),
     ["-c", "import localtranscript.main, enrich_core, fitz, torch, speechbrain, silero_vad, sklearn; print('venv ok')"],
