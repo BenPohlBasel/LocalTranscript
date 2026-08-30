@@ -1,5 +1,5 @@
 # VENDORED aus enrich (privates Repo BenPohlBasel/PDFenrichCLI),
-# Stand enrich@3d2b131 — packages/enrich-serve/src/enrich_serve/textsatz.py.
+# Stand enrich@c2f4358 — packages/enrich-serve/src/enrich_serve/textsatz.py.
 # Einzige Abweichung: der Import von _FONT_DIR/_sichtbar zeigt auf
 # .schrift (lokaler Extrakt aus refi_text.py). Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude).
@@ -76,14 +76,18 @@ _TYP_STIL = {
     "bibref": (10.0, False, 4.0),
     "caption": (9.5, False, 5.0),
     "note": (9.5, False, 4.0),
+    # Sprecher-Label-Zeile (2026-08-30): kompakt, dicht am Rede-Absatz
+    "sprecher": (9.5, False, 1.0),
 }
 
 _STREAM_VON = {"title": "main", "h1": "main", "h2": "main",
                "h3": "main", "h4": "main", "paragraph": "main",
                "quote": "main", "list-item": "main",
                "caption": "captions", "toc": "other",
-               "bibref": "other"}
-_BLOCKTYP = {"quote": "paragraph", "note": "footnote"}
+               "bibref": "other",
+               "sprecher": "other"}
+_BLOCKTYP = {"quote": "paragraph", "note": "footnote",
+             "sprecher": "speaker-label"}
 
 
 def _clamp_groesse(g: float) -> float:

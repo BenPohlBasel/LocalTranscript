@@ -51,9 +51,13 @@ def test_enrich_export_ist_echtes_dossier(client, eintrag, tmp_path):
     assert "2z-zeitkarte.json" in m.current
     t1 = d.read_layer("3-text-clean.json")
     haupt = t1.streams["main"]
-    # Sprecher fett + Timecode hh:mm:ss stehen im T1 (enrich-Konvention)
-    assert "Anna [00:00:00]: Hallo und willkommen" in haupt
-    assert "Ben [00:00:04]: Danke" in haupt
+    # Sprecher-Strom-Umbau (2026-08-30): main = REINE REDE; die
+    # Label-Zeilen (Name + hh:mm:ss) leben sichtbar im other-Strom
+    assert haupt.startswith("Hallo und willkommen")
+    assert "Anna" not in haupt and "[00:" not in haupt
+    other = t1.streams.get("other", "")
+    assert "Anna" in other and "[00:00:00]" in other
+    assert "Ben" in other and "[00:00:04]" in other
     zk = d.read_layer("2z-zeitkarte.json")
     assert len(zk.einheiten) == 2
     assert zk.einheiten[1].speaker == "Ben"
