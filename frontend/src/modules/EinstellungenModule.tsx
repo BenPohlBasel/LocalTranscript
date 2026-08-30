@@ -2,7 +2,7 @@
 // (inkl. Recursive-OFL-Nennung — Pflicht, Fonts liegen im Bundle).
 import { useEffect, useState } from "react";
 import {
-  Button, Flex, Karte, LabeledSelect, Text,
+  Button, Flex, Grid, Karte, LabeledSelect, Text,
 } from "../components/ui";
 import {
   apiGet, apiSend, errMsg, type ModellInfo, type Settings,
@@ -32,8 +32,11 @@ export default function EinstellungenModule({ settings, onChange }: {
   if (!settings) return null;
 
   return (
-    <Flex direction="column" gap="3" p="4"
-          style={{ height: "100%", overflowY: "auto", maxWidth: 720 }}>
+    // Karten-Raster wie enrich-Einstellungen (User 2026-08-30):
+    // responsives 1–2-Spalten-Grid, volle Breite
+    <Grid columns={{ initial: "1", md: "2" }} gap="4" p="4"
+          style={{ height: "100%", overflowY: "auto",
+                   alignContent: "start" }}>
       <Karte titel={tr("st.speicherort")}
              subline={tr("st.speicherort.text")}>
         <Flex align="center" gap="2">
@@ -86,7 +89,20 @@ export default function EinstellungenModule({ settings, onChange }: {
         <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
       </Karte>
 
+      <Karte titel={tr("st.app")}
+             subline={tr("st.app.sub")}>
+        <Flex direction="column" gap="2">
+          <Text size="1" color="gray">{tr("st.app.text")}</Text>
+          <Flex gap="2">
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen(
+                "https://github.com/BenPohlBasel/LocalTranscript")}>
+              GitHub</Button>
+          </Flex>
+        </Flex>
+      </Karte>
+
       {fehler && <Text size="1" color="red">{fehler}</Text>}
-    </Flex>
+    </Grid>
   );
 }
