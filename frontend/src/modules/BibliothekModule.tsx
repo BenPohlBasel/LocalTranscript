@@ -83,13 +83,19 @@ export default function BibliothekModule({ settings, onOpen }: {
     setJobs(r.jobs);
   }, [model, language, range, threshold, diarize]);
 
-  // Nativer Tauri-Drop (Pfade — kein Upload großer Audios)
+  // Nativer Tauri-Drop (Pfade — kein Upload großer Audios).
+  // EIN Abo, Race-frei (Review-Befund: Re-Subscribe je Options-
+  // Änderung verlor Unsubscriber → doppelte Jobs je Drop);
+  // die aktuelle Optionen-Fassung kommt über die Ref.
+  const starteRef = useRef(starteDateien);
+  starteRef.current = starteDateien;
   useEffect(() => {
     let ab: (() => void) | undefined;
-    void onFileDrop((paths) => { void starteDateien(paths); })
-      .then((f) => { ab = f; });
-    return () => ab?.();
-  }, [starteDateien]);
+    let weg = false;
+    void onFileDrop((paths) => { void starteRef.current(paths); })
+      .then((f) => { if (weg) f(); else ab = f; });
+    return () => { weg = true; ab?.(); };
+  }, []);
 
   const starteUpload = useCallback(async (files: FileList | null) => {
     if (!files?.length) return;
@@ -151,7 +157,8 @@ export default function BibliothekModule({ settings, onOpen }: {
         </Flex>
         <input ref={fileRef} type="file" multiple hidden
                accept={AUDIO_EXT.join(",")}
-               onChange={(e) => void starteUpload(e.target.files)} />
+               onChange={(e) => { void starteUpload(e.target.files);
+                 e.target.value = ""; }} />
       </div>
 
       <Flex gap="3" align="center" wrap="wrap">
@@ -160,6 +167,7 @@ export default function BibliothekModule({ settings, onOpen }: {
         <input ref={importRef} type="file" hidden accept=".vtt,.csv"
                onChange={(e) => {
                  const f = e.target.files?.[0];
+                 e.target.value = "";
                  if (!f) return;
                  const fd = new FormData();
                  fd.append("datei", f);
@@ -260,6 +268,7 @@ function EintragZeile({ e, onOpen, onChanged }: {
   const [frage, setFrage] = useState<"umbenennen" | "loeschen" | null>(
     null);
   const [name, setName] = useState(e.name);
+  const [dialogFehler, setDialogFehler] = useState("");
   return (
     <>
       <ListRow
@@ -286,10 +295,13 @@ function EintragZeile({ e, onOpen, onChanged }: {
                      <Button onClick={() => {
                        void apiSend(`/api/transcripts/${e.id}/rename`,
                                     { name })
-                         .then(() => { setFrage(null); onChanged(); });
+                         .then(() => { setFrage(null); onChanged(); })
+                         .catch((err) => setDialogFehler(errMsg(err)));
                      }}>{tr("allg.ok")}</Button>}>
         <TextField.Root value={name}
                         onChange={(ev) => setName(ev.target.value)} />
+        {dialogFehler && (
+          <Text size="1" color="red">{dialogFehler}</Text>)}
       </ModalDialog>
       <ModalDialog open={frage === "loeschen"}
                    onOpenChange={(o) => !o && setFrage(null)}
@@ -298,9 +310,12 @@ function EintragZeile({ e, onOpen, onChanged }: {
                      <Button color="red" onClick={() => {
                        void apiSend(`/api/transcripts/${e.id}/delete`,
                                     { confirm: e.id })
-                         .then(() => { setFrage(null); onChanged(); });
+                         .then(() => { setFrage(null); onChanged(); })
+                         .catch((err) => setDialogFehler(errMsg(err)));
                      }}>{tr("bib.loeschen")}</Button>}>
         <Text size="2">{tr("bib.loeschen.text", { name: e.name })}</Text>
+        {dialogFehler && (
+          <Text size="1" color="red">{dialogFehler}</Text>)}
       </ModalDialog>
     </>
   );

@@ -134,6 +134,17 @@ const W: Record<string, Eintrag> = {
   "job.fertig": { de: "Fertig", en: "Done", fr: "Terminé", it: "Fatto" },
   "job.abgebrochen": { de: "Abgebrochen", en: "Cancelled", fr: "Annulé",
     it: "Annullato" },
+  "job.fehler": { de: "Fehler", en: "Error", fr: "Erreur",
+    it: "Errore" },
+  "ed.play": { de: "Abspielen", en: "Play", fr: "Lecture",
+    it: "Riproduci" },
+  "ed.pause": { de: "Pause", en: "Pause", fr: "Pause", it: "Pausa" },
+  "ed.loop": { de: "Segment wiederholen", en: "Loop segment",
+    fr: "Boucler le segment", it: "Ripeti segmento" },
+  "ed.rueck5": { de: "5 s zurück (Ctrl+←)", en: "5 s back (Ctrl+←)",
+    fr: "5 s en arrière (Ctrl+←)", it: "5 s indietro (Ctrl+←)" },
+  "ed.vor5": { de: "5 s vor (Ctrl+→)", en: "5 s forward (Ctrl+→)",
+    fr: "5 s en avant (Ctrl+→)", it: "5 s avanti (Ctrl+→)" },
   "job.warte": { de: "Wartet …", en: "Waiting …", fr: "En attente …",
     it: "In attesa …" },
 
@@ -257,6 +268,7 @@ export function jobText(tr: (k: string,
     konvertiere: "job.konvertiere", sprecher: "job.sprecher",
     transkribiere: "job.transkribiere", speichere: "job.speichere",
     fertig: "job.fertig", abgebrochen: "job.abgebrochen",
+    fehler: "job.fehler",
   };
   if (map[message]) return tr(map[message]);
   if (status === "pending") return tr("job.warte");

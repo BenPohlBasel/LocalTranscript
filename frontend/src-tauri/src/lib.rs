@@ -85,7 +85,7 @@ fn beende_pid(pid: u32) {
 /// Bundle-venv relozierbar machen: pyvenv.cfg zeigt auf den
 /// python-runtime NEBEN dem venv — absolut, zur Laufzeit gesetzt
 /// (die App kann irgendwo installiert sein; v1-Electron-Muster).
-fn venv_fixen(resources: &Path) {
+fn venv_fixen(resources: &Path) -> Result<(), String> {
     let cfg = resources.join("venv/pyvenv.cfg");
     let runtime = resources.join("python-runtime/bin");
     let alt = std::fs::read_to_string(&cfg).unwrap_or_default();
@@ -100,7 +100,16 @@ fn venv_fixen(resources: &Path) {
         version,
         runtime.join("python3").display()
     );
-    let _ = std::fs::write(&cfg, neu);
+    if alt.trim() == neu.trim() {
+        return Ok(());
+    }
+    std::fs::write(&cfg, &neu).map_err(|e| {
+        format!(
+            "pyvenv.cfg nicht schreibbar ({e}) — liegt die App auf einem \
+             read-only-Volume oder in der Gatekeeper-Translokation? \
+             Einmal nach /Applications kopieren und dort öffnen."
+        )
+    })
 }
 
 struct Backend {
@@ -114,7 +123,7 @@ fn backend_finden(app: &tauri::AppHandle) -> Result<Backend, String> {
     if let Ok(res) = app.path().resource_dir() {
         let py = res.join("venv/bin/python3");
         if py.is_file() {
-            venv_fixen(&res);
+            venv_fixen(&res)?;
             return Ok(Backend {
                 python: py,
                 cwd: res.clone(),
@@ -143,7 +152,7 @@ fn backend_finden(app: &tauri::AppHandle) -> Result<Backend, String> {
 }
 
 #[tauri::command]
-fn backend_starten(
+async fn backend_starten(
     app: tauri::AppHandle,
     eigen: tauri::State<'_, EigenesBackend>,
 ) -> Result<(), String> {
@@ -219,13 +228,10 @@ pub fn run() {
                 .lock()
                 .ok()
                 .and_then(|g| *g);
+            // NUR Selbstgestartetes (eiserne Regel): ein im Terminal
+            // gestartetes Dev-Backend gehört dem User, nie der App.
             if let Some(pid) = eigen {
                 beende_pid(pid);
-            }
-            if let Some(pid) = port_halter() {
-                if ist_eigenes_backend(pid) {
-                    beende_pid(pid);
-                }
             }
         }
     });
