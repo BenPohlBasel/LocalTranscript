@@ -186,19 +186,20 @@ def _turns(segmente: list[dict]) -> list[dict]:
 
 
 def build_vtt(segmente: list[dict]) -> str:
+    """WebVTT-STANDARD (User 2026-08-30): der Sprecher ist ein
+    Voice-Tag `<v Name>` je Cue — nie Teil des Textes (das
+    "Name: "-Präfix war v1-Konvention). Ohne Schließ-Tag, wie es
+    gängige Werkzeuge schreiben; der Import versteht weiterhin
+    beide Stile (turns.py-Parser)."""
     cues = [{"speaker": s.get("sprecher") or None, "start": s["start"],
              "end": s["end"], "text": s["text"].strip()}
             for s in segmente if s["text"].strip()]
     cues = normalize_vtt_cues(cues)
     zeilen = ["WEBVTT", ""]
-    aktuell: str | None = None
     for i, c in enumerate(cues, 1):
         text = c["text"]
-        if c["speaker"] and c["speaker"] != aktuell:
-            text = f"{c['speaker']}: {text}"
-            aktuell = c["speaker"]
-        elif c["speaker"] is None:
-            aktuell = None
+        if c["speaker"]:
+            text = f"<v {c['speaker']}>{text}"
         zeit = (f"{format_vtt_timestamp(c['start'])} --> "
                 f"{format_vtt_timestamp(c['end'])}")
         zeilen += [str(i), zeit, text, ""]

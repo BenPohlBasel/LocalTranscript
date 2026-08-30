@@ -10,7 +10,9 @@ def test_vtt_roundtrip(client, eintrag):
     assert r.status_code == 200
     text = r.content.decode("utf-8")
     assert text.startswith("WEBVTT")
-    assert "Anna: " in text and "Ben: " in text
+    # WebVTT-Standard: Sprecher als Voice-Tag, nie im Text
+    assert "<v Anna>" in text and "<v Ben>" in text
+    assert "Anna: " not in text
     # Reimport des eigenen Exports ergibt dieselben Turns
     r2 = client.post("/api/import",
                      files={"datei": ("re.vtt", r.content, "text/vtt")})
