@@ -62,9 +62,15 @@ node scripts/bundle-resources.mjs   # Runtime/Binaries/Modell + venv
 cd frontend && npx tauri build      # .app + .dmg (unsigniert)
 ```
 
-`bundle-resources.mjs` übernimmt python-runtime, whisper-cli/dylibs,
-ffmpeg und Modelle aus einem daneben liegenden v1-Checkout
+`bundle-resources.mjs` übernimmt python-runtime, whisper-cli/dylibs
+und Modelle aus einem daneben liegenden v1-Checkout
 (`../whisper-web/electron/resources`) und baut das venv frisch.
+**ffmpeg**: redistributabler GPL-Static-Build von
+<https://ffmpeg.martin-riedl.de> (macos/arm64/release) →
+`frontend/src-tauri/resources/bin/ffmpeg`; das Skript verweigert
+nonfree-Builds (der v1-Binary erklärte sich selbst als „not legally
+redistributable"). Für GPL-§6-Compliance die Build-/Quell-Links dem
+GitHub-Release beilegen.
 
 ## Lizenz
 

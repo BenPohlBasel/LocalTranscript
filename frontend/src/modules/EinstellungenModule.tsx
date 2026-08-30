@@ -86,7 +86,25 @@ export default function EinstellungenModule({ settings, onChange }: {
       </Karte>
 
       <Karte titel={tr("st.lizenzen")}>
-        <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
+        <Flex direction="column" gap="2">
+          <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
+          <Flex gap="2" wrap="wrap">
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen(
+                "https://github.com/BenPohlBasel/LocalTranscript")}>
+              {tr("st.link.repo")}</Button>
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen("https://github.com/BenPohlBasel/"
+                + "LocalTranscript/releases")}>
+              {tr("st.link.releases")}</Button>
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen("https://ffmpeg.martin-riedl.de")}>
+              {tr("st.link.ffmpegbuild")}</Button>
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen("https://ffmpeg.org/download.html")}>
+              {tr("st.link.ffmpegsrc")}</Button>
+          </Flex>
+        </Flex>
       </Karte>
 
       <Karte titel={tr("st.app")}
