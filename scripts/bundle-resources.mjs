@@ -39,6 +39,23 @@ for (const teil of ["python-runtime", "bin", "lib", "models"]) {
   kopiere(quelle, ziel);
 }
 
+// 1b. LIZENZ-WÄCHTER (Live-Befund 2026-08-30): der v1-ffmpeg
+//     (osxexperts-Build) erklärte sich selbst „not legally
+//     redistributable" (--enable-nonfree) — so ein Binary darf NIE
+//     in ein Release. Ersatz: GPL-Static-Build von
+//     https://ffmpeg.martin-riedl.de (macos/arm64/release).
+{
+  const probe = execFileSync(path.join(RES, "bin/ffmpeg"), ["-L"],
+                             { encoding: "utf8" });
+  if (probe.includes("not legally redistributable")) {
+    console.error("ABBRUCH: gebündelter ffmpeg ist nonfree/nicht " +
+      "weiterverteilbar — GPL-Build von " +
+      "https://ffmpeg.martin-riedl.de nach resources/bin/ffmpeg legen.");
+    process.exit(1);
+  }
+  console.log("✓ ffmpeg-Lizenz: redistributabel (GPL)");
+}
+
 // 2. venv frisch (Symlink-venv + relative Links, v1-Muster — Symlinks
 //    erhalten den @rpath auf libpython; --copies bräche ihn)
 const venv = path.join(RES, "venv");
