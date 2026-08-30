@@ -48,6 +48,8 @@ export default function EditorModule({ id, onExit }: {
   const saveTimer = useRef<number | undefined>(undefined);
   const zustand = useRef({ sprecher, segmente });
   zustand.current = { sprecher, segmente };
+  const aktivRef = useRef(aktiv);
+  aktivRef.current = aktiv;
 
   useEffect(() => {
     void apiGet<Transkript>(`/api/transcripts/${id}`).then((t) => {
@@ -268,6 +270,20 @@ export default function EditorModule({ id, onExit }: {
         e.preventDefault(); a.currentTime += 5;
       } else if (e.code === "KeyK" || e.key === " ") {
         e.preventDefault(); toggle();
+      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        // Absatz-Schritt (User 2026-08-30): ↑/↓ laufen die Segmente
+        // entlang — Audio auf den Segment-Anfang, Zeile aktiv+scrollen
+        e.preventDefault();
+        const segs = zustand.current.segmente;
+        if (!segs.length) return;
+        const cur = aktivRef.current;
+        const i = e.key === "ArrowDown"
+          ? Math.min(cur < 0 ? 0 : cur + 1, segs.length - 1)
+          : Math.max(cur < 0 ? 0 : cur - 1, 0);
+        a.currentTime = segs[i].start;
+        setAktiv(i);
+        listRef.current?.querySelector(`[data-seg="${i}"]`)
+          ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
       }
     };
     document.addEventListener("keydown", h);
