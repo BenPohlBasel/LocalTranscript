@@ -241,6 +241,12 @@ export default function EditorModule({ id, onExit }: {
         e.preventDefault(); a.currentTime -= 5;
       } else if (e.ctrlKey && e.key === "ArrowRight") {
         e.preventDefault(); a.currentTime += 5;
+      } else if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
+        e.preventDefault(); setLoop((l) => !l);
+      } else if (e.ctrlKey && (e.key === "x" || e.key === "X")) {
+        e.preventDefault();
+        setSpeed((s) => SPEEDS[(SPEEDS.indexOf(s) + 1)
+          % SPEEDS.length]);
       }
     };
     document.addEventListener("keydown", h);
@@ -362,7 +368,8 @@ export default function EditorModule({ id, onExit }: {
                 if (audioRef.current)
                   audioRef.current.currentTime += 5;
               }}><Icon name="forward" size={15} /></IconButton>
-              <Button size="1" variant="ghost" onClick={() => {
+              <Button size="1" variant="ghost"
+                      title={tr("ed.speed")} onClick={() => {
                 const i = SPEEDS.indexOf(speed);
                 setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
               }}>{speed.toFixed(2).replace(/0$/, "")}×</Button>
