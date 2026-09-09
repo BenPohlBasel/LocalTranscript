@@ -3,7 +3,7 @@
 // Human-Editor). Die Bibliotheks-Liste lebt im Human-Editor-Tab.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Badge, Button, Checkbox, Disclosure, ErrorNote, Flex, Karte,
+  Badge, Button, Disclosure, ErrorNote, Flex, Karte,
   LabeledSelect, Progress, Text,
 } from "../components/ui";
 import { Icon } from "../components/icons";
@@ -16,6 +16,15 @@ import { isTauri, onFileDrop, pickAudio } from "../lib/tauri";
 
 const AUDIO_EXT = [".mp3", ".m4a", ".aac", ".wav", ".ogg", ".flac",
   ".webm"];
+
+// Werte sind min-max-Paare fürs Backend; gleiche Grenzen = genau n.
+// „1-1" ist der AUS-Fall (User 2026-09-09: „1 steht für keine
+// Sprechererkennung"): dann läuft die Diarisierung gar nicht erst —
+// keine Sprecher-Entitäten, und der teure Embedding-/Cluster-Lauf
+// entfällt. Das ersetzt die frühere Checkbox „Sprechererkennung";
+// zwei Bedienelemente für denselben Zustand widersprechen sich sonst.
+const AUS = "1-1";
+const SPRECHERZAHL = [AUS, "2-2", "3-3", "4-4", "5-5", "6-6", "auto"];
 
 export default function AiTranscriptModule({ settings, onEdit }: {
   settings: Settings | null;
@@ -30,8 +39,15 @@ export default function AiTranscriptModule({ settings, onEdit }: {
   const [model, setModel] = useState(settings?.model ?? "large-v3-turbo");
   const [modelle, setModelle] = useState<ModellInfo[]>([]);
   const [language, setLanguage] = useState(settings?.language ?? "de");
-  const [diarize, setDiarize] = useState(settings?.diarize ?? true);
-  const [range, setRange] = useState(settings?.speaker_range ?? "auto");
+  // Ein gespeicherter Altwert („2-4", „6-10") steht nicht mehr in der
+  // Liste — das Feld bliebe leer. Solche Werte fallen auf Auto zurück;
+  // eine abgeschaltete Erkennung aus den Einstellungen wird zu „1".
+  const [range, setRange] = useState(() => {
+    if (settings && settings.diarize === false) return AUS;
+    const s = settings?.speaker_range ?? "";
+    return SPRECHERZAHL.includes(s) ? s : "auto";
+  });
+  const diarize = range !== AUS;
   const [threshold, setThreshold] = useState(
     String(settings?.cluster_threshold ?? 0.5));
 
@@ -136,10 +152,18 @@ export default function AiTranscriptModule({ settings, onEdit }: {
           <LabeledSelect label={tr("bib.sprache")} value={language}
             onChange={setLanguage}
             options={["de", "en", "fr", "it", "es", "auto"]} />
+          {/* Exakte Zahlen statt Klammern (User 2026-09-09). Das
+              Backend nimmt min/max — gleiche Grenzen heißen „genau n"
+              und zwingen den Clusterer auf diese Zahl. Die alten
+              Klammern (2-4, 4-6 …) stammten unverändert aus v1, wo
+              „2-2" noch „Genau 2" hieß; beim Portieren ging das Label
+              verloren und übrig blieb eine Liste, die exakte Angaben
+              versteckte und bei 3 oder 5 gar keine anbot. */}
           <LabeledSelect label={tr("bib.sprecherzahl")} value={range}
             onChange={setRange}
-            options={["auto", "2-2", "2-4", "4-6", "5-8", "6-10"]}
-            optionLabels={{ auto: tr("bib.auto") }} />
+            options={SPRECHERZAHL}
+            optionLabels={{ auto: tr("bib.auto"), "1-1": "1", "2-2": "2",
+              "3-3": "3", "4-4": "4", "5-5": "5", "6-6": "6" }} />
           <LabeledSelect label={tr("bib.trennung")} value={threshold}
             onChange={setThreshold}
             options={["0.7", "0.5", "0.35", "0.25"]}
@@ -148,12 +172,6 @@ export default function AiTranscriptModule({ settings, onEdit }: {
               "0.5": tr("bib.trennung.normal"),
               "0.35": tr("bib.trennung.streng"),
               "0.25": tr("bib.trennung.sehr") }} />
-          <label style={{ display: "flex", alignItems: "center",
-                          gap: 8 }}>
-            <Checkbox checked={diarize}
-                      onCheckedChange={(v) => setDiarize(v === true)} />
-            <Text size="2">{tr("bib.diarize")}</Text>
-          </label>
         </Flex>
       </Disclosure>
 

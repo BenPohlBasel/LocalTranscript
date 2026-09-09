@@ -192,6 +192,13 @@ def _cluster(embeddings: np.ndarray,
     distance = 1.0 - affinity
     np.fill_diagonal(distance, 0.0)
 
+    # Genau EIN Sprecher: es gibt nichts zu clustern. Ohne diesen Zweig
+    # fiele n=1 in die Schwellen-Clusterung durch und lieferte trotzdem
+    # mehrere Sprecher — die Angabe wäre stillschweigend wirkungslos
+    # (User 2026-09-09, beim Umbau der Sprecherzahl-Liste aufgefallen).
+    if num_speakers == 1:
+        return np.zeros(len(embeddings), dtype=int)
+
     if num_speakers and num_speakers >= 2 and num_speakers < len(embeddings):
         sc = SpectralClustering(
             n_clusters=num_speakers,
