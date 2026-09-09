@@ -21,7 +21,14 @@ from pathlib import Path
 
 APP_NAME = "LocalTranscript"
 APP_VERSION = "2.0.0"
-PORT = 44100  # fest (merkbar); Shell + Frontend kennen ihn
+#: DER LocalTranscript-Port (2026-09-09): 5628 = „LOCT" auf der
+#: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
+#: (23119 = „ZOT"). Vier Buchstaben, nicht fünf: „LOCTR" wäre 56287
+#: und läge im EPHEMEREN Bereich, den macOS selbst verteilt
+#: (49152–65535) — als fester Dienst-Port untauglich. 5628 liegt im
+#: User-Bereich 1024–49151 und ist IANA-unvergeben.
+#: Override: LT_SERVE_PORT (Shell und Frontend kennen ihn auch).
+PORT = int(os.environ.get("LT_SERVE_PORT") or 5628)
 
 
 def get_app_root() -> Path:

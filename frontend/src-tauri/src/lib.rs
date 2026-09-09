@@ -1,7 +1,15 @@
-// LocalTranscript-Shell (enrich-Muster, vereinfacht): die Shell ist dumm —
-// sie spawnt das Python-Backend auf Port 44100, wartet auf /api/health
-// und beendet beim Quit NUR, was sie selbst gestartet hat. Ein fremd
+// LocalTranscript-Shell (enrich-Muster): die Shell ist dumm — sie spawnt
+// das Python-Backend auf 127.0.0.1:5628, wartet auf /api/health und
+// beendet beim Quit NUR, was sie selbst gestartet hat. Ein fremd
 // gestartetes gesundes Backend (Terminal-Dev) wird benutzt, nie angefasst.
+//
+// MERKDATEI (aus enrich nachgezogen, 2026-09-09): pid+port landen in
+// ~/Library/Application Support/LocalTranscript/app-backend.json. Stürzt
+// die App ab, findet der nächste Start sein verwaistes Backend wieder und
+// übernimmt es — vorher prüft die ps-Kommandozeile, ob die PID überhaupt
+// noch zu einem LocalTranscript-Backend gehört (PIDs werden vom System
+// WIEDERVERWENDET; ohne die Probe könnte die App einen wildfremden
+// Prozess „übernehmen" und beim Quit beenden).
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
@@ -10,15 +18,70 @@ use std::time::{Duration, Instant};
 
 use tauri::{Manager, RunEvent};
 
-const PORT: u16 = 44100;
+/// DER LocalTranscript-Port: 5628 = „LOCT" auf der Telefontastatur
+/// (enrich 36742 = „ENRIC", Zotero-Tradition). Vier Buchstaben, nicht
+/// fünf: „LOCTR" wäre 56287 und läge damit im EPHEMEREN Bereich
+/// (macOS verteilt 49152–65535 selbst) — als fester Dienst-Port
+/// untauglich. 5628 liegt im User-Bereich 1024–49151, IANA-unvergeben.
+/// Override: LT_SERVE_PORT (eine Quelle je Sprache, s. config.py).
+const PORT_STANDARD: u16 = 5628;
+
+fn port() -> u16 {
+    static P: std::sync::OnceLock<u16> = std::sync::OnceLock::new();
+    *P.get_or_init(|| {
+        std::env::var("LT_SERVE_PORT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .filter(|p| *p >= 1024)
+            .unwrap_or(PORT_STANDARD)
+    })
+}
 
 struct EigenesBackend(Mutex<Option<u32>>);
+
+// ---------- Merkdatei ----------
+
+fn merkdatei() -> PathBuf {
+    let home = std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("/"));
+    home.join("Library/Application Support/LocalTranscript/app-backend.json")
+}
+
+fn merk_schreiben(pid: u32) {
+    let f = merkdatei();
+    if let Some(d) = f.parent() {
+        let _ = std::fs::create_dir_all(d);
+    }
+    let _ = std::fs::write(&f, format!("{{\"pid\": {pid}, \"port\": {}}}\n", port()));
+}
+
+fn merk_loeschen() {
+    let _ = std::fs::remove_file(merkdatei());
+}
+
+/// pid+port aus der Merkdatei — bewusst von Hand geparst, die Shell
+/// zieht für zwei Zahlen keine JSON-Abhängigkeit.
+fn merk_lesen() -> Option<(u32, u16)> {
+    let roh = std::fs::read_to_string(merkdatei()).ok()?;
+    let zahl = |feld: &str| -> Option<u64> {
+        let ab = roh.find(feld)? + feld.len();
+        roh[ab..]
+            .trim_start_matches(|c: char| c == '"' || c == ':' || c.is_whitespace())
+            .chars()
+            .take_while(|c| c.is_ascii_digit())
+            .collect::<String>()
+            .parse()
+            .ok()
+    };
+    Some((zahl("\"pid\"")? as u32, zahl("\"port\"")? as u16))
+}
 
 fn health_antwortet(frist_s: u64) -> bool {
     let frist = Instant::now() + Duration::from_secs(frist_s);
     loop {
         if let Ok(mut s) = TcpStream::connect_timeout(
-            &format!("127.0.0.1:{PORT}").parse().unwrap(),
+            &format!("127.0.0.1:{}", port()).parse().unwrap(),
             Duration::from_millis(500),
         ) {
             let _ = s.set_read_timeout(Some(Duration::from_secs(2)));
@@ -40,7 +103,7 @@ fn health_antwortet(frist_s: u64) -> bool {
 
 fn port_halter() -> Option<u32> {
     let out = std::process::Command::new("/usr/sbin/lsof")
-        .args(["-ti", &format!("tcp:{PORT}"), "-sTCP:LISTEN"])
+        .args(["-ti", &format!("tcp:{}", port()), "-sTCP:LISTEN"])
         .output()
         .ok()?;
     String::from_utf8_lossy(&out.stdout)
@@ -156,8 +219,21 @@ async fn backend_starten(
     app: tauri::AppHandle,
     eigen: tauri::State<'_, EigenesBackend>,
 ) -> Result<(), String> {
-    // Läuft schon etwas Gesundes? Benutzen (nie anfassen).
+    // Läuft schon etwas Gesundes? Benutzen — und prüfen, ob es das
+    // eigene Waisenkind aus einem abgestürzten Lauf ist: dann geht es
+    // beim Quit mit, sonst bleibt es unangetastet (Terminal-Dev).
     if health_antwortet(0) {
+        if let (Some((pid, p)), Some(halter)) = (merk_lesen(), port_halter()) {
+            if p == port() && pid == halter && ist_eigenes_backend(pid) {
+                if let Ok(mut g) = eigen.0.lock() {
+                    *g = Some(pid);
+                }
+            } else {
+                // Merkdatei zeigt ins Leere (PID neu vergeben, Port
+                // gewechselt) — weg damit, bevor sie jemanden verwirrt.
+                merk_loeschen();
+            }
+        }
         return Ok(());
     }
     // Zombie auf dem Port? Nur ps-identifizierte eigene beenden.
@@ -166,7 +242,7 @@ async fn backend_starten(
             beende_pid(pid);
         } else {
             return Err(format!(
-                "Port {PORT} ist von einem fremden Prozess belegt (PID {pid})"
+                "Port {} ist von einem fremden Prozess belegt (PID {pid})", port()
             ));
         }
     }
@@ -179,7 +255,7 @@ async fn backend_starten(
         "--host",
         "127.0.0.1",
         "--port",
-        &PORT.to_string(),
+        &port().to_string(),
     ])
     .current_dir(&b.cwd)
     .env("PYTHONUNBUFFERED", "1")
@@ -193,6 +269,7 @@ async fn backend_starten(
     if let Ok(mut g) = eigen.0.lock() {
         *g = Some(pid);
     }
+    merk_schreiben(pid);
     // Erstes Laden im Bundle importiert torch — großzügige Frist.
     if health_antwortet(90) {
         Ok(())
@@ -210,8 +287,71 @@ fn ordner_oeffnen(pfad: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Nur das Nötige (User 2026-09-09): das Standardmenü schleppte File,
+/// View, Help und ein Services-Untermenü mit — leer oder mit fremden
+/// Entwickler-Werkzeugen gefüllt. Bleiben: „Über/Ausblenden/Beenden",
+/// die Textbefehle (die App ist ein Editor — ⌘Z/⌘X/⌘C/⌘V sind Pflicht)
+/// und die Fensterbefehle. Beschriftungen kommen von macOS und folgen
+/// Englisch wie die vordefinierten Einträge (About/Hide/Quit,
+/// Undo/Cut/Copy liefert muda auf Englisch) — deutsche
+/// Untermenü-Titel daneben wären ein Sprachmischmasch. Das
+/// Menü folgt damit NICHT der Oberflächensprache der App.
+fn menue(handle: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
+    use tauri::menu::{AboutMetadata, Menu, PredefinedMenuItem, Submenu};
+    let ueber = AboutMetadata {
+        name: Some("LocalTranscript".into()),
+        version: Some(env!("CARGO_PKG_VERSION").into()),
+        license: Some("GPL-3.0-or-later".into()),
+        website: Some("https://bias.city/b-ias-basel-institut-fuer-angewandte-stadtforschung/".into()),
+        website_label: Some("BIAS.City".into()),
+        comments: Some(
+            "Vollständig lokale Transkription mit Sprecherkennung.".into(),
+        ),
+        ..Default::default()
+    };
+    let app = Submenu::with_items(
+        handle,
+        "LocalTranscript",
+        true,
+        &[
+            &PredefinedMenuItem::about(handle, None, Some(ueber))?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::hide(handle, None)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::quit(handle, None)?,
+        ],
+    )?;
+    let text = Submenu::with_items(
+        handle,
+        "Edit",
+        true,
+        &[
+            &PredefinedMenuItem::undo(handle, None)?,
+            &PredefinedMenuItem::redo(handle, None)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::cut(handle, None)?,
+            &PredefinedMenuItem::copy(handle, None)?,
+            &PredefinedMenuItem::paste(handle, None)?,
+            &PredefinedMenuItem::select_all(handle, None)?,
+        ],
+    )?;
+    let fenster = Submenu::with_items(
+        handle,
+        "Window",
+        true,
+        &[
+            &PredefinedMenuItem::minimize(handle, None)?,
+            &PredefinedMenuItem::fullscreen(handle, None)?,
+            &PredefinedMenuItem::separator(handle)?,
+            &PredefinedMenuItem::close_window(handle, None)?,
+        ],
+    )?;
+    Menu::with_items(handle, &[&app, &text, &fenster])
+}
+
 pub fn run() {
     let app = tauri::Builder::default()
+        .menu(menue)
         .plugin(tauri_plugin_dialog::init())
         .manage(EigenesBackend(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![backend_starten, ordner_oeffnen])
@@ -233,6 +373,7 @@ pub fn run() {
             if let Some(pid) = eigen {
                 beende_pid(pid);
             }
+            merk_loeschen();
         }
     });
 }

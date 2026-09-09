@@ -261,6 +261,22 @@ const W: Record<string, Eintrag> = {
   "ed.leer": { de: "Keine Segmente.", en: "No segments.",
     fr: "Aucun segment.", it: "Nessun segmento." },
 
+  "st.bias": { de: "BIAS.City", en: "BIAS.City", fr: "BIAS.City",
+    it: "BIAS.City" },
+  // Der Institutsname bleibt in ALLEN Sprachen deutsch — Eigenname,
+  // keine erfundene Amtsübersetzung.
+  "st.bias.sub": { de: "Basel Institut für angewandte Stadtforschung",
+    en: "Basel Institut für angewandte Stadtforschung",
+    fr: "Basel Institut für angewandte Stadtforschung",
+    it: "Basel Institut für angewandte Stadtforschung" },
+  "st.bias.text": {
+    de: "LocalTranscript entsteht am B-IAS. Die App ist freie Software und bleibt es.",
+    en: "LocalTranscript is made at B-IAS. The app is free software and stays that way.",
+    fr: "LocalTranscript est développé au B-IAS. L'application est un logiciel libre et le reste.",
+    it: "LocalTranscript nasce al B-IAS. L'app è software libero e tale resta." },
+  "st.bias.link": { de: "bias.city öffnen", en: "Open bias.city",
+    fr: "Ouvrir bias.city", it: "Apri bias.city" },
+
   // Kit-Bausteine (components/ui.tsx) — enrich nutzt denselben
   // ui.*-Namensraum; ui.caret.* sind buchstäblich dieselben Schlüssel.
   "ui.caret.aufklappen": { de: "Aufklappen", en: "Expand",

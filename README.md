@@ -19,7 +19,8 @@ Sprecher-Diarisierung — Neubau des LocalTranscript-Prototyps als
   (T0=T1 byte-treu, PDF in Recursive gesetzt, Zeitkarte
   Offsets↔Sekunden↔Sprecher, Audio-Kopie, Analyse-Kette „narrativ") —
   direkt in enrich importierbar.
-- **Privat:** Loopback only (127.0.0.1:44100), keine Netz-Calls.
+- **Privat:** Loopback only (127.0.0.1:5628 — „LOCT" auf der
+  Telefontastatur; `LT_SERVE_PORT` überschreibt), keine Netz-Calls.
 
 ## Architektur
 
@@ -50,8 +51,8 @@ Pfad-Dependency des .enrich-Exports.
 ```bash
 cd backend && uv sync && uv run pytest          # Backend + Tests
 cd frontend && npm install
-npm run dev                                      # Browser-Dev (Proxy :44100)
-uv run uvicorn localtranscript.main:app --port 44100   # in backend/
+npm run dev                                      # Browser-Dev (Proxy :5628)
+uv run uvicorn localtranscript.main:app --port 5628    # in backend/
 npx tauri dev                                    # App-Dev
 ```
 

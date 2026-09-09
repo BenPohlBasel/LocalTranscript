@@ -10,6 +10,9 @@ import {
 import { setSprache, useT, type Sprache } from "../lib/i18n";
 import { isTauri, ordnerOeffnen, pickOrdner } from "../lib/tauri";
 
+const BIAS_URL = "https://bias.city/"
+  + "b-ias-basel-institut-fuer-angewandte-stadtforschung/";
+
 export default function EinstellungenModule({ settings, onChange }: {
   settings: Settings | null;
   onChange: (s: Settings) => void;
@@ -116,6 +119,17 @@ export default function EinstellungenModule({ settings, onChange }: {
               void ordnerOeffnen(
                 "https://github.com/BenPohlBasel/LocalTranscript")}>
               GitHub</Button>
+          </Flex>
+        </Flex>
+      </Karte>
+
+      <Karte titel={tr("st.bias")} subline={tr("st.bias.sub")}>
+        <Flex direction="column" gap="2">
+          <Text size="1" color="gray">{tr("st.bias.text")}</Text>
+          <Flex gap="2">
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen(BIAS_URL)}>
+              {tr("st.bias.link")}</Button>
           </Flex>
         </Flex>
       </Karte>
