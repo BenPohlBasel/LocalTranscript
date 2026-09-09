@@ -14,7 +14,10 @@ Sprecher-Diarisierung — Neubau des LocalTranscript-Prototyps als
 - **Editor:** Autosave, Sprecher umbenennen/zusammenführen/umhängen,
   Hörprobe je Sprecher, Segmente teilen/verbinden/löschen,
   Audio-Player mit Folgen-Modus, Timecodes immer hh:mm:ss.
-- **Exporte:** VTT · CSV · TXT · **`.enrich.zip`** — ein vollwertiges
+- **Exporte:** VTT · CSV · TXT · **`.qdpx`** (REFI-QDA, für ATLAS.ti /
+  NVivo / MAXQDA: Transkript als TextSource *und* als `Transcript`
+  einer `AudioSource` mit einem `SyncPoint` je Äußerung, Sprecher als
+  Codes) · **`.enrich.zip`** — ein vollwertiges
   [enrich](https://github.com/BenPohlBasel/PDFenrichCLI)-Dossier
   (T0=T1 byte-treu, PDF in Recursive gesetzt, Zeitkarte
   Offsets↔Sekunden↔Sprecher, Audio-Kopie, Analyse-Kette „narrativ") —
@@ -72,6 +75,23 @@ und Modelle aus einem daneben liegenden v1-Checkout
 nonfree-Builds (der v1-Binary erklärte sich selbst als „not legally
 redistributable"). Für GPL-§6-Compliance die Build-/Quell-Links dem
 GitHub-Release beilegen.
+
+## Austauschformate und ihre Lizenzen
+
+**REFI-QDA (`.qdpx`).** LocalTranscript *unterstützt den Export nach
+REFI-QDA*. Die Spezifikation steht unter der **MIT-Lizenz, Copyright
+2019 REFI-QDA** (<https://www.qdasoftware.org/>). Es gibt keine
+offizielle Zertifizierung für REFI-QDA, und Markenrechte deckt die
+MIT-Lizenz der Spezifikation nicht ab — entsprechende Behauptungen
+werden hier bewusst nicht erhoben. Die REFI-Schemas (XSD) liegen
+**nicht** im Bundle: LocalTranscript schreibt nach der Spezifikation
+und verweist nur auf die Schema-Adresse, damit greift die
+MIT-Beilagepflicht nicht.
+
+**enrich-Dossier (`.enrich.zip`).** Die Format-Spezifikation steht
+unter der **MIT-Lizenz** (BIAS.City).
+
+**WebVTT** (W3C) · **CSV** · **TXT** sind offen und unbeschränkt.
 
 ## Lizenz
 

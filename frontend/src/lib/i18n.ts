@@ -188,6 +188,10 @@ const W: Record<string, Eintrag> = {
     it: "Salvataggio non riuscito: {e}" },
   "ed.export": { de: "Export", en: "Export", fr: "Export",
     it: "Esporta" },
+  "ed.export.qdpx": { de: "REFI-QDA für ATLAS.ti (.qdpx.zip)",
+    en: "REFI-QDA for ATLAS.ti (.qdpx.zip)",
+    fr: "REFI-QDA pour ATLAS.ti (.qdpx.zip)",
+    it: "REFI-QDA per ATLAS.ti (.qdpx.zip)" },
   "ed.export.enrich": { de: "enrich-Dossier (.enrich.zip)",
     en: "enrich dossier (.enrich.zip)",
     fr: "Dossier enrich (.enrich.zip)",
@@ -261,6 +265,33 @@ const W: Record<string, Eintrag> = {
   "ed.leer": { de: "Keine Segmente.", en: "No segments.",
     fr: "Aucun segment.", it: "Nessun segmento." },
 
+  "st.formate": { de: "Formate", en: "Formats", fr: "Formats",
+    it: "Formati" },
+  "st.formate.sub": {
+    de: "Austauschformate und ihre Spezifikations-Lizenzen",
+    en: "Interchange formats and their specification licenses",
+    fr: "Formats d'échange et licences de leurs spécifications",
+    it: "Formati di scambio e licenze delle specifiche" },
+  // Wortlaut bewusst zurückhaltend: „unterstützt" — es gibt KEINE
+  // Zertifizierung für REFI-QDA, und Markenrechte deckt die
+  // MIT-Lizenz der Spezifikation nicht ab (User 2026-09-09).
+  "st.formate.refi": {
+    de: "REFI-QDA (.qdpx) — LocalTranscript unterstützt den Export nach REFI-QDA; die Spezifikation steht unter der MIT-Lizenz, Copyright 2019 REFI-QDA. Keine offizielle Zertifizierung, keine Marken-Lizenz.",
+    en: "REFI-QDA (.qdpx) — LocalTranscript supports export to REFI-QDA; the specification is MIT-licensed, Copyright 2019 REFI-QDA. No official certification, no trademark license.",
+    fr: "REFI-QDA (.qdpx) — LocalTranscript prend en charge l'export vers REFI-QDA ; la spécification est sous licence MIT, Copyright 2019 REFI-QDA. Aucune certification officielle, aucune licence de marque.",
+    it: "REFI-QDA (.qdpx) — LocalTranscript supporta l'export in REFI-QDA; la specifica è sotto licenza MIT, Copyright 2019 REFI-QDA. Nessuna certificazione ufficiale, nessuna licenza di marchio." },
+  "st.formate.enrich": {
+    de: "enrich-Dossier (.enrich.zip) — Format-Spezifikation unter MIT-Lizenz, BIAS.City. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
+    en: "enrich dossier (.enrich.zip) — format specification MIT-licensed, BIAS.City. WebVTT (W3C) · CSV · TXT are open and unrestricted.",
+    fr: "Dossier enrich (.enrich.zip) — spécification du format sous licence MIT, BIAS.City. WebVTT (W3C) · CSV · TXT sont ouverts et sans restriction.",
+    it: "Dossier enrich (.enrich.zip) — specifica del formato sotto licenza MIT, BIAS.City. WebVTT (W3C) · CSV · TXT sono aperti e senza restrizioni." },
+  "st.formate.xsd": {
+    de: "Die REFI-Schemas (XSD) liegen NICHT im Bundle — LocalTranscript schreibt nach der Spezifikation und verweist nur auf die Schema-Adresse. Damit greift die MIT-Beilagepflicht nicht.",
+    en: "The REFI schemas (XSD) are NOT bundled — LocalTranscript writes to the specification and only references the schema URL. The MIT attribution requirement therefore does not apply.",
+    fr: "Les schémas REFI (XSD) ne sont PAS embarqués — LocalTranscript écrit selon la spécification et ne référence que l'adresse du schéma. L'obligation d'attribution MIT ne s'applique donc pas.",
+    it: "Gli schemi REFI (XSD) NON sono inclusi — LocalTranscript scrive secondo la specifica e cita solo l'indirizzo dello schema. L'obbligo di attribuzione MIT non si applica." },
+  "st.link.refi": { de: "REFI-QDA-Standard", en: "REFI-QDA standard",
+    fr: "Standard REFI-QDA", it: "Standard REFI-QDA" },
   "st.bias": { de: "BIAS.City", en: "BIAS.City", fr: "BIAS.City",
     it: "BIAS.City" },
   // Der Institutsname bleibt in ALLEN Sprachen deutsch — Eigenname,
