@@ -62,3 +62,11 @@ export async function onFileDrop(
     if (e.payload.type === "drop") cb(e.payload.paths);
   });
 }
+
+/** „About LocalTranscript" aus dem Menü — die Shell schickt nur das
+    Signal, den Dialog baut das Frontend (übersetzt, mit Links). */
+export async function onUeber(cb: () => void): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const { listen } = await import("@tauri-apps/api/event");
+  return listen("ueber", () => cb());
+}

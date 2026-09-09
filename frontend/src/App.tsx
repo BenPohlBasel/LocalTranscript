@@ -2,12 +2,13 @@
 // (Speicherort), dann Bibliothek ⇄ Editor (Drilldown, enrich-
 // Werkstatt-Muster) + Einstellungen.
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, Flex, Heading, SegTabs, Text }
+import { Badge, Button, Flex, Heading, ModalDialog, SegTabs, Text }
   from "./components/ui";
 import { Icon } from "./components/icons";
 import { apiGet, apiSend, errMsg, type Settings } from "./lib/api";
 import { setSprache, useT, type Sprache } from "./lib/i18n";
-import { backendStarten, isTauri, pickOrdner } from "./lib/tauri";
+import { backendStarten, isTauri, onUeber, ordnerOeffnen, pickOrdner }
+  from "./lib/tauri";
 import AiTranscriptModule from "./modules/AiTranscriptModule";
 import EditorModule from "./modules/EditorModule";
 import EinstellungenModule from "./modules/EinstellungenModule";
@@ -26,6 +27,7 @@ export default function App() {
   const [tab, setTab] = useState<"ai" | "editor" | "einstellungen">(
     "ai");
   const [editorId, setEditorId] = useState<string | null>(null);
+  const [ueber, setUeber] = useState(false);
 
   const starte = useCallback(async () => {
     setBoot("lade");
@@ -41,6 +43,14 @@ export default function App() {
     }
   }, []);
   useEffect(() => { void starte(); }, [starte]);
+  // „About LocalTranscript" aus dem Menü
+  useEffect(() => {
+    let ab: (() => void) | undefined;
+    let weg = false;
+    void onUeber(() => setUeber(true))
+      .then((f) => { if (weg) f(); else ab = f; });
+    return () => { weg = true; ab?.(); };
+  }, []);
 
   if (boot !== "bereit") {
     return (
@@ -115,7 +125,65 @@ export default function App() {
               : <EinstellungenModule settings={settings}
                                      onChange={setSettings} />}
       </div>
+      <UeberDialog open={ueber} onClose={() => setUeber(false)} />
     </Flex>
+  );
+}
+
+const REPO = "https://github.com/BenPohlBasel/LocalTranscript";
+const BIAS = "https://bias.city/"
+  + "b-ias-basel-institut-fuer-angewandte-stadtforschung/";
+
+/** Eigener Über-Dialog: das macOS-Standardpanel zeigt nur Name und
+    Version, und Links darin wären nicht klickbar. Die Texte kommen aus
+    denselben Schlüsseln wie die Einstellungs-Karten — EINE Quelle. */
+function UeberDialog({ open, onClose }: {
+  open: boolean; onClose: () => void;
+}) {
+  const tr = useT();
+  // Die APP-Version steht fest im Build. Die Backend-Version wird nur
+  // dazugesetzt, wenn sie abweicht — dann spricht die App mit einem
+  // fremden Backend, und das soll man sehen.
+  const [backend, setBackend] = useState("");
+  useEffect(() => {
+    if (!open || backend) return;
+    void apiGet<{ version: string }>("/api/health")
+      .then((h) => setBackend(h.version)).catch(() => undefined);
+  }, [open, backend]);
+  const version = backend && backend !== __APP_VERSION__
+    ? `${__APP_VERSION__} · Backend ${backend}`
+    : __APP_VERSION__;
+  const link = (label: string, url: string) => (
+    <Button size="1" variant="soft" onClick={() => void ordnerOeffnen(url)}>
+      {label}</Button>
+  );
+  return (
+    <ModalDialog open={open} onOpenChange={(o) => !o && onClose()}
+                 title={tr("ueber.titel")} width={520}
+                 footer={<Button onClick={onClose}>
+                   {tr("allg.schliessen")}</Button>}>
+      <Flex direction="column" gap="3">
+        <Flex direction="column" gap="1">
+          <Heading size="4">{tr("app.titel")}</Heading>
+          <Text size="1" color="gray">
+            {tr("ueber.version", { v: version })}</Text>
+          <Text size="2" color="gray">{tr("st.app.sub")}</Text>
+        </Flex>
+        <Text size="2">{tr("ueber.herkunft")}</Text>
+        <Text size="2">{tr("st.app.text")}</Text>
+        <Flex gap="2" wrap="wrap">
+          {link(tr("st.link.repo"), REPO)}
+          {link(tr("st.link.releases"), `${REPO}/releases`)}
+          {link(tr("st.link.lizenztext"), `${REPO}/blob/main/LICENSE`)}
+          {link("BIAS.City", BIAS)}
+        </Flex>
+        <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
+        <Flex gap="2" wrap="wrap">
+          {link(tr("st.link.ffmpegbuild"), "https://ffmpeg.martin-riedl.de")}
+          {link(tr("st.link.ffmpegsrc"), "https://ffmpeg.org/download.html")}
+        </Flex>
+      </Flex>
+    </ModalDialog>
   );
 }
 
