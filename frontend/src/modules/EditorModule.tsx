@@ -6,7 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState }
   from "react";
 import {
   Badge, Button, Checkbox, ErrorNote, Flex, IconButton,
-  Select, SidePanel, Text, TextField,
+  SearchField, SegTabs, Select, SidePanel, Text, TextField,
 } from "../components/ui";
 import { Icon } from "../components/icons";
 import {
@@ -14,10 +14,18 @@ import {
   type Segment, type Sprecher, type Transkript,
 } from "../lib/api";
 import { useT } from "../lib/i18n";
-import { KEYS, lget, lset } from "../lib/storage";
+import { KEYS, lget, lset, sget, sset } from "../lib/storage";
 import { isTauri, savePath } from "../lib/tauri";
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
+
+// EIN Zeilen-Slot für alle Zellen einer Segmentzeile (User
+// 2026-09-09: „ausrichten der Zeilen"): 28 px = Rahmen 1 + Polster 3
+// + Textzeile 19,5 + Polster 3 + Rahmen 1 der Textarea. Alles darin
+// zentriert → Play, Timecode, Sprecher-Badge, Text und Aktionen
+// sitzen auf derselben Mittellinie (vorher 13,5–18,75 px Streuung).
+const SEG_SLOT = { height: 28, display: "flex",
+                   alignItems: "center" } as const;
 
 let _seq = 0;
 function neueId(): string {
@@ -43,6 +51,22 @@ export default function EditorModule({ id, onExit }: {
   const [loop, setLoop] = useState(false);
   const [folgen, setFolgen] = useState(
     lget(KEYS.editorFolgen) !== "0");
+  const [seitenTab, setSeitenTab] = useState<"sprecher" | "suchen">(
+    sget(KEYS.editorSeitenTab) === "suchen" ? "suchen" : "sprecher");
+  // Zähler je Segment: die Textareas sind UNKONTROLLIERT
+  // (defaultValue) und zeigen programmatisch geänderten Text nur
+  // nach Remount. Statt — wie bei Teilen/Verbinden — die id zu
+  // wechseln (die ist kanonische Identität in transkript.json),
+  // hängt der Zähler am React-KEY: Ersetzen remountet die Zeile,
+  // die Segment-id bleibt.
+  const [rev, setRev] = useState<Record<string, number>>({});
+  // Zeile des aktuellen Suchtreffers — EIGENE Markierung, nicht
+  // die Abspiel-Markierung: ohne sie sieht man nur, dass irgendwo
+  // gescrollt wurde, und liest den Treffer in der Nachbarzeile
+  // (User 2026-09-09: „liefert Workshop wenn ich Werkstatt suche" —
+  // Segment 99 „Workshop-Tagen" steht direkt über Segment 100
+  // „Werkstattverfahren", dem echten Treffer).
+  const [suchZeile, setSuchZeile] = useState(-1);
   const audioRef = useRef<HTMLAudioElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -181,6 +205,57 @@ export default function EditorModule({ id, onExit }: {
     setSegmente((s) => s.map((x) => x.sprecher
       ? x : { ...x, sprecher: wer }));
     dirty();
+  }, [dirty]);
+
+  // ---------- Suchen & Ersetzen ----------
+  const zeigeTreffer = useCallback((i: number) => {
+    setSuchZeile(i);
+    if (i < 0) return;
+    setAktiv(i);
+    listRef.current?.querySelector(`[data-seg="${i}"]`)
+      ?.scrollIntoView({ block: "center", behavior: "smooth" });
+    // Der Kopf springt mit — aber nur im Stillstand; in laufender
+    // Wiedergabe würde die Suche das Hören unterbrechen.
+    const a = audioRef.current;
+    const seg = zustand.current.segmente[i];
+    if (a && a.paused && seg) a.currentTime = seg.start;
+  }, []);
+
+  const textErsetzen = useCallback((sid: string, off: number,
+                                    laenge: number, ersatz: string) => {
+    setSegmente((s) => s.map((x) => x.id === sid
+      ? { ...x, text: x.text.slice(0, off) + ersatz
+                      + x.text.slice(off + laenge) }
+      : x));
+    setRev((r) => ({ ...r, [sid]: (r[sid] ?? 0) + 1 }));
+    dirty();
+  }, [dirty]);
+
+  const alleErsetzen = useCallback((was: string, ersatz: string,
+                                    gross: boolean,
+                                    weich: boolean) => {
+    // aus zustand.current gerechnet, NICHT im State-Updater: der wird
+    // im StrictMode doppelt aufgerufen und würde doppelt zählen
+    const segs = zustand.current.segmente;
+    const bump: Record<string, true> = {};
+    let n = 0;
+    const neuSegs = segs.map((x) => {
+      const [text, k] = ersetzeAlleIn(x.text, was, ersatz,
+                                      gross, weich);
+      if (!k) return x;
+      n += k;
+      bump[x.id] = true;
+      return { ...x, text };
+    });
+    if (!n) return 0;
+    setSegmente(neuSegs);
+    setRev((r) => {
+      const o = { ...r };
+      for (const k of Object.keys(bump)) o[k] = (o[k] ?? 0) + 1;
+      return o;
+    });
+    dirty();
+    return n;
   }, [dirty]);
 
   // ---------- Player ----------
@@ -341,7 +416,7 @@ export default function EditorModule({ id, onExit }: {
     <Flex style={{ height: "100%", minHeight: 0 }}>
       <Flex direction="column"
             style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
-        <Flex align="center" gap="2" px="3" py="2"
+        <Flex align="center" gap="2" px="4" py="2"
               style={{ borderBottom: "1px solid var(--gray-a5)" }}>
           <Button size="1" variant="ghost" onClick={onExit}>
             <Icon name="back" /> {tr("ed.zurueck")}</Button>
@@ -357,18 +432,20 @@ export default function EditorModule({ id, onExit }: {
         {fehler && <ErrorNote>{fehler}</ErrorNote>}
         {exportNote && (
           <Text size="1" color="gray"
-                style={{ padding: "4px 12px" }}>{exportNote}</Text>
+                style={{ padding: "4px 16px" }}>{exportNote}</Text>
         )}
 
         <div ref={listRef}
              style={{ flex: 1, overflowY: "auto", minHeight: 0,
-                      padding: "8px 12px 96px" }}>
+                      padding: "8px 16px 96px" }}>
           {segmente.length === 0 && (
             <Text size="2" color="gray">{tr("ed.leer")}</Text>
           )}
           {segmente.map((seg, i) => (
-            <SegmentZeile key={seg.id} seg={seg} index={i}
+            <SegmentZeile key={`${seg.id}#${rev[seg.id] ?? 0}`}
+              seg={seg} index={i}
               aktiv={i === aktiv}
+              treffer={i === suchZeile}
               name={sprecherName.get(seg.sprecher ?? "") ?? ""}
               farbe={sprecherFarbe(sprecher, seg.sprecher)}
               hatAudio={hatAudio}
@@ -379,11 +456,15 @@ export default function EditorModule({ id, onExit }: {
           ))}
         </div>
 
-        <Flex align="center" gap="2" px="3" py="2"
+        {/* Drei Zonen (User 2026-09-09): der Transport steht MITTIG in
+            der Spalte, die Laufzeit rechts — die beiden Randzonen sind
+            gleich breit (flex 1), damit die Mitte echt die Mitte ist. */}
+        <Flex align="center" gap="2" px="4" py="2"
               style={{ borderTop: "1px solid var(--gray-a5)",
                        background: "var(--color-panel-solid)" }}>
           {hatAudio ? (
             <>
+              <div style={{ flex: 1 }} />
               <audio ref={audioRef}
                      src={`${API_BASE}/api/transcripts/${id}/audio`}
                      onTimeUpdate={onTime}
@@ -393,18 +474,18 @@ export default function EditorModule({ id, onExit }: {
               <IconButton title={tr("ed.rueck5")} onClick={() => {
                 if (audioRef.current)
                   audioRef.current.currentTime -= 5;
-              }}><Icon name="rewind" size={15} /></IconButton>
+              }}><Icon name="rewind" size={16} /></IconButton>
               <IconButton title={laeuft ? tr("ed.pause") : tr("ed.play")}
                           onClick={() => {
                 const a = audioRef.current;
                 if (!a) return;
                 if (a.paused) void a.play(); else a.pause();
-              }}><Icon name={laeuft ? "pause" : "play"} size={17} />
+              }}><Icon name={laeuft ? "pause" : "play"} size={18} />
               </IconButton>
               <IconButton title={tr("ed.vor5")} onClick={() => {
                 if (audioRef.current)
                   audioRef.current.currentTime += 5;
-              }}><Icon name="forward" size={15} /></IconButton>
+              }}><Icon name="forward" size={16} /></IconButton>
               <Button size="1" variant="ghost"
                       title={tr("ed.speed")} onClick={() => {
                 const i = SPEEDS.indexOf(speed);
@@ -412,7 +493,7 @@ export default function EditorModule({ id, onExit }: {
               }}>{speed.toFixed(2).replace(/0$/, "")}×</Button>
               <IconButton title={tr("ed.loop")} onClick={() => setLoop(!loop)}>
                 <span style={{ opacity: loop ? 1 : 0.4 }}>
-                  <Icon name="loop" size={15} /></span>
+                  <Icon name="loop" size={16} /></span>
               </IconButton>
               <label style={{ display: "flex", alignItems: "center",
                               gap: 6 }}>
@@ -422,11 +503,13 @@ export default function EditorModule({ id, onExit }: {
                 }} />
                 <Text size="1">{tr("ed.folgen")}</Text>
               </label>
-              <div style={{ flex: 1 }} />
-              <Text size="1" color="gray">
-                {aktiv >= 0 && segmente[aktiv]
-                  ? hms(segmente[aktiv].start) : ""}
-              </Text>
+              <Flex justify="end" align="center" style={{ flex: 1 }}>
+                <Text size="1" color="gray"
+                      style={{ fontVariantNumeric: "tabular-nums" }}>
+                  {aktiv >= 0 && segmente[aktiv]
+                    ? hms(segmente[aktiv].start) : ""}
+                </Text>
+              </Flex>
             </>
           ) : (
             <Text size="1" color="gray">{tr("ed.keinaudio")}</Text>
@@ -454,14 +537,28 @@ export default function EditorModule({ id, onExit }: {
           ))}
         </div>
       )}
-      <SidePanel side="right" title={tr("ed.sprecher")}
-                 storageKey={KEYS.sidebarSprecher}
-                 defaultWidth={260} resizable>
-        <SprecherPanel id={id} sprecher={sprecher} segmente={segmente}
-                       hatAudio={hatAudio}
-                       onRename={umbenennen} onNeu={sprecherNeu}
-                       onMerge={zusammenfuehren}
-                       onLeere={leereZuweisen} />
+      <SidePanel side="right" storageKey={KEYS.sidebarSprecher}
+                 defaultWidth={260} resizable
+                 title={
+                   <SegTabs value={seitenTab}
+                     onChange={(v) => {
+                       sset(KEYS.editorSeitenTab, v);
+                       setSeitenTab(v as "sprecher" | "suchen");
+                       if (v !== "suchen") setSuchZeile(-1);
+                     }}
+                     options={[
+                       { value: "sprecher", label: tr("ed.sprecher") },
+                       { value: "suchen", label: tr("ed.tab.suchen") }]} />
+                 }>
+        {seitenTab === "sprecher"
+          ? <SprecherPanel id={id} sprecher={sprecher}
+                           segmente={segmente} hatAudio={hatAudio}
+                           onRename={umbenennen} onNeu={sprecherNeu}
+                           onMerge={zusammenfuehren}
+                           onLeere={leereZuweisen} />
+          : <SuchPanel segmente={segmente} onZeige={zeigeTreffer}
+                       onErsetze={textErsetzen}
+                       onAlleErsetzen={alleErsetzen} />}
       </SidePanel>
     </Flex>
   );
@@ -512,10 +609,13 @@ function MenueEintrag({ label, farbe, onClick }: {
 // die Textarea misst ihre Höhe nur bei Mount + Eingabe (erzwungenes
 // Layout je Render war der Haupt-Kostenpunkt × 558 Zeilen).
 const SegmentZeile = memo(function SegmentZeile({
-  seg, index, aktiv, name, farbe, hatAudio, onSpringe, onText,
+  seg, index, aktiv, treffer, name, farbe, hatAudio, onSpringe, onText,
   onMenue, onTeilen, onVerbinden, onEntfernen,
 }: {
-  seg: Segment; index: number; aktiv: boolean; name: string;
+  seg: Segment; index: number; aktiv: boolean;
+  /** aktueller Suchtreffer — Ring statt Füllung, damit er
+      von der Abspiel-Markierung unterscheidbar bleibt */
+  treffer: boolean; name: string;
   farbe: ReturnType<typeof sprecherFarbe>;
   hatAudio: boolean;
   onSpringe: (t: number, abspielen?: boolean) => void;
@@ -530,7 +630,9 @@ const SegmentZeile = memo(function SegmentZeile({
 
   const wachsen = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    // +2 = die beiden Rahmen (border-box); ohne sie ist die Zeile
+    // flacher als SEG_SLOT und die Grundlinien laufen auseinander
+    el.style.height = `${el.scrollHeight + 2}px`;
   };
 
   return (
@@ -541,16 +643,25 @@ const SegmentZeile = memo(function SegmentZeile({
            gap: 8, alignItems: "start", padding: "5px 4px",
            borderRadius: 8,
            background: aktiv ? "var(--accent-a3)" : undefined,
+           outline: treffer ? "2px solid var(--accent-8)" : undefined,
+           outlineOffset: -2,
          }}>
-      <IconButton title={tr("ed.abhier")}
-                  onClick={() => onSpringe(seg.start, true)}>
-        <span style={{ opacity: hatAudio ? 1 : 0.25 }}>
-          <Icon name="play" size={14} /></span>
-      </IconButton>
-      <Text size="1" color="gray" style={{ paddingTop: 5,
-        cursor: hatAudio ? "pointer" : undefined,
-        fontVariantNumeric: "tabular-nums" }}
-            onClick={() => onSpringe(seg.start)}>{hms(seg.start)}</Text>
+      <div style={{ ...SEG_SLOT, justifyContent: "center" }}>
+        <IconButton title={tr("ed.abhier")}
+                    onClick={() => onSpringe(seg.start, true)}>
+          {/* display:flex nimmt dem Icon den Inline-Kontext — sonst
+              zieht sein verticalAlign(-2px) den Glyph aus der Zeile */}
+          <span style={{ display: "flex",
+                         opacity: hatAudio ? 1 : 0.25 }}>
+            <Icon name="play" size={14} /></span>
+        </IconButton>
+      </div>
+      <div style={SEG_SLOT}>
+        <Text size="1" color="gray" style={{
+          cursor: hatAudio ? "pointer" : undefined,
+          fontVariantNumeric: "tabular-nums" }}
+              onClick={() => onSpringe(seg.start)}>{hms(seg.start)}</Text>
+      </div>
       {/* leichter Knopf statt Radix-Select je Zeile (PERF: ~6 ms ×
           557 Zeilen je Render) — EIN geteiltes Menü im Parent */}
       <button type="button"
@@ -558,8 +669,8 @@ const SegmentZeile = memo(function SegmentZeile({
                 const r = e.currentTarget.getBoundingClientRect();
                 onMenue(seg.id, r.left, r.bottom + 2);
               }}
-              style={{ background: "none", border: "none", padding: 0,
-                       textAlign: "left", cursor: "pointer",
+              style={{ ...SEG_SLOT, background: "none", border: "none",
+                       padding: 0, textAlign: "left", cursor: "pointer",
                        maxWidth: 130, overflow: "hidden" }}>
         <Badge color={farbe} variant="soft">
           {name || tr("ed.sprecher.ohne")}
@@ -581,21 +692,22 @@ const SegmentZeile = memo(function SegmentZeile({
                   onText(seg.id, e.currentTarget.value);
                 }}
                 className="seg-text" />
-      <Flex gap="1" style={{ paddingTop: 3 }}>
+      <Flex gap="1" style={SEG_SLOT}>
         <IconButton title={tr("ed.teilen")} onClick={() => {
           const pos = taRef.current?.selectionStart ?? 0;
           onTeilen(seg.id, pos);
-        }}><Icon name="split" size={13} /></IconButton>
+        }}><Icon name="split" size={14} /></IconButton>
         <IconButton title={tr("ed.verbinden")}
                     onClick={() => onVerbinden(seg.id)}>
-          <Icon name="back" size={13} /></IconButton>
+          <Icon name="merge" size={14} /></IconButton>
         <IconButton title={tr("ed.zeile.loeschen")}
                     onClick={() => onEntfernen(seg.id)}>
-          <Icon name="trash" size={13} /></IconButton>
+          <Icon name="trash" size={14} /></IconButton>
       </Flex>
     </div>
   );
 }, (a, b) => a.seg === b.seg && a.aktiv === b.aktiv
+  && a.treffer === b.treffer
   && a.index === b.index && a.name === b.name && a.farbe === b.farbe
   && a.hatAudio === b.hatAudio);
 
@@ -647,21 +759,50 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
       `${API_BASE}/api/transcripts/${id}/sprecher/${sid}/sample`);
     void a.play();
   };
+  // Zusammenführen als Icon-Knopf mit Klappmenü (Layout-Befund
+  // 2026-09-09): der breite Select-Platzhalter „Zusammenführen in …"
+  // sprengte die schmale Sidebar — die Segment-Zahl brach um. Jetzt
+  // dasselbe Menü-Muster wie in den Segment-Zeilen, die Aktionszeile
+  // bleibt bei jeder Panel-Breite einzeilig.
+  const [merge, setMerge] = useState<string | null>(null);
+  useEffect(() => {
+    if (!merge) return;
+    const zu = (e: Event) => {
+      if ((e.target as HTMLElement | null)
+          ?.closest?.("[data-merge-menue]")) return;
+      setMerge(null);
+    };
+    document.addEventListener("pointerdown", zu, true);
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMerge(null);
+    };
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("pointerdown", zu, true);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [merge]);
   return (
-    <Flex direction="column" gap="2" p="2">
+    // EIN Rasterrand für die ganze App (User 2026-09-09): 16 px —
+    // dieselbe Kante wie „LocalTranscript" links und der
+    // Einstellungen-Knopf rechts. Ghost-Knöpfe tragen negative
+    // Ränder, ihr GLYPH sitzt damit ebenfalls auf 16 px.
+    <Flex direction="column" gap="2" px="4" py="3">
       {sprecher.map((s) => {
         const n = segmente.filter((x) => x.sprecher === s.id).length;
         return (
           <Flex key={s.id} direction="column" gap="1"
-                style={{ borderBottom: "1px solid var(--gray-a4)",
+                style={{ position: "relative",
+                         borderBottom: "1px solid var(--gray-a4)",
                          paddingBottom: 8 }}>
             <Flex align="center" gap="2">
               <Badge color={sprecherFarbe(sprecher, s.id)}
                      variant="solid" radius="full"> </Badge>
               <NameFeld id={s.id} name={s.name} onRename={onRename} />
             </Flex>
-            <Flex align="center" gap="2">
-              <Text size="1" color="gray">
+            <Flex align="center" gap="1">
+              <Text size="1" color="gray"
+                    style={{ whiteSpace: "nowrap" }}>
                 {tr("ed.sprecher.n", { n })}</Text>
               <div style={{ flex: 1 }} />
               {hatAudio && n > 0 && (
@@ -670,20 +811,32 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
                   <Icon name="sample" size={14} /></IconButton>
               )}
               {sprecher.length > 1 && (
-                <Select.Root value=""
-                             onValueChange={(v) => v
-                               && onMerge(s.id, v)}>
-                  <Select.Trigger variant="ghost"
-                    placeholder={tr("ed.sprecher.merge")} />
-                  <Select.Content>
-                    {sprecher.filter((x) => x.id !== s.id)
-                      .map((x) => (
-                        <Select.Item key={x.id} value={x.id}>
-                          {x.name}</Select.Item>))}
-                  </Select.Content>
-                </Select.Root>
+                <IconButton title={tr("ed.sprecher.merge")}
+                            onClick={() => setMerge(
+                              (cur) => cur === s.id ? null : s.id)}>
+                  <Icon name="merge" size={14} /></IconButton>
               )}
             </Flex>
+            {merge === s.id && (
+              <div data-merge-menue
+                   style={{ position: "absolute", right: 0, top: "100%",
+                            zIndex: 60, minWidth: 160, maxWidth: "100%",
+                            maxHeight: 250, overflowY: "auto",
+                            padding: 4, borderRadius: 8,
+                            background: "var(--color-panel-solid)",
+                            border: "1px solid var(--gray-a6)",
+                            boxShadow: "var(--shadow-4)" }}>
+                <Text size="1" color="gray" as="div"
+                      style={{ padding: "2px 8px 4px" }}>
+                  {tr("ed.sprecher.merge")}</Text>
+                {sprecher.filter((x) => x.id !== s.id).map((x) => (
+                  <MenueEintrag key={x.id} label={x.name}
+                                farbe={sprecherFarbe(sprecher, x.id)}
+                                onClick={() => { setMerge(null);
+                                  onMerge(s.id, x.id); }} />
+                ))}
+              </div>
+            )}
             {ohne > 0 && (
               <Button size="1" variant="ghost"
                       onClick={() => onLeere(s.id)}>
@@ -694,6 +847,249 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
       })}
       <Button size="1" variant="soft" onClick={onNeu}>
         <Icon name="plus" size={14} /> {tr("ed.sprecher.neu")}</Button>
+    </Flex>
+  );
+}
+
+// ---------- Suchen & Ersetzen (Seitenspalte, Tab 2) ----------
+
+/** Passt `nadel` ab Position i? Beide Zeichenketten kommen bereits
+    normalisiert (Groß-/Kleinschreibung) herein. `weich` überliest
+    einen TRENNSTRICH samt folgender Leerzeichen/Umbrüche mitten im
+    Wort — so findet „Werkstatt" auch „Werk- statt". Gibt die Länge
+    IM TEXT zurück (kann länger sein als die Nadel) oder -1. */
+function passtAb(heu: string, nadel: string, i: number,
+                 weich: boolean): number {
+  let j = i, k = 0;
+  while (k < nadel.length) {
+    if (j >= heu.length) return -1;
+    if (weich && k > 0 && heu[j] === "-") {
+      let m = j + 1;
+      while (m < heu.length && /\s/.test(heu[m])) m += 1;
+      if (m < heu.length && heu[m] === nadel[k]) { j = m; continue; }
+      return -1;
+    }
+    if (heu[j] !== nadel[k]) return -1;
+    j += 1; k += 1;
+  }
+  return j - i;
+}
+
+/** Alle Vorkommen in EINEM Text — LITERAL: kein Wörterbuch, keine
+    Stammformen, keine Übersetzung, und ohne RegExp, damit Sonder-
+    zeichen im Suchbegriff (. * ? [ ) nichts kaputtmachen. */
+function findeAlle(text: string, was: string, gross: boolean,
+                   weich: boolean): { off: number; len: number }[] {
+  const aus: { off: number; len: number }[] = [];
+  if (!was) return aus;
+  const heu = gross ? text : text.toLowerCase();
+  const nadel = gross ? was : was.toLowerCase();
+  if (!weich) {
+    let p = heu.indexOf(nadel);
+    while (p >= 0) {
+      aus.push({ off: p, len: nadel.length });
+      p = heu.indexOf(nadel, p + nadel.length);
+    }
+    return aus;
+  }
+  // weich: nur dort genau prüfen, wo das erste Zeichen sitzt —
+  // sonst wäre es O(Text × Nadel) bei jedem Tastendruck
+  let i = heu.indexOf(nadel[0]);
+  while (i >= 0) {
+    const len = passtAb(heu, nadel, i, true);
+    if (len > 0) {
+      aus.push({ off: i, len });
+      i = heu.indexOf(nadel[0], i + len);
+    } else {
+      i = heu.indexOf(nadel[0], i + 1);
+    }
+  }
+  return aus;
+}
+
+/** Alle Vorkommen in EINEM Text ersetzen; gibt neuen Text + Anzahl. */
+function ersetzeAlleIn(text: string, was: string, ersatz: string,
+                       gross: boolean,
+                       weich: boolean): [string, number] {
+  const tr = findeAlle(text, was, gross, weich);
+  if (!tr.length) return [text, 0];
+  let aus = "", p = 0;
+  for (const x of tr) {
+    aus += text.slice(p, x.off) + ersatz;
+    p = x.off + x.len;
+  }
+  return [aus + text.slice(p), tr.length];
+}
+
+// `len` ist die Länge IM TEXT — bei überlesener Trennung länger als
+// der Suchbegriff („Werk- statt" = 11 für „Werkstatt" = 9)
+type Treffer = { i: number; seg: string; off: number; len: number };
+
+function SuchPanel({ segmente, onZeige, onErsetze, onAlleErsetzen }: {
+  segmente: Segment[];
+  onZeige: (i: number) => void;
+  onErsetze: (sid: string, off: number, laenge: number,
+              ersatz: string) => void;
+  onAlleErsetzen: (was: string, ersatz: string,
+                   gross: boolean, weich: boolean) => number;
+}) {
+  const tr = useT();
+  const [was, setWas] = useState("");
+  const [womit, setWomit] = useState("");
+  const [gross, setGross] = useState(false);
+  const [weich, setWeich] = useState(true);
+  const [idx, setIdx] = useState(0);
+  const [note, setNote] = useState("");
+
+  const treffer = useMemo<Treffer[]>(() => {
+    if (!was) return [];
+    const aus: Treffer[] = [];
+    segmente.forEach((s, i) => {
+      for (const x of findeAlle(s.text, was, gross, weich)) {
+        aus.push({ i, seg: s.id, off: x.off, len: x.len });
+      }
+    });
+    return aus;
+  }, [segmente, was, gross, weich]);
+
+  const zeigeRef = useRef(onZeige);
+  zeigeRef.current = onZeige;
+  const trefferRef = useRef(treffer);
+  trefferRef.current = treffer;
+
+  // Neue Suche: zählen und zum ERSTEN Vorkommen springen. Hängt
+  // bewusst nur an der Anfrage — nicht an `treffer`, sonst würde
+  // jeder Tastendruck im Transkript zurück an den Anfang springen.
+  useEffect(() => {
+    setIdx(0);
+    setNote("");
+    const t = trefferRef.current;
+    zeigeRef.current(t.length ? t[0].i : -1);
+  }, [was, gross, weich]);
+
+  // Nach einem Ersetzen: zum nächsten Vorkommen AB der Schnittmarke —
+  // so wird ein Ersatz, der den Suchbegriff enthält, nicht endlos
+  // wieder gefunden.
+  const weiterAb = useRef<{ i: number; off: number } | null>(null);
+  useEffect(() => {
+    const m = weiterAb.current;
+    if (!m) return;
+    weiterAb.current = null;
+    const k = treffer.findIndex((x) => x.i > m.i
+      || (x.i === m.i && x.off >= m.off));
+    const ziel = k >= 0 ? k : 0;
+    setIdx(ziel);
+    if (treffer[ziel]) zeigeRef.current(treffer[ziel].i);
+  }, [treffer]);
+
+  const stelle = treffer.length
+    ? Math.min(idx, treffer.length - 1) : -1;
+  const cur = stelle >= 0 ? treffer[stelle] : null;
+
+  const springe = (k: number) => {
+    if (!treffer.length) return;
+    const n = ((k % treffer.length) + treffer.length) % treffer.length;
+    setIdx(n);
+    onZeige(treffer[n].i);
+  };
+
+  const ersetzen = () => {
+    if (!cur) return;
+    setNote("");
+    weiterAb.current = { i: cur.i, off: cur.off + womit.length };
+    onErsetze(cur.seg, cur.off, cur.len, womit);
+  };
+
+  const alle = () => {
+    const n = onAlleErsetzen(was, womit, gross, weich);
+    setIdx(0);
+    setNote(n ? tr("ed.suche.ersetzt", { n }) : "");
+  };
+
+  // Umfeld des aktuellen Treffers — zeigt IM PANEL, was gleich
+  // ersetzt wird (der Fokus bleibt im Suchfeld, die Textarea im
+  // Transkript wird nicht angefasst).
+  const vorschau = () => {
+    if (!cur) return null;
+    const text = segmente[cur.i]?.text ?? "";
+    const a = Math.max(0, cur.off - 26);
+    const b = cur.off + cur.len;
+    return (
+      <Text size="1" color="gray" as="div"
+            style={{ lineHeight: 1.5, wordBreak: "break-word" }}>
+        {a > 0 ? "… " : ""}{text.slice(a, cur.off)}
+        <mark style={{ background: "var(--accent-a4)",
+                       color: "var(--gray-12)", borderRadius: 3,
+                       padding: "0 1px" }}>
+          {text.slice(cur.off, b)}</mark>
+        {text.slice(b, b + 26)}{b + 26 < text.length ? " …" : ""}
+      </Text>
+    );
+  };
+
+  return (
+    <Flex direction="column" gap="3" px="4" py="3">
+      <Flex direction="column" gap="1">
+        <Text size="1" color="gray">{tr("ed.suche.was")}</Text>
+        <SearchField value={was} onChange={setWas} placeholder="" />
+      </Flex>
+      <Flex direction="column" gap="1">
+        <Text size="1" color="gray">{tr("ed.suche.womit")}</Text>
+        <TextField.Root value={womit}
+                        onChange={(e) => setWomit(e.target.value)} />
+      </Flex>
+      <Flex direction="column" gap="2">
+        <label style={{ display: "flex", alignItems: "center",
+                        gap: 8 }}>
+          <Checkbox checked={gross}
+                    onCheckedChange={(v) => setGross(v === true)} />
+          <Text size="1">{tr("ed.suche.gross")}</Text>
+        </label>
+        <label style={{ display: "flex", alignItems: "center",
+                        gap: 8 }}>
+          <Checkbox checked={weich}
+                    onCheckedChange={(v) => setWeich(v === true)} />
+          <Text size="1">{tr("ed.suche.weich")}</Text>
+        </label>
+        <Text size="1" color="gray">{tr("ed.suche.literal")}</Text>
+      </Flex>
+
+      <Flex align="center" gap="2" style={{ minHeight: 24 }}>
+        <Text size="1" weight="medium"
+              style={{ fontVariantNumeric: "tabular-nums" }}>
+          {!was ? "" : treffer.length
+            ? tr("ed.suche.stand", { i: stelle + 1, n: treffer.length })
+            : tr("ed.suche.keine")}
+        </Text>
+        <div style={{ flex: 1 }} />
+        {treffer.length > 1 && (
+          <>
+            <IconButton title={tr("ed.suche.zurueck")}
+                        onClick={() => springe(stelle - 1)}>
+              <Icon name="back" size={16} /></IconButton>
+            <IconButton title={tr("ed.suche.weiter")}
+                        onClick={() => springe(stelle + 1)}>
+              <Icon name="next" size={16} /></IconButton>
+          </>
+        )}
+      </Flex>
+      {cur && vorschau()}
+      {note && <Text size="1" color="gray">{note}</Text>}
+
+      {/* „Alle ersetzen" steht bewusst allein in der zweiten Reihe —
+          es ist die einzige Aktion, die man nicht Treffer für Treffer
+          zurücknehmen kann (rückholbar nur über history/). */}
+      <Flex direction="column" gap="2" align="start">
+        <Flex gap="2" align="center">
+          <Button size="1" variant="soft" disabled={!cur}
+                  onClick={ersetzen}>{tr("ed.suche.ersetzen")}</Button>
+          <Button size="1" variant="ghost" disabled={treffer.length < 2}
+                  onClick={() => springe(stelle + 1)}>
+            {tr("ed.suche.skip")}</Button>
+        </Flex>
+        <Button size="1" variant="ghost" disabled={!treffer.length}
+                onClick={alle}>{tr("ed.suche.alle")}</Button>
+      </Flex>
     </Flex>
   );
 }

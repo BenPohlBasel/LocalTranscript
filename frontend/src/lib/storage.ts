@@ -6,6 +6,7 @@ export const KEYS = {
   editorFolgen: "lt.editor.folgen",
   editorSpeed: "lt.editor.speed",
   sidebarSprecher: "lt.editor.sprecher-panel",
+  editorSeitenTab: "lt.editor.seitentab",
 } as const;
 
 export function sget(key: string): string | null {
