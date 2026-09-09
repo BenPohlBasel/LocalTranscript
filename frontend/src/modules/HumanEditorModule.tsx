@@ -37,10 +37,10 @@ export default function HumanEditorModule({ onOpen }: {
       if (isTauri()) {
         const p = await pickTranskript();
         if (!p) return;
-        // mp3 dazu (optional — Abbrechen überspringt; liegt ein
-        // gleichnamiges Audio neben der Datei, findet es das
-        // Backend auch ohne Auswahl)
-        const audio = await pickAudio(tr("he.audiowahl"), false);
+        // Ein .enrich.zip trägt sein Audio schon mit sich — nur bei
+        // vtt/csv lohnt die Nachfrage (User 2026-09-09).
+        const audio = p.toLowerCase().endsWith(".zip")
+          ? null : await pickAudio(tr("he.audiowahl"), false);
         await apiSend("/api/import-path", { path: p,
           audio_path: audio?.[0] ?? null });
         void lade();
@@ -56,7 +56,7 @@ export default function HumanEditorModule({ onOpen }: {
       <Flex gap="3" align="center" wrap="wrap">
         <Button variant="soft" onClick={() => void importiere()}>
           <Icon name="text" /> {tr("bib.import")}</Button>
-        <input ref={importRef} type="file" hidden accept=".vtt,.csv"
+        <input ref={importRef} type="file" hidden accept=".vtt,.csv,.zip"
                onChange={(e) => {
                  const f = e.target.files?.[0];
                  e.target.value = "";

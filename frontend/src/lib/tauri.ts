@@ -36,7 +36,8 @@ export async function pickAudio(title?: string,
 export async function pickTranskript(): Promise<string | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
   const r = await open({ multiple: false, filters: [{
-    name: "Transkript", extensions: ["vtt", "webvtt", "csv"] }] });
+    name: "Transkript",
+    extensions: ["vtt", "webvtt", "csv", "zip"] }] });
   return typeof r === "string" ? r : null;
 }
 

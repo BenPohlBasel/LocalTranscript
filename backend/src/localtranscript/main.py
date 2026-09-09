@@ -229,21 +229,54 @@ def _import_turns(turns: list[dict], name: str, quelle_art: str,
             "sprecher": len(sprecher)}
 
 
+def _import_paket(daten: bytes, fallback: str) -> dict:
+    """.enrich.zip → Eintrag. NUR transkript.json und Audio werden
+    gezogen; Analyse-Schichten fallen weg — nach dem ersten Edit
+    stimmte keine davon mehr (User-Regel 2026-09-09)."""
+    from . import paket
+    try:
+        p = paket.lies(daten)
+    except paket.PaketFehler as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    audio_tmp: Path | None = None
+    try:
+        if p["audio_bytes"]:
+            audio_tmp = _tmpdatei(Path(p["audio_name"]).suffix,
+                                  "lt-paket-")
+            audio_tmp.write_bytes(p["audio_bytes"])
+        eintrag = bibliothek.anlegen(
+            name=p["name"] or fallback,
+            segmente=p["segmente"], sprecher=p["sprecher"],
+            quelle={"datei": f"{fallback}.enrich.zip",
+                    "erzeugt": "import-enrich",
+                    "genau": p["genau"]},
+            audio=audio_tmp)
+    finally:
+        if audio_tmp is not None:
+            audio_tmp.unlink(missing_ok=True)
+    return {"eintrag": eintrag["id"], "segmente": len(p["segmente"]),
+            "sprecher": len(p["sprecher"]), "genau": p["genau"]}
+
+
 def _parse_import(daten: bytes, endung: str) -> list[dict]:
     from .enrich_export.turns import parse_transkript_csv, parse_transkript_vtt
     if endung in (".vtt", ".webvtt"):
         return parse_transkript_vtt(daten)
     if endung == ".csv":
         return parse_transkript_csv(daten)
-    raise HTTPException(status_code=400,
-                        detail=f"Nur .vtt/.csv — nicht {endung}")
+    raise HTTPException(
+        status_code=400,
+        detail=f"Nur .vtt/.csv/.zip (enrich-Paket) — nicht {endung}")
 
 
 @app.post("/api/import")
 async def import_upload(datei: UploadFile = File(...),
                         audio: UploadFile | None = File(None)) -> dict:
     name = Path(datei.filename or "transkript")
-    turns = _parse_import(await datei.read(), name.suffix.lower())
+    roh = await datei.read()
+    if name.suffix.lower() == ".zip":
+        return _import_paket(roh, name.stem.removesuffix(".enrich"))
+    turns = _parse_import(roh, name.suffix.lower())
     audio_tmp: Path | None = None
     try:
         if audio is not None and audio.filename:
@@ -269,6 +302,9 @@ def import_path(req: ImportPathReq) -> dict:
     p = Path(req.path).expanduser()
     if not p.is_file():
         raise HTTPException(status_code=404, detail=f"{p} fehlt")
+    if p.suffix.lower() == ".zip":
+        return _import_paket(p.read_bytes(),
+                             p.stem.removesuffix(".enrich"))
     turns = _parse_import(p.read_bytes(), p.suffix.lower())
     audio: Path | None = None
     if req.audio_path:
