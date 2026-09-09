@@ -394,11 +394,13 @@ export default function EditorModule({ id, onExit }: {
   const [exportNote, setExportNote] = useState("");
   const exportiere = useCallback(async (format: string) => {
     setExportNote("");
-    const endung = format === "enrich" ? "enrich.zip" : format;
+    const endung = format === "enrich" ? "enrich.zip"
+      : format === "qdpx" ? "qdpx.zip" : format;
     try {
       if (isTauri()) {
         const p = await savePath(`${name || "transkript"}.${endung}`,
-                                 format === "enrich" ? "zip" : format);
+                                 format === "enrich" || format === "qdpx"
+                                   ? "zip" : format);
         if (!p) return;
         await apiSend(`/api/transcripts/${id}/export`,
                       { format, path: p });
@@ -576,6 +578,8 @@ function ExportMenu({ onExport }: {
         <Select.Item value="csv">CSV</Select.Item>
         <Select.Item value="txt">TXT</Select.Item>
         <Select.Item value="enrich">{tr("ed.export.enrich")}
+        </Select.Item>
+        <Select.Item value="qdpx">{tr("ed.export.qdpx")}
         </Select.Item>
       </Select.Content>
     </Select.Root>

@@ -16,7 +16,7 @@ from pathlib import Path
 
 from . import ausgabe, bibliothek
 
-FORMATE = ("vtt", "csv", "txt", "enrich")
+FORMATE = ("vtt", "csv", "txt", "enrich", "qdpx")
 
 
 def export_bytes(eid: str, format: str) -> tuple[bytes, str, str]:
@@ -37,6 +37,13 @@ def export_bytes(eid: str, format: str) -> tuple[bytes, str, str]:
     if format == "enrich":
         return (_enrich_zip(eid, daten, seg, stamm),
                 f"{stamm}.enrich.zip", "application/zip")
+    if format == "qdpx":
+        from . import qdpx
+        if not seg:
+            raise ValueError("Leeres Transkript — nichts zu exportieren")
+        return (qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
+                              bibliothek.audio_pfad(eid)),
+                f"{stamm}.qdpx.zip", "application/zip")
     raise ValueError(f"Unbekanntes Format: {format}")
 
 

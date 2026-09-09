@@ -444,7 +444,7 @@ def export_datei(eid: str, req: ExportReq) -> dict:
     # überschreiben (~/.zshrc, LaunchAgents) — die Endung muss zum
     # Format passen, mehr Constraint erlaubt der freie Save-Dialog nicht
     erlaubt = {"vtt": ".vtt", "csv": ".csv", "txt": ".txt",
-               "enrich": ".zip"}[req.format]
+               "enrich": ".zip", "qdpx": ".zip"}[req.format]
     if ziel.suffix.lower() != erlaubt:
         raise HTTPException(status_code=409,
                             detail=f"Zieldatei muss auf {erlaubt} enden")

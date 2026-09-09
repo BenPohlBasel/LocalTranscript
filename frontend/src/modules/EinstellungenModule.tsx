@@ -123,6 +123,22 @@ export default function EinstellungenModule({ settings, onChange }: {
         </Flex>
       </Karte>
 
+      {/* Eigene Karte für die Austauschformate (User 2026-09-09):
+          die Spezifikations-Lizenzen sind eine andere Frage als die
+          der mitgelieferten Werkzeuge. */}
+      <Karte titel={tr("st.formate")} subline={tr("st.formate.sub")}>
+        <Flex direction="column" gap="2">
+          <Text size="1" color="gray">{tr("st.formate.refi")}</Text>
+          <Text size="1" color="gray">{tr("st.formate.enrich")}</Text>
+          <Text size="1" color="gray">{tr("st.formate.xsd")}</Text>
+          <Flex gap="2" wrap="wrap">
+            <Button size="1" variant="soft" onClick={() =>
+              void ordnerOeffnen("https://www.qdasoftware.org/")}>
+              {tr("st.link.refi")}</Button>
+          </Flex>
+        </Flex>
+      </Karte>
+
       <Karte titel={tr("st.bias")} subline={tr("st.bias.sub")}>
         <Flex direction="column" gap="2">
           <Text size="1" color="gray">{tr("st.bias.text")}</Text>
