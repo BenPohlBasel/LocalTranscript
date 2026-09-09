@@ -337,24 +337,20 @@ fn ordner_oeffnen(pfad: String) -> Result<(), String> {
 /// Untermenü-Titel daneben wären ein Sprachmischmasch. Das
 /// Menü folgt damit NICHT der Oberflächensprache der App.
 fn menue(handle: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
-    use tauri::menu::{AboutMetadata, Menu, PredefinedMenuItem, Submenu};
-    let ueber = AboutMetadata {
-        name: Some("LocalTranscript".into()),
-        version: Some(env!("CARGO_PKG_VERSION").into()),
-        license: Some("GPL-3.0-or-later".into()),
-        website: Some("https://bias.city/b-ias-basel-institut-fuer-angewandte-stadtforschung/".into()),
-        website_label: Some("BIAS.City".into()),
-        comments: Some(
-            "Vollständig lokale Transkription mit Sprecherkennung.".into(),
-        ),
-        ..Default::default()
-    };
+    use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+    // EIGENER Über-Eintrag statt PredefinedMenuItem::about: das
+    // macOS-Standardpanel zeigt nur Name, Version und Credits —
+    // license/website/comments aus AboutMetadata fallen dort unter den
+    // Tisch, und Links darin wären nicht anklickbar. Der Eintrag
+    // schickt ein Ereignis ans Frontend, das seinen eigenen Dialog
+    // öffnet: übersetzt, mit klickbaren Quellen (User 2026-09-09).
     let app = Submenu::with_items(
         handle,
         "LocalTranscript",
         true,
         &[
-            &PredefinedMenuItem::about(handle, None, Some(ueber))?,
+            &MenuItem::with_id(handle, "ueber", "About LocalTranscript",
+                               true, None::<&str>)?,
             &PredefinedMenuItem::separator(handle)?,
             &PredefinedMenuItem::hide(handle, None)?,
             &PredefinedMenuItem::separator(handle)?,
@@ -392,6 +388,12 @@ fn menue(handle: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wr
 pub fn run() {
     let app = tauri::Builder::default()
         .menu(menue)
+        .on_menu_event(|handle, ereignis| {
+            if ereignis.id() == "ueber" {
+                use tauri::Emitter;
+                let _ = handle.emit("ueber", ());
+            }
+        })
         .plugin(tauri_plugin_dialog::init())
         .manage(EigenesBackend(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![backend_starten, ordner_oeffnen])
