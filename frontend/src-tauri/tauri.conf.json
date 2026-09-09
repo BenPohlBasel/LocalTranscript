@@ -48,7 +48,8 @@
     },
     "macOS": {
       "minimumSystemVersion": "14.0",
-      "signingIdentity": "-"
+      "signingIdentity": "A24B887F1B465B0F6767E8EF61FF12A00CAA66D1",
+      "entitlements": "entitlements.plist"
     }
   }
 }
