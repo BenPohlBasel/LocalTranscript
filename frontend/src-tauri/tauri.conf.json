@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "LocalTranscript",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "identifier": "city.bias.localtranscript",
   "build": {
     "beforeDevCommand": "npm run dev",
