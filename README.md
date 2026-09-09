@@ -87,14 +87,22 @@ nicht verhandelbar: ohne `disable-library-validation` startet die App
 nach dem Signieren nicht, weil Python .so-Dateien mit fremder
 Signatur lädt.
 
-Notarisieren (braucht ein app-spezifisches Passwort von
-appleid.apple.com):
+Alles zusammen in EINEM Aufruf (braucht ein app-spezifisches Passwort
+von appleid.apple.com):
 
 ```bash
 export APPLE_ID=…  APPLE_PASSWORD=…  APPLE_TEAM_ID=CCRJ4A42D3
-cd frontend && npx tauri build      # lädt hoch, wartet, heftet an
+cd frontend && npm run release
 spctl -a -vv /Applications/LocalTranscript.app   # → Notarized Developer ID
 ```
+
+`npm run release` kettet die vier Schritte: Resources einspielen,
+Programmteile signieren, bauen (Tauri notarisiert die .app) und
+zuletzt `notarize-dmg.mjs` — denn **Tauri notarisiert das DMG nicht
+mit**. Ohne diesen Schritt meldet Gatekeeper beim Doppelklick auf das
+geladene Image „Unnotarized Developer ID", obwohl die App darin
+sauber ist. Hängt das Ticket schon, tut das Skript nichts und spart
+den 1,8-GB-Upload.
 
 `bundle-resources.mjs` übernimmt python-runtime, whisper-cli/dylibs
 und Modelle aus einem daneben liegenden v1-Checkout
