@@ -51,6 +51,8 @@ export type Job = {
 export type Settings = {
   library_root: string; default_library_root: string; model: string;
   language: string; diarize: boolean; speaker_range: string;
+  /** gleichzeitige Läufe, 1–4 (Standard 1 = nacheinander) */
+  max_parallel: number;
   cluster_threshold: number; ui_language: string;
 };
 export type ModellInfo = { name: string; size_mb: number };

@@ -22,7 +22,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
-from . import bibliothek
+from . import bibliothek, config
 from .config import get_ffmpeg_cli, read_config
 from .transcribe import (
     transcribe_classic,
@@ -58,6 +58,40 @@ def _setze(job: dict, **kv) -> None:
 
 
 _CANCEL: dict[str, threading.Event] = {}
+
+# ---------- Warteschlange ----------
+# Vorher startete jeder Job sofort seinen Thread — vier gedroppte
+# Dateien rechneten gleichzeitig um dieselbe GPU. Jetzt wartet der
+# Thread ganz am Anfang auf einen Platz; der Job bleibt so lange
+# „pending" mit started_at=None, und die Oberfläche zeigt „wartet …".
+# Streng der Reihe nach (FIFO), damit die zuerst gedroppte Datei auch
+# zuerst drankommt.
+_SLOT = threading.Condition()
+_LAUFEND: set[str] = set()
+_WARTEND: list[str] = []
+
+
+def _nimm_slot(job: dict) -> None:
+    jid = job["id"]
+    with _SLOT:
+        _WARTEND.append(jid)
+        while True:
+            if _CANCEL.get(jid, threading.Event()).is_set():
+                _WARTEND.remove(jid)
+                raise Abbruch
+            if _WARTEND[0] == jid and len(_LAUFEND) < config.max_parallel():
+                _WARTEND.pop(0)
+                _LAUFEND.add(jid)
+                return
+            _SLOT.wait(0.5)
+
+
+def _gib_slot(job: dict) -> None:
+    with _SLOT:
+        _LAUFEND.discard(job["id"])
+        if job["id"] in _WARTEND:
+            _WARTEND.remove(job["id"])
+        _SLOT.notify_all()
 _PROC: dict[str, subprocess.Popen | None] = {}
 
 
@@ -114,6 +148,7 @@ def merge_consecutive_speakers(diarization: list,
 def _konvertiere(job: dict, quelle: Path, arbeits_dir: Path) -> Path:
     """IMMER nach 16 kHz mono WAV (auch .wav-Quellen — Resample-Fix)."""
     ziel = arbeits_dir / f"{job['id']}.wav"
+    _nimm_slot(job)
     _setze(job, started_at=datetime.now(UTC).isoformat(
         timespec="seconds"), progress=5, message="konvertiere")
     proc = subprocess.Popen(
@@ -252,6 +287,7 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
         quelle_tmp = job.get("_quelle_tmp")
         if quelle_tmp:
             Path(quelle_tmp).unlink(missing_ok=True)
+        _gib_slot(job)
         _CANCEL.pop(job["id"], None)
         _PROC.pop(job["id"], None)
 
