@@ -263,11 +263,20 @@ export default function EditorModule({ id, onExit }: {
                          [segmente]);
   const sprecherName = useMemo(
     () => new Map(sprecher.map((s) => [s.id, s.name])), [sprecher]);
+  // 10 ms Nachsicht (User-Befund 2026-09-09: „ohne Play jittert der
+  // Runter-Pfeil auf der Stelle"). Beim Sprung auf einen Segmentanfang
+  // landet WebKit ein HAAR davor — bei Segment 2 des Podcasts
+  // 5,0199999999999996 statt 5,02. Mit exaktem `<=` gehört die
+  // Position dann noch zum VORIGEN Segment, und onTime zieht die eben
+  // gesetzte Markierung sofort zurück: der Pfeil kommt nicht vom
+  // Fleck. Chromium trifft exakt — deshalb war es im Browser-Dev
+  // unsichtbar und nur im Tauri-Fenster zu sehen.
+  const RASTER = 0.01;
   const indexBei = useCallback((t: number) => {
     let lo = 0, hi = starts.length - 1, aus = -1;
     while (lo <= hi) {
       const mid = (lo + hi) >> 1;
-      if (starts[mid] <= t) { aus = mid; lo = mid + 1; }
+      if (starts[mid] <= t + RASTER) { aus = mid; lo = mid + 1; }
       else hi = mid - 1;
     }
     return aus;
