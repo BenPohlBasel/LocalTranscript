@@ -12,6 +12,7 @@ import {
   type ComponentProps, type MouseEvent as ReactMouseEvent, type ReactNode,
   type RefObject,
 } from "react";
+import { useT } from "../lib/i18n";
 import { sget, sset } from "../lib/storage";
 import { Icon, type IconName } from "./icons";
 
@@ -270,10 +271,14 @@ export function Disclosure({ label, children, defaultOpen = false,
 export function Caret({ open, onClick }: {
   open: boolean; onClick?: (e: ReactMouseEvent) => void;
 }) {
+  // Hook VOR dem Early-Return (React #310) — wie in enrichs Kit
+  const tr = useT();
   if (!onClick) return <span className="ui-caret">{open ? "▾" : "▸"}</span>;
   return (
     <button type="button" className="ui-caret"
-            aria-expanded={open} aria-label={open ? "Einklappen" : "Aufklappen"}
+            aria-expanded={open}
+            aria-label={tr(open ? "ui.caret.zuklappen"
+                                : "ui.caret.aufklappen")}
             onClick={onClick}>{open ? "▾" : "▸"}</button>
   );
 }
@@ -479,6 +484,7 @@ export function FarbWahl({ value, onChange, farben }: {
 export function CodeFarbenInput({ value, onChange }: {
   value: string; onChange: (v: string) => void;
 }) {
+  const tr = useT();
   const farben = parseCodeFarben(value);
   return (
     <Flex gap="3" align="center" wrap="wrap">
@@ -499,7 +505,7 @@ export function CodeFarbenInput({ value, onChange }: {
         </label>
       ))}
       <Button size="1" variant="soft" color="gray"
-              onClick={() => onChange("")}>Zurücksetzen</Button>
+              onClick={() => onChange("")}>{tr("ui.zuruecksetzen")}</Button>
     </Flex>
   );
 }
@@ -637,6 +643,7 @@ export function DataTable<T>({ columns, rows, rowKey, selected, onToggle,
       ehrliche „… X weitere"-Zeile ausgewiesen (kein silent cap). */
   cap?: number;
 }) {
+  const tr = useT();
   const [sort, setSort] = useState(defaultSort ?? null);
   const sorted = useMemo(() => {
     const col = sort ? columns.find((c) => c.key === sort.key) : undefined;
@@ -682,7 +689,7 @@ export function DataTable<T>({ columns, rows, rowKey, selected, onToggle,
           {withSelect && (
             <Table.ColumnHeaderCell style={{ width: 32 }}>
               <Checkbox size="1" checked={allChecked}
-                        aria-label="Alle sichtbaren an/abwählen"
+                        aria-label={tr("ui.tabelle.alle")}
                         onCheckedChange={(c) => onToggleAll?.(keys, c === true)} />
             </Table.ColumnHeaderCell>
           )}
@@ -710,7 +717,7 @@ export function DataTable<T>({ columns, rows, rowKey, selected, onToggle,
                 <Table.Cell>
                   {sel === true ? (
                     <Checkbox size="1" checked={selected.has(k)}
-                              aria-label="Zeile auswählen"
+                              aria-label={tr("ui.tabelle.zeile")}
                               onCheckedChange={(c) => onToggle?.(k, c === true)} />
                   ) : (
                     // disabled feuert keine Tooltips — der title sitzt am Span
@@ -982,6 +989,7 @@ export function TabBar({ tabs, active, onSelect, onClose, onReorder }: {
       der Aufrufer hält und persistiert die Ordnung. */
   onReorder?: (src: string, dst: string) => void;
 }) {
+  const tr = useT();
   // Quelle des Zugs im Ref (Drop liest SYNCHRON — State wäre beim
   // schnellen Drop noch nicht committed); State nur für die Optik.
   const dragRef = useRef<string | null>(null);
@@ -1025,8 +1033,10 @@ export function TabBar({ tabs, active, onSelect, onClose, onReorder }: {
             {t.icon && <span className="ui-tab-icon"><Icon name={t.icon} size={13} /></span>}
             <span>{t.title}</span>
             {t.closable && onClose && (
-              <button type="button" className="ui-tab-close" title="Tab schließen"
-                      aria-label={`${t.title} schließen`}
+              <button type="button" className="ui-tab-close"
+                      title={tr("ui.tab.schliessen")}
+                      aria-label={tr("ui.tab.schliessen.x",
+                                     { t: t.title })}
                       onClick={(e) => { e.stopPropagation(); onClose(t.id); }}>×</button>
             )}
           </div>
@@ -1112,6 +1122,7 @@ export function SidePanel({ side, title, storageKey, defaultWidth = 300,
   headTone?: "accent";
   children: ReactNode;
 }) {
+  const tr = useT();
   const [open, setOpen] = useState(() => sget(`${storageKey}.open`) !== "0");
   const [width, setWidth] = useState(() =>
     Number(sget(`${storageKey}.w`)) || defaultWidth);
@@ -1149,7 +1160,8 @@ export function SidePanel({ side, title, storageKey, defaultWidth = 300,
   if (!open) {
     return (
       <div className={`ui-sidestrip ${side}`}>
-        <IconButton title="Einblenden" onClick={toggle}>
+        <IconButton title={tr("ui.panel.einblenden")}
+                    onClick={toggle}>
           {side === "left" ? "⟩" : "⟨"}
         </IconButton>
       </div>
@@ -1166,14 +1178,26 @@ export function SidePanel({ side, title, storageKey, defaultWidth = 300,
   const panel = (
     <Flex direction="column" className={`ui-sidepanel ${side}`}
           style={{ width: resizable ? width : defaultWidth, flexShrink: 0 }}>
-      <Flex px="3" py="2" gap="2" align="center" className="ui-sidehead"
+      {/* px="4": Kopf und Inhalt des Panels stehen auf demselben
+          16-px-Raster wie der App-Rahmen (User 2026-09-09) */}
+      <Flex px="4" py="2" gap="2" align="center" className="ui-sidehead"
             style={headTone === "accent"
               ? { background: "var(--accent-a3)" } : undefined}>
-        {side === "right" && <IconButton title="Ausblenden" onClick={toggle}>⟩</IconButton>}
-        <Text size="1" weight="medium" color="gray"
-              style={{ flex: 1, minWidth: 0 }} truncate>{title}</Text>
+        {side === "right" && (
+          <IconButton title={tr("ui.panel.ausblenden")}
+                      onClick={toggle}>⟩</IconButton>)}
+        {/* Ein STRING wird als Titel gesetzt (gekürzt); ein Knoten —
+            etwa eine Unter-Navigation wie SegTabs — kommt roh in die
+            Kopfzeile, sonst steckte er in einem <span> mit
+            text-overflow (LocalTranscript 2026-09-09). */}
+        {typeof title === "string"
+          ? <Text size="1" weight="medium" color="gray"
+                  style={{ flex: 1, minWidth: 0 }} truncate>{title}</Text>
+          : <div style={{ flex: 1, minWidth: 0 }}>{title}</div>}
         {headerExtra}
-        {side === "left" && <IconButton title="Ausblenden" onClick={toggle}>⟨</IconButton>}
+        {side === "left" && (
+          <IconButton title={tr("ui.panel.ausblenden")}
+                      onClick={toggle}>⟨</IconButton>)}
       </Flex>
       <Box style={{ flex: 1, minHeight: 0, overflow: "auto" }}>{children}</Box>
     </Flex>

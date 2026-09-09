@@ -582,6 +582,10 @@ body { margin: 0; background: var(--gray-1); }
    die Pfeiltasten im Text (der Player-Handler lässt Textfelder in
    Ruhe). */
 .seg-text {
+  /* border-box: sonst addiert das Feld Polster + Rahmen ZUM 1fr
+     der Rasterspalte (14 px) und schob sich unter die Aktions-
+     Icons (User-Befund 2026-09-09: „Felder und Icons überschneiden") */
+  box-sizing: border-box;
   resize: none;
   border: 1px solid transparent;
   border-radius: 6px;

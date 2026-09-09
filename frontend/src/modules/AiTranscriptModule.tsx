@@ -117,7 +117,7 @@ export default function AiTranscriptModule({ settings, onEdit }: {
           background: dragOver ? "var(--accent-a3)" : "var(--gray-a2)",
         }}>
         <Flex direction="column" align="center" gap="1">
-          <Icon name="import" size={26} />
+          <Icon name="import" size={24} />
           <Text size="3" weight="medium">{tr("bib.drop")}</Text>
           <Text size="1" color="gray">{tr("bib.dropsub")}</Text>
         </Flex>
@@ -189,7 +189,7 @@ function JobZeile({ job, onEdit }: {
         {job.status === "completed" && job.eintrag && (
           <Button size="1" variant="soft"
                   onClick={() => onEdit(job.eintrag!)}>
-            <Icon name="edit" size={13} /> {tr("allg.bearbeiten")}
+            <Icon name="edit" size={14} /> {tr("allg.bearbeiten")}
           </Button>
         )}
         {!fertig && (
