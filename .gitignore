@@ -12,6 +12,9 @@ frontend/src-tauri/gen/
 # Bundle-Artefakte (groß, werden aus Quellen gebaut)
 resources/
 models/*.bin
+# SpeechBrain legt beim ersten Diarisierungs-Lauf Symlinks in
+# den huggingface-Cache — maschinenspezifisch, nie ins Repo
+models/speechbrain/
 bin/
 dist/
 *.dmg
