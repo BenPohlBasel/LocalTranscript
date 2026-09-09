@@ -70,7 +70,30 @@ npx tauri dev                                    # App-Dev
 
 ```bash
 node scripts/bundle-resources.mjs   # Runtime/Binaries/Modell + venv
-cd frontend && npx tauri build      # .app + .dmg (unsigniert)
+node scripts/sign-resources.mjs     # 250 Programmteile: Developer ID
+cd frontend && npx tauri build      # .app + .dmg, Hülle versiegelt
+```
+
+**Die Reihenfolge ist Pflicht.** Tauri signiert nur die Hülle und das
+Hauptprogramm; die 250 mitgelieferten Bibliotheken (python3,
+whisper-cli, ffmpeg, torch, SpeechBrain) behalten sonst die
+Ad-hoc-Signatur des Linkers — und die lehnt Apples Notardienst ab,
+nach dem 1,9-GB-Upload. `sign-resources.mjs` signiert sie mit
+Developer ID, Hardened Runtime, Entitlements und Zeitstempel (55 s);
+die Signatur liegt im Mach-O und überlebt das Kopieren ins Bundle.
+
+Die Berechtigungen in `frontend/src-tauri/entitlements.plist` sind
+nicht verhandelbar: ohne `disable-library-validation` startet die App
+nach dem Signieren nicht, weil Python .so-Dateien mit fremder
+Signatur lädt.
+
+Notarisieren (braucht ein app-spezifisches Passwort von
+appleid.apple.com):
+
+```bash
+export APPLE_ID=…  APPLE_PASSWORD=…  APPLE_TEAM_ID=CCRJ4A42D3
+cd frontend && npx tauri build      # lädt hoch, wartet, heftet an
+spctl -a -vv /Applications/LocalTranscript.app   # → Notarized Developer ID
 ```
 
 `bundle-resources.mjs` übernimmt python-runtime, whisper-cli/dylibs
