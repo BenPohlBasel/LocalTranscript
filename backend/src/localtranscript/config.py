@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "LocalTranscript"
-APP_VERSION = "2.1.2"
+APP_VERSION = "2.1.3"
 #: DER LocalTranscript-Port (2026-09-09): 5628 = „LOCT" auf der
 #: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
 #: (23119 = „ZOT"). Vier Buchstaben, nicht fünf: „LOCTR" wäre 56287
