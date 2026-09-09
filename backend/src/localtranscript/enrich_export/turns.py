@@ -1,4 +1,4 @@
-# VENDORED-Extrakt aus enrich@c2f4358 —
+# VENDORED-Extrakt aus enrich@d1f4214 —
 # packages/enrich-serve/src/enrich_serve/textimport.py (die puren
 # Transkript-Funktionen, VERBATIM-Slice; Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude)).
@@ -151,7 +151,8 @@ def turns_zu_struktur(turns: list[dict]) -> tuple[dict, list[dict]]:
         if b["speaker"]:
             label_runs.append(run(b["speaker"], fett=True))
         if tc:
-            label_runs.append(run(tc, farbe="#8a8a8a"))
+            label_runs.append(run(f" {tc}" if b["speaker"] else tc,
+                                  farbe="#8a8a8a"))
         if label_runs:
             absaetze.append({"typ": "sprecher", "runs": label_runs,
                              "noten": []})
