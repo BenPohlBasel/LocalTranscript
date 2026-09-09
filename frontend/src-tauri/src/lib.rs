@@ -3,13 +3,20 @@
 // beendet beim Quit NUR, was sie selbst gestartet hat. Ein fremd
 // gestartetes gesundes Backend (Terminal-Dev) wird benutzt, nie angefasst.
 //
-// MERKDATEI (aus enrich nachgezogen, 2026-09-09): pid+port landen in
+// MERKDATEI (aus enrich nachgezogen, 2026-09-09): app+pid+port landen in
 // ~/Library/Application Support/LocalTranscript/app-backend.json. Stürzt
 // die App ab, findet der nächste Start sein verwaistes Backend wieder und
 // übernimmt es — vorher prüft die ps-Kommandozeile, ob die PID überhaupt
 // noch zu einem LocalTranscript-Backend gehört (PIDs werden vom System
 // WIEDERVERWENDET; ohne die Probe könnte die App einen wildfremden
 // Prozess „übernehmen" und beim Quit beenden).
+//
+// Die Datei merkt sich AUCH die PID der App, der das Backend gehört.
+// Ohne sie hätte eine ZWEITE Instanz das Backend der ersten als eigene
+// Waise übernommen und beim Beenden mitgerissen (live aufgetreten
+// 2026-09-09: Dev-Build neben installierter App). Übernommen wird nur,
+// was einem TOTEN Lauf gehört — läuft die Besitzerin noch, ist das
+// Backend fremd und die Merkdatei ihres.
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
@@ -53,16 +60,31 @@ fn merk_schreiben(pid: u32) {
     if let Some(d) = f.parent() {
         let _ = std::fs::create_dir_all(d);
     }
-    let _ = std::fs::write(&f, format!("{{\"pid\": {pid}, \"port\": {}}}\n", port()));
+    let _ = std::fs::write(
+        &f,
+        format!(
+            "{{\"app\": {}, \"pid\": {pid}, \"port\": {}}}\n",
+            std::process::id(),
+            port()
+        ),
+    );
 }
 
 fn merk_loeschen() {
     let _ = std::fs::remove_file(merkdatei());
 }
 
-/// pid+port aus der Merkdatei — bewusst von Hand geparst, die Shell
-/// zieht für zwei Zahlen keine JSON-Abhängigkeit.
-fn merk_lesen() -> Option<(u32, u16)> {
+fn pid_lebt(pid: u32) -> bool {
+    std::process::Command::new("/bin/kill")
+        .args(["-0", &pid.to_string()])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+/// app+pid+port aus der Merkdatei — bewusst von Hand geparst, die Shell
+/// zieht für drei Zahlen keine JSON-Abhängigkeit.
+fn merk_lesen() -> Option<(u32, u32, u16)> {
     let roh = std::fs::read_to_string(merkdatei()).ok()?;
     let zahl = |feld: &str| -> Option<u64> {
         let ab = roh.find(feld)? + feld.len();
@@ -74,7 +96,16 @@ fn merk_lesen() -> Option<(u32, u16)> {
             .parse()
             .ok()
     };
-    Some((zahl("\"pid\"")? as u32, zahl("\"port\"")? as u16))
+    Some((
+        zahl("\"app\"")? as u32,
+        zahl("\"pid\"")? as u32,
+        zahl("\"port\"")? as u16,
+    ))
+}
+
+/// Gehört die Merkdatei DIESEM Lauf? Nur dann darf er sie räumen.
+fn merk_ist_meine() -> bool {
+    merk_lesen().map(|(app, _, _)| app == std::process::id()).unwrap_or(false)
 }
 
 fn health_antwortet(frist_s: u64) -> bool {
@@ -223,14 +254,23 @@ async fn backend_starten(
     // eigene Waisenkind aus einem abgestürzten Lauf ist: dann geht es
     // beim Quit mit, sonst bleibt es unangetastet (Terminal-Dev).
     if health_antwortet(0) {
-        if let (Some((pid, p)), Some(halter)) = (merk_lesen(), port_halter()) {
-            if p == port() && pid == halter && ist_eigenes_backend(pid) {
+        if let Some((app_pid, b_pid, p)) = merk_lesen() {
+            if pid_lebt(app_pid) && app_pid != std::process::id() {
+                // Eine ANDERE Instanz dieser App lebt und besitzt das
+                // Backend: fremd. Nicht übernehmen, Merkdatei ist ihre.
+            } else if p == port()
+                && Some(b_pid) == port_halter()
+                && ist_eigenes_backend(b_pid)
+            {
+                // Waise eines abgestürzten Laufs — übernehmen und den
+                // Besitz auf UNS umschreiben.
                 if let Ok(mut g) = eigen.0.lock() {
-                    *g = Some(pid);
+                    *g = Some(b_pid);
                 }
+                merk_schreiben(b_pid);
             } else {
-                // Merkdatei zeigt ins Leere (PID neu vergeben, Port
-                // gewechselt) — weg damit, bevor sie jemanden verwirrt.
+                // Eintrag zeigt ins Leere (PID neu vergeben, Port
+                // gewechselt) — weg damit, bevor er jemanden verwirrt.
                 merk_loeschen();
             }
         }
@@ -373,7 +413,11 @@ pub fn run() {
             if let Some(pid) = eigen {
                 beende_pid(pid);
             }
-            merk_loeschen();
+            // Nur die eigene Merkdatei räumen — gehört sie einer
+            // anderen laufenden Instanz, bleibt sie stehen.
+            if merk_ist_meine() {
+                merk_loeschen();
+            }
         }
     });
 }
