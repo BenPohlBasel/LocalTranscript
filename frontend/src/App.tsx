@@ -68,20 +68,23 @@ export default function App() {
 
   return (
     <Flex direction="column" style={{ height: "100vh" }}>
-      {/* EINE Kopfzeile statt zweier (User 2026-09-09: „der Name steht
-          doppelt, und ich sehe nicht, wo ich das Fenster greifen kann").
-          titleBarStyle "Overlay" + hiddenTitle blenden die native
-          Leiste aus; die Ampel schwebt in DIESER Zeile, links bleiben
-          78 px für sie frei. data-tauri-drag-region macht den
-          Hintergrund zur Greiffläche — Knöpfe darin bleiben Knöpfe,
-          Tauri prüft das Ereignisziel. Der eigene Grauton hebt die
-          Leiste sichtbar vom Inhalt ab. */}
-      <Flex data-tauri-drag-region align="center" gap="3" px="4" py="2"
+      {/* Der Name stand doppelt (native Leiste + App-Kopf). Behoben
+          über hiddenTitle: die NATIVE Fensterleiste bleibt — sie ist
+          die Greiffläche, an der man das Fenster zieht —, nur ihr
+          Titeltext ist aus. Der Name steht damit einmal, hier.
+
+          NICHT über titleBarStyle "Overlay" (Versuch 2026-09-09,
+          zurückgenommen): das nimmt die native Leiste ganz weg, die
+          Tabs kleben an der Fensterkante, und der Ersatz
+          data-tauri-drag-region tut NICHTS, solange die Capability
+          core:window:allow-start-dragging fehlt — das Fenster ließ
+          sich überhaupt nicht mehr verschieben.
+
+          Der eigene Grauton trennt den Kopf sichtbar vom Inhalt. */}
+      <Flex align="center" gap="3" px="4" py="2"
             style={{ borderBottom: "1px solid var(--gray-a5)",
-                     background: "var(--gray-a3)",
-                     paddingLeft: isTauri() ? 78 : undefined }}>
-        <Heading size="4" data-tauri-drag-region>
-          {tr("app.titel")}</Heading>
+                     background: "var(--gray-a3)" }}>
+        <Heading size="4">{tr("app.titel")}</Heading>
         <div style={{ flex: 1 }} />
         {/* im Editor-Drilldown ist KEIN Tab aktiv — so feuert der
             Klick auf „Human-Editor" ein onChange und verlässt den
