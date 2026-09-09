@@ -1,6 +1,6 @@
 [package]
 name = "localtranscript-app"
-version = "2.1.1"
+version = "2.1.2"
 description = "LocalTranscript — Tauri-Shell (spawnt das Python-Backend)"
 authors = ["Ben Pohl / BIAS.City"]
 edition = "2021"
