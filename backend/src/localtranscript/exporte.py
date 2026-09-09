@@ -83,6 +83,14 @@ def _enrich_zip(eid: str, daten: dict, seg: list[dict],
             zeiten=zeiten, audio=audio,
             zeiten_quelle="localtranscript")
         d.set_analyse_kette("narrativ", "localtranscript")
+        # BEILAGE: die kanonische Wahrheit (ein VTT als JSON — dieselben
+        # Cues, dazu die Sprecher als Entitäten mit stabilen ids, was
+        # VTT nicht ausdrücken kann). Kein Layer, kein Manifest-Eintrag
+        # — dieselbe Sorte Datei wie audio.mp3 und source.pdf daneben.
+        import json as _json
+        (d.path / "transkript.json").write_text(
+            _json.dumps(daten, ensure_ascii=False, indent=2),
+            encoding="utf-8")
         zip_pfad = Path(td) / f"{stamm}.enrich.zip"
         d.pack(zip_pfad)
         return zip_pfad.read_bytes()

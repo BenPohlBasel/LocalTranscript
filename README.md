@@ -22,6 +22,13 @@ Sprecher-Diarisierung — Neubau des LocalTranscript-Prototyps als
   (T0=T1 byte-treu, PDF in Recursive gesetzt, Zeitkarte
   Offsets↔Sekunden↔Sprecher, Audio-Kopie, Analyse-Kette „narrativ") —
   direkt in enrich importierbar.
+- **Weitergabe:** dasselbe `.enrich.zip` kann beides — enrich füttern
+  und ein Transkript an Kolleginnen und Kollegen geben, die im
+  Human-Editor weiterarbeiten. Im Dossier liegt `transkript.json` als
+  Beilage (die kanonische Wahrheit, ein VTT als JSON), das Audio ist
+  ohnehin dabei. Der Import zieht **nur** diese beiden — jede
+  Analyse-Schicht fällt weg, denn nach dem ersten Edit stimmt keine
+  davon mehr.
 - **Privat:** Loopback only (127.0.0.1:5628 — „LOCT" auf der
   Telefontastatur; `LT_SERVE_PORT` überschreibt), keine Netz-Calls.
 
