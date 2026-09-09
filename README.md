@@ -133,10 +133,25 @@ unter der **MIT-Lizenz** (BIAS.City).
 
 ## Lizenz
 
-**GPL-3.0-or-later** (BIAS.City) — die App übernimmt bewusst die
-Lizenz des strengsten mitgelieferten Werkzeugs (ffmpeg, GPL-Build);
-alle übrigen Bausteine (MIT/Apache/ISC/OFL/BSD) sind GPL-kompatibel. Mitgeliefert u. a.: whisper.cpp (MIT), silero-vad
-(MIT), SpeechBrain (Apache-2.0), PyMuPDF (AGPL-3.0, GPL-kompatibel
-per §13), Recursive-Schrift (SIL OFL 1.1,
+**AGPL-3.0-or-later** (BIAS.City). Die App übernimmt die Lizenz des
+strengsten mitgelieferten Werkzeugs — und das ist **PyMuPDF
+(AGPL-3.0)**, nicht ffmpeg. PyMuPDF baut den Dossier-PDF-Satz im
+enrich-Export (`enrich_export/textsatz.py`: `fitz.Font`,
+`fitz.TextWriter`) und bringt MuPDF als Binärteil mit (58 MB im
+Bundle). GPLv3 §13 erlaubt die Verbindung von GPL- und AGPL-Code
+ausdrücklich, lässt die AGPL-Netzwerkklausel aber „auf die
+Kombination als solche" wirken — deshalb steht das Ganze unter AGPL.
+
+**Die Netzwerkklausel ist erfüllt, bevor sie greift:** LocalTranscript
+bindet ausschließlich an `127.0.0.1`, und die Host-Wache in `main.py`
+weist alles Fremde mit 421 ab — eine Fernnutzung im Sinne von §13 gibt
+es nicht. Der Quellcode liegt ohnehin offen; der Knopf „Quellcode
+(GitHub)" im Über-Dialog ist das Angebot in der App selbst.
+
+Mitgeliefert u. a.: whisper.cpp (MIT), Modell large-v3-turbo (OpenAI,
+MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0), PyMuPDF
+(AGPL-3.0), Recursive-Schrift (SIL OFL 1.1,
 `backend/src/localtranscript/enrich_export/fonts/LICENSE-OFL.txt`),
-ffmpeg (LGPL/GPL-Build) — vollständige Liste in den Einstellungen.
+FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
+(GPL-3.0-Build, `--enable-gpl --enable-version3`) — vollständige
+Liste in den Einstellungen.

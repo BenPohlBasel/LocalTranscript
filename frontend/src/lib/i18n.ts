@@ -272,6 +272,11 @@ const W: Record<string, Eintrag> = {
   "ed.leer": { de: "Keine Segmente.", en: "No segments.",
     fr: "Aucun segment.", it: "Nessun segmento." },
 
+  "st.agpl": {
+    de: "AGPL §13 verlangt, Fernnutzern den Quellcode anzubieten. LocalTranscript hört nur auf 127.0.0.1 und weist fremde Hosts ab — es gibt keine Fernnutzung. Der Quellcode liegt zudem offen auf GitHub.",
+    en: "AGPL §13 requires offering the source to remote users. LocalTranscript listens on 127.0.0.1 only and rejects foreign hosts — there is no remote use. The source is public on GitHub anyway.",
+    fr: "L'AGPL §13 exige d'offrir le code source aux utilisateurs distants. LocalTranscript n'écoute que sur 127.0.0.1 et rejette les hôtes étrangers — aucun usage distant. Le code est de toute façon public sur GitHub.",
+    it: "L'AGPL §13 richiede di offrire il codice agli utenti remoti. LocalTranscript ascolta solo su 127.0.0.1 e rifiuta host estranei — nessun uso remoto. Il codice è comunque pubblico su GitHub." },
   "st.formate": { de: "Formate", en: "Formats", fr: "Formats",
     it: "Formati" },
   "st.formate.sub": {
@@ -367,22 +372,26 @@ const W: Record<string, Eintrag> = {
   "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
     it: "Licenze" },
   "st.lizenzen.text": {
-    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF fürs Dossier-PDF (AGPL-3.0) · Recursive-Schrift im enrich-Export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) — LocalTranscript selbst: GPL-3.0-or-later.",
-    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF for the dossier PDF (AGPL-3.0) · Recursive typeface in enrich export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) — LocalTranscript itself: GPL-3.0-or-later.",
-    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF pour le PDF du dossier (AGPL-3.0) · police Recursive dans l'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript : GPL-3.0-or-later.",
-    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF per il PDF del dossier (AGPL-3.0) · carattere Recursive nell'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript: GPL-3.0-or-later." },
+    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF fürs Dossier-PDF (AGPL-3.0) · Recursive-Schrift im enrich-Export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) — LocalTranscript selbst: AGPL-3.0-or-later.",
+    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF for the dossier PDF (AGPL-3.0) · Recursive typeface in enrich export (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) — LocalTranscript itself: AGPL-3.0-or-later.",
+    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF pour le PDF du dossier (AGPL-3.0) · police Recursive dans l'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript : AGPL-3.0-or-later.",
+    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyMuPDF per il PDF del dossier (AGPL-3.0) · carattere Recursive nell'export enrich (SIL OFL 1.1) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) — LocalTranscript: AGPL-3.0-or-later." },
   "st.app": { de: "LocalTranscript", en: "LocalTranscript",
     fr: "LocalTranscript", it: "LocalTranscript" },
   "st.app.sub": {
-    de: "Freie Software — GPL-3.0-or-later · BIAS.City",
-    en: "Free software — GPL-3.0-or-later · BIAS.City",
-    fr: "Logiciel libre — GPL-3.0-or-later · BIAS.City",
-    it: "Software libero — GPL-3.0-or-later · BIAS.City" },
+    de: "Freie Software — AGPL-3.0-or-later · BIAS.City",
+    en: "Free software — AGPL-3.0-or-later · BIAS.City",
+    fr: "Logiciel libre — AGPL-3.0-or-later · BIAS.City",
+    it: "Software libero — AGPL-3.0-or-later · BIAS.City" },
+  // Die Begründung war falsch: nicht ffmpeg gibt den Takt vor, sondern
+  // PyMuPDF. Es baut das Dossier-PDF und steht unter AGPL-3.0; GPLv3
+  // §13 erlaubt die Verbindung, lässt die AGPL-Netzwerkklausel aber
+  // „auf die Kombination als solche" wirken (User-Frage 2026-09-10).
   "st.app.text": {
-    de: "Quellcode, Lizenztext und Releases auf GitHub. Die App übernimmt die GPL bewusst als eigene Lizenz — das strengste mitgelieferte Werkzeug (ffmpeg, GPL-Build) setzt den Takt.",
-    en: "Source code, license text and releases on GitHub. The app deliberately adopts the GPL as its own license — the strictest bundled tool (ffmpeg, GPL build) sets the pace.",
-    fr: "Code source, licence et versions sur GitHub. L'application adopte délibérément la GPL — l'outil embarqué le plus strict (ffmpeg, build GPL) donne le ton.",
-    it: "Codice sorgente, licenza e release su GitHub. L'app adotta deliberatamente la GPL — lo strumento incluso più restrittivo (ffmpeg, build GPL) detta il passo." },
+    de: "Quellcode, Lizenztext und Releases auf GitHub. Die App übernimmt die AGPL bewusst als eigene Lizenz — das strengste mitgelieferte Werkzeug ist PyMuPDF (AGPL-3.0), das den Dossier-PDF-Satz baut; seine Netzwerkklausel gilt für das ganze Werk.",
+    en: "Source code, license text and releases on GitHub. The app deliberately adopts the AGPL as its own license — the strictest bundled tool is PyMuPDF (AGPL-3.0), which typesets the dossier PDF; its network clause applies to the work as a whole.",
+    fr: "Code source, licence et versions sur GitHub. L'application adopte délibérément l'AGPL — l'outil embarqué le plus strict est PyMuPDF (AGPL-3.0), qui compose le PDF du dossier ; sa clause réseau s'applique à l'ensemble.",
+    it: "Codice sorgente, licenza e release su GitHub. L'app adotta deliberatamente l'AGPL — lo strumento incluso più restrittivo è PyMuPDF (AGPL-3.0), che compone il PDF del dossier; la sua clausola di rete vale per l'intera opera." },
   "ueber.titel": { de: "Über LocalTranscript",
     en: "About LocalTranscript", fr: "À propos de LocalTranscript",
     it: "Informazioni su LocalTranscript" },

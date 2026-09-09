@@ -178,6 +178,7 @@ function UeberDialog({ open, onClose }: {
           {link("BIAS.City", BIAS)}
         </Flex>
         <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
+        <Text size="1" color="gray">{tr("st.agpl")}</Text>
         <Flex gap="2" wrap="wrap">
           {link(tr("st.link.ffmpegbuild"), "https://ffmpeg.martin-riedl.de")}
           {link(tr("st.link.ffmpegsrc"), "https://ffmpeg.org/download.html")}
