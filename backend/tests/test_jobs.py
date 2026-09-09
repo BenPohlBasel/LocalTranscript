@@ -34,10 +34,15 @@ def test_diarize_pipeline_landet_in_bibliothek(client, tmp_path,
         return c
     monkeypatch.setattr(jobs, "_clip", fake_clip)
     import localtranscript.diarize as dia
-    monkeypatch.setattr(dia, "diarize_audio",
-                        lambda p, mi, ma, th: [
-                            SpeakerSegment(0.0, 5.0, "SPEAKER_01"),
-                            SpeakerSegment(5.0, 20.0, "SPEAKER_00")])
+    # `fortschritt` spiegelt die echte Signatur — der Job meldet damit
+    # den Diarisierungs-Fortschritt (10 → 25 %); der Doppelgänger ruft
+    # ihn einmal, damit der Meldeweg mitgeprüft ist.
+    def fake_diarize(pfad, mi, ma, th, fortschritt=None):
+        if fortschritt is not None:
+            fortschritt(0, 2)
+        return [SpeakerSegment(0.0, 5.0, "SPEAKER_01"),
+                SpeakerSegment(5.0, 20.0, "SPEAKER_00")]
+    monkeypatch.setattr(dia, "diarize_audio", fake_diarize)
 
     def fake_seg(clip, model, lang, time_offset=0.0, register=None):
         return [TranscriptSegment(time_offset, time_offset + 2.0,

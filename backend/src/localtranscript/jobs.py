@@ -43,7 +43,11 @@ def _neu(filename: str, params: dict) -> dict:
            "message": "", "partial_text": "", "error": None,
            "eintrag": None,
            "created_at": datetime.now(UTC).isoformat(
-               timespec="seconds")}
+               timespec="seconds"),
+           # gesetzt, wenn die Arbeit WIRKLICH beginnt — bei mehreren
+           # gedroppten Dateien liegt created_at weit davor, und die
+           # Anzeige „vergangen" wäre gelogen (User 2026-09-09)
+           "started_at": None}
     with _LOCK:
         JOBS[job["id"]] = job
     return job
@@ -110,7 +114,8 @@ def merge_consecutive_speakers(diarization: list,
 def _konvertiere(job: dict, quelle: Path, arbeits_dir: Path) -> Path:
     """IMMER nach 16 kHz mono WAV (auch .wav-Quellen — Resample-Fix)."""
     ziel = arbeits_dir / f"{job['id']}.wav"
-    _setze(job, progress=5, message="konvertiere")
+    _setze(job, started_at=datetime.now(UTC).isoformat(
+        timespec="seconds"), progress=5, message="konvertiere")
     proc = subprocess.Popen(
         [get_ffmpeg_cli(), "-y", "-i", str(quelle), "-ar", "16000",
          "-ac", "1", "-c:a", "pcm_s16le", str(ziel)],
@@ -161,9 +166,17 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             _setze(job, status="diarizing", progress=10,
                    message="sprecher")
             from .diarize import diarize_audio
+            # 10 → 25 % füllen, sonst steht der Balken die ganze
+            # Diarisierung still; nebenbei greift der Abbruch dann
+            # SOFORT und nicht erst nach dem ganzen Lauf.
+            def _diar_fortschritt(i: int, n: int) -> None:
+                _pruefe_abbruch(job)
+                _setze(job, progress=10 + int(i / max(n, 1) * 15))
+
             diar = diarize_audio(str(wav), p["min_speakers"],
                                  p["max_speakers"],
-                                 p["cluster_threshold"])
+                                 p["cluster_threshold"],
+                                 fortschritt=_diar_fortschritt)
             _pruefe_abbruch(job)
             bloecke = merge_consecutive_speakers(diar)
             labels: dict[str, str] = {}   # SPEAKER_00 → Entitäts-ID

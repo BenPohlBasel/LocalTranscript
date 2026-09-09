@@ -173,6 +173,13 @@ const W: Record<string, Eintrag> = {
     en: "5 s forward (L or →, while typing ⌥L)",
     fr: "5 s en avant (L ou →, en tapant ⌥L)",
     it: "5 s avanti (L o →, digitando ⌥L)" },
+  "job.wartet": { de: "wartet …", en: "waiting …", fr: "en attente …",
+    it: "in attesa …" },
+  "job.zeit": { de: "{v} von ~{g}", en: "{v} of ~{g}",
+    fr: "{v} sur ~{g}", it: "{v} di ~{g}" },
+  "job.zeit.offen": { de: "{v} — Restzeit noch offen",
+    en: "{v} — estimate pending", fr: "{v} — estimation en cours",
+    it: "{v} — stima in corso" },
   "job.warte": { de: "Wartet …", en: "Waiting …", fr: "En attente …",
     it: "In attesa …" },
 
