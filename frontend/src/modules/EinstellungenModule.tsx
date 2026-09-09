@@ -70,6 +70,14 @@ export default function EinstellungenModule({ settings, onChange }: {
             value={settings.language}
             onChange={(v) => setze({ language: v })}
             options={["de", "en", "fr", "it", "es", "auto"]} />
+          {/* Gleichzeitige Läufe (User 2026-09-09). Standard 1: mehr
+              als einer teilt sich dieselbe GPU — vier parallel sind
+              nicht schneller als vier nacheinander, nur unübersichtlich. */}
+          <LabeledSelect label={tr("st.parallel")}
+            value={String(settings.max_parallel ?? 1)}
+            onChange={(v) => setze({ max_parallel: Number(v) })}
+            options={["1", "2", "3", "4"]}
+            optionLabels={{ "1": tr("st.parallel.eins") }} />
           <LabeledSelect label={tr("st.uisprache")}
             value={settings.ui_language}
             onChange={(v) => { setSprache(v as Sprache);

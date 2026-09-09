@@ -21,6 +21,7 @@ Public API matches the previous pyannote-based implementation:
   SpeakerSegment(start, end, speaker)
 """
 
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -65,6 +66,18 @@ def _get_vad():
         print("Loading silero-vad...")
         _vad_model = load_silero_vad()
     return _vad_model
+
+
+#: Torch/SpeechBrain sind in DIESEM Aufbau nicht nebenläufig: das
+#: ECAPA-Modell ist ein modulweites Singleton, und zwei Threads, die
+#: gleichzeitig encode_batch() darauf rufen, reißen den Prozess mit
+#: einer Heap-Verletzung ab (EXC_BREAKPOINT in libsystem_malloc, aus
+#: at::native::as_strided — live aufgetreten 2026-09-09 beim ersten
+#: Lauf mit max_parallel=2; der Absturz nahm ALLE laufenden Jobs mit).
+#: Die Diarisierung läuft deshalb immer nur einmal zur Zeit. Das
+#: kostet wenig: die Transkription — der längere Teil — ist ein
+#: eigener Prozess (whisper-cli) und bleibt echt parallel.
+_TORCH_SPERRE = threading.Lock()
 
 
 def _get_embedder():
@@ -251,7 +264,23 @@ def diarize_audio(
     threshold: float = 0.5,
     fortschritt=None,
 ) -> list[SpeakerSegment]:
-    """Diarize an audio file. Returns list of SpeakerSegment."""
+    """Diarize an audio file. Returns list of SpeakerSegment.
+
+    Läuft unter _TORCH_SPERRE — siehe dort, warum das nicht optional
+    ist. Ein wartender Job blockiert hier, bis der vorige durch ist.
+    """
+    with _TORCH_SPERRE:
+        return _diarize_audio(audio_path, min_speakers, max_speakers,
+                              threshold, fortschritt)
+
+
+def _diarize_audio(
+    audio_path: str,
+    min_speakers: int = 0,
+    max_speakers: int = 0,
+    threshold: float = 0.5,
+    fortschritt=None,
+) -> list[SpeakerSegment]:
     audio_path = str(Path(audio_path).resolve())
 
     if not Path(audio_path).exists():

@@ -118,6 +118,12 @@ DEFAULTS = {
     "speaker_range": "auto",  # "auto" | "min-max"
     "cluster_threshold": 0.5,
     "ui_language": "de",
+    # Wieviele Läufe gleichzeitig rechnen dürfen. 1 = nacheinander
+    # (User 2026-09-09: „der Batch startet alle zugleich"). Mehr als
+    # einer teilt sich dieselbe GPU und dieselben Kerne — vier Läufe
+    # parallel sind nicht schneller als vier nacheinander, nur
+    # unübersichtlicher.
+    "max_parallel": 1,
 }
 
 
@@ -155,3 +161,14 @@ def default_library_root() -> Path:
 def library_root() -> Path | None:
     root = read_config().get("library_root") or ""
     return Path(root) if root else None
+
+
+def max_parallel() -> int:
+    """Gleichzeitige Läufe, 1–4. Wird bei JEDEM Slot-Versuch gelesen —
+    eine Änderung in den Einstellungen wirkt sofort, auch auf schon
+    wartende Jobs."""
+    try:
+        n = int(read_config().get("max_parallel", 1))
+    except (TypeError, ValueError):
+        return 1
+    return max(1, min(4, n))
