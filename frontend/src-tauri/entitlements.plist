@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Berechtigungen für die Hardened Runtime (Developer-ID-Signatur).
+
+  Ohne sie startet die App nach dem Signieren NICHT: im Bundle steckt
+  ein vollständiges CPython mit 244 dylib/so-Dateien (numpy, torch,
+  SpeechBrain) plus whisper-cli und ffmpeg. Die Hardened Runtime
+  verbietet standardmäßig genau das, was diese Bibliotheken brauchen.
+
+  Wir sind NICHT sandboxed (Developer ID verlangt das nicht) — daher
+  keine Datei- oder Netz-Berechtigungen; das Backend bindet ohnehin
+  nur an 127.0.0.1.
+-->
+<plist version="1.0">
+<dict>
+  <!-- Python lädt .so-Dateien aus dem venv, die eine andere (oder gar
+       keine) Team-Signatur tragen. OHNE DIESE ZEILE bricht der Start
+       mit „code signature invalid" ab — der häufigste Stolperstein
+       beim Signieren gebündelter Python-Runtimes. -->
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+
+  <!-- torch/numpy erzeugen und führen Code zur Laufzeit aus. -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+
+  <!-- Das venv wird zur Laufzeit relokalisiert (venv_fixen in lib.rs
+       schreibt pyvenv.cfg); Python wertet dabei DYLD_/PYTHON*-Variablen
+       aus. -->
+  <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+  <true/>
+</dict>
+</plist>
