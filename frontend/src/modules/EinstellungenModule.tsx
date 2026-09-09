@@ -99,6 +99,7 @@ export default function EinstellungenModule({ settings, onChange }: {
       <Karte titel={tr("st.lizenzen")}>
         <Flex direction="column" gap="2">
           <Text size="1" color="gray">{tr("st.lizenzen.text")}</Text>
+          <Text size="1" color="gray">{tr("st.agpl")}</Text>
           <Flex gap="2" wrap="wrap">
             <Button size="1" variant="soft" onClick={() =>
               void ordnerOeffnen(
