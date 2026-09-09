@@ -44,6 +44,8 @@ export type Job = {
   id: string; filename: string; status: string; progress: number;
   message: string; partial_text: string; error: string | null;
   eintrag: string | null; created_at: string;
+  /** gesetzt, sobald der Job wirklich rechnet (nicht mehr wartet) */
+  started_at: string | null;
   params: Record<string, unknown>;
 };
 export type Settings = {

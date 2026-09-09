@@ -188,6 +188,44 @@ export default function AiTranscriptModule({ settings, onEdit }: {
   );
 }
 
+/** mm:ss — Läufe unter einer Stunde sind der Normalfall; darüber
+    hh:mm:ss, damit die Zahl nicht heimlich überläuft. */
+function mmss(sekunden: number): string {
+  const s = Math.max(0, Math.round(sekunden));
+  const m = Math.floor(s / 60) % 60, h = Math.floor(s / 3600);
+  const zwei = (n: number) => String(n).padStart(2, "0");
+  return h ? `${h}:${zwei(m)}:${zwei(s % 60)}` : `${zwei(m)}:${zwei(s % 60)}`;
+}
+
+/** Vergangen / geschätzt gesamt. Die Schätzung rechnet aus dem ECHTEN
+    Fortschritt hoch (v1 riet stur aus der Dateigröße: 1,6 min je MB,
+    ohne je nachzukorrigieren). Sie erscheint erst ab 5 % — davor ist
+    die Hochrechnung Kaffeesatz —, wird mit jedem Block genauer und
+    verschwindet nie wieder: „immer etwas zu sehen" (User 2026-09-09). */
+function Laufzeit({ job }: { job: Job }) {
+  const tr = useT();
+  const [jetzt, setJetzt] = useState(() => Date.now());
+  const start = job.started_at ?? job.created_at;
+  useEffect(() => {
+    const t = window.setInterval(() => setJetzt(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, []);
+  if (!job.started_at) {
+    return <Text size="1" color="gray">{tr("job.wartet")}</Text>;
+  }
+  const vergangen = (jetzt - Date.parse(start)) / 1000;
+  const p = Math.min(99, Math.max(0, job.progress));
+  const gesamt = p >= 5 ? vergangen * 100 / p : null;
+  return (
+    <Text size="1" color="gray"
+          style={{ fontVariantNumeric: "tabular-nums" }}>
+      {gesamt
+        ? tr("job.zeit", { v: mmss(vergangen), g: mmss(gesamt) })
+        : tr("job.zeit.offen", { v: mmss(vergangen) })}
+    </Text>
+  );
+}
+
 function JobZeile({ job, onEdit }: {
   job: Job; onEdit: (id: string) => void;
 }) {
@@ -217,7 +255,12 @@ function JobZeile({ job, onEdit }: {
             {tr("bib.abbrechen")}</Button>
         )}
       </Flex>
-      {!fertig && <Progress value={job.progress} />}
+      {!fertig && (
+        <Flex align="center" gap="3">
+          <div style={{ flex: 1 }}><Progress value={job.progress} /></div>
+          <Laufzeit job={job} />
+        </Flex>
+      )}
       {job.status === "failed" && (
         <Text size="1" color="red">
           {tr("bib.jobfehler", { e: job.error ?? "?" })}</Text>

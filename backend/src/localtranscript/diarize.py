@@ -153,12 +153,21 @@ def _load_audio_16k(audio_path: str) -> tuple[torch.Tensor, int]:
 
 
 def _embed_windows(waveform: torch.Tensor, sr: int,
-                   windows: list[tuple[float, float]]) -> np.ndarray:
-    """Run ECAPA on each (start, end) window. Returns (N, 192) array."""
+                   windows: list[tuple[float, float]],
+                   fortschritt=None) -> np.ndarray:
+    """Run ECAPA on each (start, end) window. Returns (N, 192) array.
+
+    `fortschritt(i, n)` wird alle 10 Fenster gerufen — ohne diese
+    Meldung stünde der Job-Fortschritt über die ganze Diarisierung
+    still, und die Restzeit-Schätzung blähte sich auf (User-Befund
+    2026-09-09: „00:54 von ~08:58", danach Sprung auf ~04:55).
+    """
     encoder = _get_embedder()
     out = []
     with torch.no_grad():
-        for s, e in windows:
+        for i, (s, e) in enumerate(windows):
+            if fortschritt is not None and i % 10 == 0:
+                fortschritt(i, len(windows))
             i0 = max(0, int(s * sr))
             i1 = min(waveform.shape[1], int(e * sr))
             chunk = waveform[:, i0:i1]
@@ -240,6 +249,7 @@ def diarize_audio(
     min_speakers: int = 0,
     max_speakers: int = 0,
     threshold: float = 0.5,
+    fortschritt=None,
 ) -> list[SpeakerSegment]:
     """Diarize an audio file. Returns list of SpeakerSegment."""
     audio_path = str(Path(audio_path).resolve())
@@ -272,7 +282,8 @@ def diarize_audio(
         return []
 
     print(f"Embedding {len(all_windows)} windows...")
-    embeddings = _embed_windows(waveform, sr, all_windows)
+    embeddings = _embed_windows(waveform, sr, all_windows,
+                                fortschritt)
     if len(embeddings) == 0:
         return []
 
