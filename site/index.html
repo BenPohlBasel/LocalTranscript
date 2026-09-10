@@ -97,8 +97,10 @@ main>section.dpo{background:var(--dunkel)}
 /* Kopfleiste */
 header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:5}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:3.5rem}
-/* Seitenmarke oben links: B/IAS als Wortmarke, serifenlos (Recursive Sans) */
-.brand{font-variation-settings:'CASL' 0,'MONO' 0;font-weight:700;letter-spacing:.01em;color:#000;text-decoration:none;font-size:1.15rem}
+/* Seitenmarke oben links: B/IAS. Recursive hat in jedem Schnitt ein
+   I mit Querbalken (kein Stilsatz nimmt sie weg) — die Wortmarke steht
+   darum in der Systemschrift, fett, ohne fremden Abruf. */
+.brand{font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;font-weight:700;letter-spacing:.01em;color:#000;text-decoration:none;font-size:1.2rem}
 .brand:hover{text-decoration:none}
 .right{display:flex;align-items:center;gap:1.25rem}
 .right a.nav{font-size:.92rem;color:#000;text-decoration:none}
