@@ -2,7 +2,7 @@
 // (inkl. Recursive-OFL-Nennung — Pflicht, Fonts liegen im Bundle).
 import { useEffect, useState } from "react";
 import {
-  Button, Flex, Grid, Karte, LabeledSelect, Text,
+  Button, Flex, Grid, Karte, LabeledSelect, Text, TextField,
 } from "../components/ui";
 import {
   apiGet, apiSend, errMsg, type ModellInfo, type Settings,
@@ -32,6 +32,10 @@ export default function EinstellungenModule({ settings, onChange }: {
     void apiSend<Settings>("/api/settings", aend)
       .then(onChange).catch((e) => setFehler(errMsg(e)));
   };
+  // E-Mail: lokal tippen, beim Verlassen des Feldes oder Enter sichern
+  const [mail, setMail] = useState(settings?.user_email ?? "");
+  useEffect(() => { setMail(settings?.user_email ?? ""); },
+            [settings?.user_email]);
   if (!settings) return null;
 
   return (
@@ -90,6 +94,33 @@ export default function EinstellungenModule({ settings, onChange }: {
           <Text size="1" color="gray" mt="2" as="div">
             {tr("st.modelle", { d: modelsDir })}</Text>
         )}
+      </Karte>
+
+      <Karte titel={tr("st.identitaet")} subline={tr("st.identitaet.sub")}>
+        <Flex direction="column" gap="3">
+          <Flex direction="column" gap="1">
+            <Text size="1" weight="medium">{tr("st.email")}</Text>
+            <TextField.Root size="2" type="email" value={mail}
+              placeholder="name@institut.ch"
+              onChange={(e) => setMail(e.target.value)}
+              onBlur={() => { if (mail.trim() !== settings.user_email)
+                setze({ user_email: mail.trim() }); }}
+              onKeyDown={(e) => { if (e.key === "Enter")
+                (e.target as HTMLInputElement).blur(); }} />
+            <Text size="1" color="gray">{tr("st.email.hinweis")}</Text>
+          </Flex>
+          <Flex direction="column" gap="1">
+            <Text size="1" weight="medium">{tr("st.install")}</Text>
+            <Flex gap="2" align="center" wrap="wrap">
+              <Text size="1" style={{ fontFamily: "monospace" }}>
+                {settings.install_id}</Text>
+              <Button size="1" variant="soft"
+                      onClick={() => setze({ install_id: "neu" })}>
+                {tr("st.install.neu")}</Button>
+            </Flex>
+            <Text size="1" color="gray">{tr("st.install.hinweis")}</Text>
+          </Flex>
+        </Flex>
       </Karte>
 
       <Karte titel={tr("st.datenschutz")}>

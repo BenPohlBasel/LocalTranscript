@@ -54,6 +54,10 @@ export type Settings = {
   /** gleichzeitige Läufe, 1–4 (Standard 1 = nacheinander) */
   max_parallel: number;
   cluster_threshold: number; ui_language: string;
+  /** freiwillig: steht als Person im Journal exportierter Dossiers */
+  user_email: string;
+  /** zufällige Kennung dieser Installation (nie Gerät, nie Person) */
+  install_id: string;
 };
 export type ModellInfo = { name: string; size_mb: number };
 
