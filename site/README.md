@@ -98,6 +98,23 @@ Beide sagen ausdrücklich, was NICHT abgedeckt ist: Backups und
 Diagnosedaten von macOS, und dass Exporte mit Audio (.qdpx, .enrich.zip)
 die Aufnahme samt Stimme und Klarnamen tragen.
 
+## Schrift und Kontrast
+
+Schrift ist schwarz oder weiss — nie grau, nie farbig. Farbe (das Lila
+des Zeichens) steht nur als Fläche (Knöpfe, Schrittzahl, Tabellenspalte)
+oder als Linie (Unterstrich der Links). Auf dem dunklen Datenschutz-
+Abschnitt weiss, sonst schwarz.
+
+Geprüft mit `node site/docs/pruefe-kontrast.mjs`: jedes Text/Grund-Paar
+bei 1440, 820 und 390 px auf 4.5:1, jede Schriftfarbe auf schwarz oder
+weiss, nichts ragt über den Rand, nichts scrollt waagrecht. Die
+Vergleichstabelle scrollt absichtlich in ihrem eigenen Rahmen.
+
+Ein Fehler, den der Test gefunden hat: Die Wechselfarbe der Abschnitte
+(`main>section:nth-child(even)`) ist spezifischer als `.dpo` und
+überschrieb dessen dunklen Grund — der Datenschutz-Abschnitt stand
+hellgrau mit weisser Schrift. Darum `main>section.dpo`.
+
 ## Farbe
 
 Ein Ton, in Stufen: `--lila-600` (#4f46e5) trägt Knöpfe und Links,
