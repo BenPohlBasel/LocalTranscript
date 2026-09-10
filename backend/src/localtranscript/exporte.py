@@ -102,7 +102,7 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
         # Konvention, Schicht-Köpfe, Transkript als Quelle mit origin je
         # Record, Inventar mit Hash für jede Datei, Journal verkettet.
         from .format2 import baue_container
-        return baue_container(daten, d.path, audio, stamm)
+        return baue_container(daten, d, stamm)
 
 
 def packe_verzeichnis(ordner: Path) -> bytes:

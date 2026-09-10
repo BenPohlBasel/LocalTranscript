@@ -36,9 +36,9 @@ def test_transkript_ist_registrierte_quelle(client, eintrag):
     z = zipfile.ZipFile(io.BytesIO(inhalt))
     w = z.namelist()[0].split("/", 1)[0]
     m = json.loads(z.read(f"{w}/manifest.json"))
-    f = m["files"]["source/transcript.json"]
+    f = m["files"]["transcript.json"]
     assert f["role"] == "layer" and f["layer"] in m["layers"]
-    t = json.loads(z.read(f"{w}/source/transcript.json"))
+    t = json.loads(z.read(f"{w}/transcript.json"))
     assert t["kind"] == "transcript" and t["schema"] == "transcript/1.0.0"
     assert t["segments"] and all("origin" in s for s in t["segments"])
 
@@ -168,8 +168,8 @@ def test_inventar_erkennt_veraenderte_datei(client, eintrag):
     with zipfile.ZipFile(aus, "w", zipfile.ZIP_STORED) as neu:
         for i in alt.infolist():
             roh = alt.read(i.filename)
-            if i.filename.endswith("/text/clean.json"):
+            if i.filename.endswith("/3-text-clean.json"):
                 roh = roh.replace(b"Hallo", b"Hallx")
             neu.writestr(i, roh)
-    with pytest.raises(paket.PaketFehler, match="clean.json ver"):
+    with pytest.raises(paket.PaketFehler, match="3-text-clean.json ver"):
         paket.lies(aus.getvalue())

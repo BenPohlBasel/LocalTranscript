@@ -40,10 +40,11 @@ def test_txt(client, eintrag):
 
 
 def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
-    """Der Export ist ein Format-2-Container (FORMAT.md): eine Wurzel,
-    Konvention source/ text/, Schicht-Köpfe, Inventar mit Hash für
-    JEDE Datei. Der Inhalt der Text-Schichten ist der aus textsatz:
-    main = reine Rede, Label-Zeilen im other-Strom."""
+    """Der Export ist ein Format-2-Container, wie enrich ihn heute
+    schreibt (Nummern, Wurzel): eine Wurzel, Inventar mit Hash für JEDE
+    Datei, Lineage, das Transkript als Quelle, das PDF als Lesefassung.
+    Der Inhalt der Text-Schichten ist der aus textsatz: main = reine
+    Rede, Label-Zeilen im other-Strom."""
     r = client.get(f"/api/transcripts/{eintrag}/export/enrich")
     assert r.status_code == 200, r.text
     z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -51,21 +52,21 @@ def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
     assert len(wurzeln) == 1 and next(iter(wurzeln)).endswith(".enrich")
     w = next(iter(wurzeln))
     m = json.loads(z.read(f"{w}/manifest.json"))
-    assert m["format"] == 2 and m["analyse_kette"] == "narrativ"
-    assert m["source"] == {"kind": "transcript",
-                           "canonical": "source/transcript.json",
-                           "rendered": "source/document.pdf"}
-    t1 = json.loads(z.read(f"{w}/text/clean.json"))
+    assert m["analyse_kette"] == "narrativ" and m["profile"] == "handover"
+    assert m["source"] == {"kind": "transcript", "canonical": "transcript.json",
+                           "media": None, "rendered": "source.pdf"}
+    assert m["producer"] == {"app": "localtranscript", "version": m["producer"]["version"]}
+    t1 = json.loads(z.read(f"{w}/3-text-clean.json"))
     assert t1["kind"] == "text-clean" and t1["origin"] == "machine"
     haupt = t1["streams"]["main"]
     assert haupt.startswith("Hallo und willkommen")
     assert "Anna" not in haupt and "[00:" not in haupt
     other = t1["streams"].get("other", "")
     assert "Anna" in other and "[00:00:00]" in other
-    zk = json.loads(z.read(f"{w}/text/timemap.json"))
+    zk = json.loads(z.read(f"{w}/2z-zeitkarte.json"))
     assert len(zk["einheiten"]) == 2 and zk["einheiten"][1]["speaker"] == "Ben"
-    assert z.read(f"{w}/source/document.pdf")[:5] == b"%PDF-"
-    assert m["files"]["source/document.pdf"]["role"] == "rendered"
+    assert z.read(f"{w}/source.pdf")[:5] == b"%PDF-"
+    assert m["files"]["source.pdf"]["role"] == "rendered"
 
 
 def test_export_in_datei(client, eintrag, tmp_path):

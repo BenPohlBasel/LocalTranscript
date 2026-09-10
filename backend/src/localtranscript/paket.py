@@ -129,12 +129,16 @@ def lies(daten: bytes) -> dict:
 
     with z:
         from . import format2
-        m2 = format2.ist_format2(z)
-        if m2 is not None:
+        f2 = format2.manifest_format2(z)
+        if f2 is not None:
             try:
-                return format2.lies(z, m2)
+                p2 = format2.lies(z, *f2)
             except ValueError as e:
                 raise PaketFehler(str(e)) from e
+            if p2 is not None:
+                return p2
+            # enrich-eigenes Transkript-Dossier (Quelle = T0): weiter
+            # unten über die Zeitkarte, wie Format 1
         tj = _mitglied(z, "transkript.json")
         name = ""
         genau = tj is not None

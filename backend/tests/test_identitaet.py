@@ -44,15 +44,23 @@ def test_email_freiwillig_und_geprueft(client):
 
 def test_export_traegt_app_install_und_email(client, eintrag):
     client.post("/api/settings", json={"user_email": "nora@uni.ch"})
+    # eine Schreibung NACH dem Hinterlegen — die trägt die Person; der
+    # Import-Run davor bleibt ehrlich ohne (wer damals schrieb, war anonym)
+    d = client.get(f"/api/transcripts/{eintrag}").json()
+    d["segmente"][0]["text"] = "Geprüft."
+    client.put(f"/api/transcripts/{eintrag}",
+               json={"sprecher": d["sprecher"], "segmente": d["segmente"]})
     inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
     z = zipfile.ZipFile(io.BytesIO(inhalt))
     tj = json.loads(_teil(z, "transcript.json"))
-    wer = json.loads(_teil(z, "manifest.json"))["producer"]
-    assert wer["user"] == "nora@uni.ch"
-    assert wer["app"].startswith("localtranscript/")
-    assert wer["install"].startswith("ins-")
+    m = json.loads(_teil(z, "manifest.json"))
+    assert m["producer"]["app"] == "localtranscript"
+    eigene = [r for r in m["runs"] if r["tool"] == "localtranscript"]
+    assert eigene and all(r["who"]["install"].startswith("ins-") for r in eigene)
+    assert eigene[0]["who"]["user"] is None and eigene[-1]["who"]["user"] == "nora@uni.ch"
+    assert eigene[-1]["origin"] == "human" and eigene[-1]["agent"]["user"] == "nora@uni.ch"
+    assert tj["by"]["user"] == "nora@uni.ch"
     manifest = _teil(z, "manifest.json").decode()
-    assert "nora@uni.ch" in manifest          # producer + Gate-Freigaben
     host = socket.gethostname()               # nie eine Geräte-Kennung
     assert host not in manifest and host not in json.dumps(tj)
 
@@ -60,5 +68,6 @@ def test_export_traegt_app_install_und_email(client, eintrag):
 def test_ohne_email_steht_die_app_im_dossier(client, eintrag):
     inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
     z = zipfile.ZipFile(io.BytesIO(inhalt))
-    assert "user" not in json.loads(_teil(z, "manifest.json"))["producer"]
-    assert f"localtranscript/{config.APP_VERSION}" in _teil(z, "manifest.json").decode()
+    m = json.loads(_teil(z, "manifest.json"))
+    assert all(r["who"]["user"] is None for r in m["runs"] if r["tool"] == "localtranscript")
+    assert m["producer"] == {"app": "localtranscript", "version": config.APP_VERSION}
