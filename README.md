@@ -245,8 +245,9 @@ trademarks — no such claim is made here. The REFI schemas (XSD) are
 references the schema URL, so the MIT attribution requirement does not
 apply.
 
-**enrich dossier (`.enrich`).** The format specification is under
-the **MIT licence** (BIAS.City).
+**enrich dossier (`.enrich`).** The format is described in
+`FORMAT.md` in the enrich repository — Format 1 as it is, Format 2 as a
+proposal — under the **MIT licence** (B/IAS).
 
 **WebVTT** (W3C) · **CSV** · **TXT** are open and unrestricted.
 
