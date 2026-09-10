@@ -83,8 +83,8 @@ registrazioni.
 - **Che cosa l'app non decide:** quali informazioni sostituire — luoghi,
   datori di lavoro, eventi. Resta una decisione di chi fa ricerca.
 - **La registrazione resta quella che è.** La pseudonimizzazione
-  riguarda il testo. Le esportazioni REFI-QDA (`.qdpx`) e dossier enrich
-  (`.enrich.zip`) contengono il file audio con voce e nomi reali;
+  riguarda il testo. Le esportazioni REFI-QDA (`.qdpx.zip`) e dossier enrich
+  (`.enrich`) contengono il file audio con voce e nomi reali;
   WebVTT, CSV e testo contengono solo il testo. Chi vuole consegnare
   solo dati pseudonimizzati consegna un formato di testo.
 

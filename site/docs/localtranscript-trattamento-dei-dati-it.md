@@ -62,7 +62,7 @@ personali `[sì / no: …]`.
    (HTTP 421). I dati diagnostici del sistema macOS sono regolati dalle
    sue impostazioni di sistema, non dal software.
 5. **Uscita.** I file di esportazione (WebVTT, CSV, testo, REFI-QDA
-   `.qdpx`, dossier enrich `.enrich.zip`) vengono scritti dove chi opera
+   `.qdpx`, dossier enrich `.enrich`) vengono scritti dove chi opera
    li salva. **Le esportazioni REFI-QDA ed enrich contengono la
    registrazione audio.** Consegnarle significa consegnare la
    registrazione.

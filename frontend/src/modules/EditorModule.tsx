@@ -403,13 +403,14 @@ export default function EditorModule({ id, onExit }: {
   const [exportNote, setExportNote] = useState("");
   const exportiere = useCallback(async (format: string) => {
     setExportNote("");
-    const endung = format === "enrich" ? "enrich.zip"
-      : format === "qdpx" ? "qdpx.zip" : format;
+    // .enrich ist EINE Datei (ein Zip, wie .docx) und heisst nach dem,
+    // was drin ist. .qdpx.zip bleibt: darin liegt das .qdpx UND daneben
+    // der Media-Ordner mit dem Audio, wie ATLAS.ti es exportiert.
+    const endung = format === "qdpx" ? "qdpx.zip" : format;
     try {
       if (isTauri()) {
         const p = await savePath(`${name || "transkript"}.${endung}`,
-                                 format === "enrich" || format === "qdpx"
-                                   ? "zip" : format);
+                                 format === "qdpx" ? "zip" : format);
         if (!p) return;
         await apiSend(`/api/transcripts/${id}/export`,
                       { format, path: p });

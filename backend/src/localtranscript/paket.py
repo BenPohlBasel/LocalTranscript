@@ -1,4 +1,4 @@
-"""Das .enrich-Paket LESEN — die Gegenrichtung zu exporte._enrich_zip.
+"""Das .enrich-Paket LESEN — die Gegenrichtung zu exporte._enrich_paket.
 
 Zweck (User 2026-09-09): ein Transkript an Kolleginnen und Kollegen
 geben, die im Human-Editor weiterarbeiten. Ein Paket, zwei Fähigkeiten
@@ -95,6 +95,30 @@ def _t1(z: zipfile.ZipFile) -> str:
         return ""
 
 
+def ist_paket(p) -> bool:
+    """Ein enrich-Dossier: EINE Datei .enrich (ein Zip, wie .docx) — oder
+    dasselbe als Verzeichnis, wie enrich es beim Arbeiten ablegt (auf dem
+    Mac ein Package). Ein «.enrich.zip» gibt es nicht mehr (User
+    2026-09-10); was frühere Versionen so nannten, wird still weiter
+    gelesen, damit nichts Altes bricht."""
+    p = Path(p)
+    name = p.name.lower()
+    if p.is_dir():
+        return name.endswith(".enrich")
+    return name.endswith((".enrich", ".enrich.zip"))
+
+
+def lies_pfad(p) -> dict:
+    """Wie lies(), nimmt aber einen Pfad — Datei ODER Verzeichnis. Ein
+    Verzeichnis wird im Speicher gepackt und durch denselben Leser
+    geschickt; so gibt es genau EINE Lesart."""
+    p = Path(p)
+    if p.is_dir():
+        from .exporte import packe_verzeichnis
+        return lies(packe_verzeichnis(p))
+    return lies(p.read_bytes())
+
+
 def lies(daten: bytes) -> dict:
     """Paket-Bytes → {name, segmente, sprecher, audio_name, audio_bytes,
     genau} — `genau` sagt, ob die kanonische Beilage gefunden wurde."""
@@ -149,6 +173,3 @@ def lies(daten: bytes) -> dict:
             "genau": genau}
 
 
-def ist_paket(pfad_oder_name: str) -> bool:
-    """Endung, die `lies` versuchen darf."""
-    return Path(pfad_oder_name).suffix.lower() == ".zip"

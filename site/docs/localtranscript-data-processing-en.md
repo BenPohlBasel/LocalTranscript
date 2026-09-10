@@ -57,8 +57,8 @@ conversation, special categories of personal data may be involved
    loopback address `127.0.0.1` and rejects requests from any other host
    (HTTP 421). Diagnostic data of the macOS operating system is governed
    by its system settings, not by the software.
-5. **Output.** Export files (WebVTT, CSV, plain text, REFI-QDA `.qdpx`,
-   enrich dossier `.enrich.zip`) are written wherever the operator saves
+5. **Output.** Export files (WebVTT, CSV, plain text, REFI-QDA `.qdpx.zip`,
+   enrich dossier `.enrich`) are written wherever the operator saves
    them. **REFI-QDA and enrich exports contain the audio recording.**
    Passing them on is passing on the recording.
 

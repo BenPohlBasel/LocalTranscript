@@ -37,7 +37,7 @@ export async function pickTranskript(): Promise<string | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
   const r = await open({ multiple: false, filters: [{
     name: "Transkript",
-    extensions: ["vtt", "webvtt", "csv", "zip"] }] });
+    extensions: ["vtt", "webvtt", "csv", "enrich"] }] });
   return typeof r === "string" ? r : null;
 }
 

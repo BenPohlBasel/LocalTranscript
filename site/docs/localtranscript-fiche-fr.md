@@ -84,8 +84,8 @@ enregistrements.
   remplacer — lieux, employeurs, événements. Cela reste la décision de
   la personne qui fait la recherche.
 - **L'enregistrement reste ce qu'il est.** La pseudonymisation porte
-  sur le texte. Les exports REFI-QDA (`.qdpx`) et dossier enrich
-  (`.enrich.zip`) contiennent le fichier audio avec la voix et les noms
+  sur le texte. Les exports REFI-QDA (`.qdpx.zip`) et dossier enrich
+  (`.enrich`) contiennent le fichier audio avec la voix et les noms
   réels ; WebVTT, CSV et texte ne contiennent que le texte. Qui ne veut
   transmettre que des données pseudonymisées transmet un format texte.
 

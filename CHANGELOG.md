@@ -3,6 +3,24 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## Unreleased
+
+### Changed
+
+- **The enrich dossier is one file: `.enrich`.** The export no longer
+  writes `.enrich.zip` but `<name>.enrich` — a zip container like
+  `.docx` or `.qdpx`, stored without compression (the audio inside does
+  not compress anyway). enrich opens it by content. On macOS the app
+  declares the dossier type, so a `.enrich` shows as a single document
+  whether or not enrich is installed.
+- **Import takes the dossier in both forms:** the `.enrich` file, and
+  the dossier folder as enrich keeps it while working (a package on
+  macOS) — chosen in the dialog or dropped onto the Human Editor list.
+  Files named `.enrich.zip` by earlier versions are still read; they are
+  just no longer produced or offered.
+- Drag and drop onto the Human Editor list imports `.enrich`, `.vtt`
+  and `.csv` files.
+
 ## 2.2.0 — 2026-09-09
 
 Requires macOS 14 or later, Apple Silicon. Signed with a Developer ID
