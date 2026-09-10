@@ -292,8 +292,12 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         </ol>
         <p data-t="g6c"></p>
       </div>
-      <div class="shot"><img data-img="import" src="img/import-de.png"
-        width="1200" height="750" alt="" data-alt="altImport"></div>
+      <div>
+        <div class="shot"><img data-img="import" src="img/import-de.png"
+          width="1200" height="750" alt="" data-alt="altImport"></div>
+        <div class="shot" style="margin-top:1rem"><img src="img/import-dialog.png"
+          width="1200" height="314" alt="" data-alt="altImportDialog"></div>
+      </div>
     </div>
     <div class="row schritt gross">
       <div class="t">
@@ -1408,6 +1412,7 @@ de:{
   altExport:"Geöffnetes Export-Menü mit allen Formaten",
   altLibrary:"Bibliotheksliste mit einem Transkript",
   altImport:"Human-Editor mit dem Knopf «Transkript importieren» oben links",
+  altImportDialog:"Erster Dialog des Imports: die .vtt ist wählbar, die gleichnamige .mp3 daneben ausgegraut — sie kommt im zweiten Schritt",
   altFind:"Panel Suchen und Ersetzen mit Trefferzähler",
   altSettings:"Einstellungen mit Speicherort, Lizenzen und Formaten",
 
@@ -1502,6 +1507,7 @@ en:{
   altExport:"Open export menu with all formats",
   altLibrary:"Library list with one transcript",
   altImport:"Human Editor with the “Import transcript” button at the top left",
+  altImportDialog:"First import dialog: the .vtt can be chosen, the .mp3 of the same name next to it is greyed out — it comes in the second step",
   altFind:"Find and replace panel with match counter",
   altSettings:"Settings with storage location, licences and formats",
 
@@ -1596,6 +1602,7 @@ fr:{
   altExport:"Menu d'export ouvert avec tous les formats",
   altLibrary:"Liste de la bibliothèque avec une transcription",
   altImport:"Éditeur humain avec le bouton « Importer une transcription » en haut à gauche",
+  altImportDialog:"Première boîte de dialogue de l'import : le .vtt est sélectionnable, le .mp3 du même nom à côté est grisé — il vient à la seconde étape",
   altFind:"Panneau Rechercher et remplacer avec compteur d'occurrences",
   altSettings:"Réglages avec emplacement, licences et formats",
 
@@ -1690,6 +1697,7 @@ it:{
   altExport:"Menu di esportazione aperto con tutti i formati",
   altLibrary:"Elenco della libreria con una trascrizione",
   altImport:"Editor umano con il pulsante « Importa trascrizione » in alto a sinistra",
+  altImportDialog:"Prima finestra dell'importazione: il .vtt è selezionabile, l'.mp3 con lo stesso nome accanto è disattivato — arriva al secondo passo",
   altFind:"Pannello Cerca e sostituisci con contatore delle occorrenze",
   altSettings:"Impostazioni con posizione, licenze e formati",
 
@@ -1790,8 +1798,8 @@ function setLang(l, inDieUrl){
     if(HTML_KEYS.has(k)) el.innerHTML = v; else el.textContent = v;
   });
   /* Bildschirmfotos gibt es je Sprache: img/<name>-<lang>.png */
-  document.querySelectorAll('img[data-img]').forEach(im=>{
-    im.src = 'img/' + im.dataset.img + '-' + l + '.png';
+  document.querySelectorAll('img[data-img], img[data-alt]').forEach(im=>{
+    if(im.dataset.img) im.src = 'img/' + im.dataset.img + '-' + l + '.png';
     const a = im.dataset.alt;
     if(a) im.alt = (a in t) ? t[a] : (T.de[a] || im.alt);
   });
