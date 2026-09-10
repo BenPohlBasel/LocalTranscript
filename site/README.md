@@ -56,13 +56,20 @@ Schriftkanten leiden).
 
 ## Textbausteine (docs/)
 
-Zwei Markdown-Dateien je Sprache, im Datenschutz-Abschnitt zum
-Herunterladen. Die Knöpfe speichern die Datei als Blob aus Text, der
-in `index.html` eingebettet ist — das `download`-Attribut allein tut
-das nur von einem Server aus; von `file://` öffnen Chromium und WebKit
-die .md im Fenster. Die Dateien in `docs/` bleiben die Quelle; nach
-jeder Änderung daran `python3 site/docs/einbetten.py` laufen lassen,
-sonst lädt der Knopf den alten Stand:
+Zwei Textbausteine je Sprache, als Markdown und als Word-Datei, im
+Abschnitt «Texte für Datenschutz und Methodenteil» in einem
+Vorschaufenster lesbar und von dort zu speichern. Die Knöpfe bauen die
+Datei als Blob aus Inhalt, der in `index.html` eingebettet ist (die .md
+als Klartext, die .docx als Base64, zusammen 190 KB) — das
+`download`-Attribut allein tut das nur von einem Server aus; von
+`file://` öffnen Chromium und WebKit die Datei im Fenster.
+
+Die `.md` in `docs/` bleiben die Quelle. Nach jeder Änderung daran:
+
+    python3 site/docs/einbetten.py
+
+Das erzeugt die `.docx` mit pandoc neu und spielt beides in
+`index.html` ein. Ohne diesen Lauf lädt der Knopf den alten Stand.
 
 - **Verfahrensbeschreibung** — in Sachform, zehn Abschnitte nach dem
   Muster eines Verfahrensverzeichnisses, mit `[eckigen Klammern]` für

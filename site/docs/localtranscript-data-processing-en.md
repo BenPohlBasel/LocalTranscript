@@ -5,10 +5,10 @@ protection impact assessment, an ethics application or a data
 management plan. As of 10 September 2026, LocalTranscript 2.2.0. Items
 in `[square brackets]` are completed by the controller.
 
-A note first: a program cannot be "GDPR compliant" — processing can.
-This text describes what the software does and does not do. Whether the
-processing carried out with it satisfies the GDPR or the revised Swiss
-FADP is for the controller to judge. The text is not legal advice.
+The text describes what the software does and does not do. The legal
+assessment of the controller's own processing — under the GDPR or the
+revised Swiss FADP — is made by the controller; the text is no
+substitute for legal advice.
 
 ---
 

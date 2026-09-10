@@ -6,10 +6,9 @@ domanda al comitato etico o un piano di gestione dei dati. Stato al
 10 settembre 2026, LocalTranscript 2.2.0. Le voci tra `[parentesi
 quadre]` vengono completate dal titolare del trattamento.
 
-Nota preliminare: un programma non può essere « conforme al GDPR » —
-può esserlo un trattamento. Questo testo descrive che cosa il software
-fa e che cosa non fa. Se il trattamento svolto con esso soddisfi il GDPR
-o la nLPD svizzera lo giudica il titolare. Il testo non costituisce
+Il testo descrive che cosa il software fa e che cosa non fa. La
+qualificazione giuridica del proprio trattamento — secondo il GDPR o la
+nLPD svizzera — spetta al titolare; il testo non sostituisce una
 consulenza legale.
 
 ---
