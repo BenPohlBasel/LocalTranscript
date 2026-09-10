@@ -58,8 +58,9 @@ li{margin:.35rem 0}
 body{font-size:clamp(1rem,.85rem + .35vw,1.15rem)}
 section{padding:4.5rem 0}
 @media (max-width:640px){section{padding:3rem 0}}
-section+section{border-top:1px solid var(--line)}
-.hero+section{border-top:0}   /* keine Linie unter dem Hero-Fenster */
+/* Abschnitte trennen sich durch Farbe, nicht durch Linien: jeder
+   zweite auf dem Waschton, der Datenschutz-Abschnitt dunkel. */
+main>section:nth-child(even){background:var(--wash)}
 .row{display:flex;flex-wrap:wrap;gap:.9rem 3rem;align-items:flex-start}
 .row>:first-child{flex:0 0 min(100%,17rem)}
 .row>:last-child{flex:1 1 30rem;min-width:0}
@@ -123,7 +124,7 @@ h1 .initial{width:.92em;height:.92em;display:inline-block;vertical-align:-.1em;m
 .shot img{width:100%}
 
 /* Code-Marke (Drei Dinge) */
-code{font-variation-settings:'MONO' 1;font-size:.9rem;background:var(--wash);border:1px solid var(--line);border-radius:.3rem;padding:.15rem .45rem}
+code{font-variation-settings:'MONO' 1;font-size:.9rem;background:var(--paper);border:1px solid var(--line);border-radius:.3rem;padding:.15rem .45rem}
 
 /* Vergleichstabelle */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -138,8 +139,7 @@ tbody tr:last-child td,tbody tr:last-child th{border-bottom:1px solid var(--line
 .fn{font-size:.82rem;color:var(--ink-2);margin-top:1rem;max-width:70ch}
 
 /* Dunkler Abschnitt: dieselben Zeilen, andere Farben */
-.dpo{background:var(--dunkel);color:var(--dunkel-ink);border-top:0}
-.dpo+section{border-top:0}
+.dpo{background:var(--dunkel);color:var(--dunkel-ink)}
 .dpo h2,.dpo h3{color:#fff}
 .dpo a{color:var(--lila-300)}
 .dpo .lede,.dpo .row .t p,.dpo .row .t li,.dpo .small{color:var(--dunkel-ink-2)}
@@ -162,7 +162,7 @@ tbody tr:last-child td,tbody tr:last-child th{border-bottom:1px solid var(--line
 .viewer-note{margin-top:1rem;max-width:62ch}
 
 /* Fusszeile: dieselbe Zeile, kleiner */
-footer{padding:2.5rem 0 3rem;font-size:.88rem;color:var(--ink-2);border-top:1px solid var(--line)}
+footer{padding:2.5rem 0 3rem;font-size:.88rem;color:var(--ink-2);background:var(--wash)}
 footer .row>:first-child{flex:1 1 24rem}
 footer .row>:last-child{flex:1 1 20rem}
 footer address{font-style:normal}
