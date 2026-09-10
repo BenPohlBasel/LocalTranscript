@@ -54,6 +54,24 @@ mit Pillow auf Breite bringen und als PNG-8 sichern (256 Farben ohne
 Dithering — UI-Flächen sind flach, das spart zwei Drittel, ohne dass die
 Schriftkanten leiden).
 
+## Textbausteine (docs/)
+
+Zwei Markdown-Dateien je Sprache, im Datenschutz-Abschnitt zum
+Herunterladen verlinkt (`download`-Attribut, Datei je Sprache über
+`data-doc` im Skript):
+
+- **Verfahrensbeschreibung** — in Sachform, zehn Abschnitte nach dem
+  Muster eines Verfahrensverzeichnisses, mit `[eckigen Klammern]` für
+  das, was nur die verantwortliche Stelle weiss. Zum Einfügen in
+  Verfahrensverzeichnis, DSFA, Ethikantrag, Datenmanagementplan.
+- **App-Blatt für Forschende** — welche KI was tut (Tabelle), wo der
+  Code liegt, warum nichts den Rechner verlässt, wie Namen ersetzt
+  werden, plus ein fertiger Satz für den Methodenteil.
+
+Beide sagen ausdrücklich, was NICHT abgedeckt ist: Backups und
+Diagnosedaten von macOS, und dass Exporte mit Audio (.qdpx, .enrich.zip)
+die Aufnahme samt Stimme und Klarnamen tragen.
+
 ## Farbe
 
 Ein Ton, in Stufen: `--lila-600` (#4f46e5) trägt Knöpfe und Links,
