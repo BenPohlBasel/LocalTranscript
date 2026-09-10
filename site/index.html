@@ -357,12 +357,12 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <tbody>
           <tr><th data-t="r1"></th><td class="us" data-t="r1a"></td><td data-t="r1b"></td><td data-t="r1c"></td><td data-t="r1d"></td><td data-t="r1e"></td></tr>
           <tr><th data-t="r2"></th><td class="us">AGPL-3.0</td><td data-t="no"></td><td data-t="no"></td><td data-t="yes"></td><td data-t="no"></td></tr>
-          <tr><th data-t="r3"></th><td class="us" data-t="r3a"></td><td data-t="r3b"></td><td data-t="yes"></td><td data-t="yes"></td><td data-t="no"></td></tr>
+          <tr><th data-t="r3"></th><td class="us" data-t="r3a"></td><td data-t="r3b"></td><td data-t="yes"></td><td data-t="r3d"></td><td data-t="no"></td></tr>
           <tr><th data-t="r4"></th><td class="us" data-t="r4a"></td><td data-t="r4b"></td><td data-t="no"></td><td data-t="r4d"></td><td data-t="yes"></td></tr>
           <tr><th data-t="r5"></th><td class="us" data-t="r5a"></td><td data-t="r5b"></td><td data-t="r5c"></td><td data-t="r5d"></td><td data-t="r5e"></td></tr>
           <tr><th data-t="r6"></th><td class="us" data-t="r6a"></td><td data-t="no"></td><td data-t="no"></td><td data-t="no"></td><td data-t="r6e"></td></tr>
           <tr><th data-t="r7"></th><td class="us">DE · EN · FR · IT</td><td>EN</td><td>EN</td><td data-t="r7d"></td><td data-t="r7e"></td></tr>
-          <tr><th data-t="r8"></th><td class="us">macOS (Apple Silicon)</td><td>macOS</td><td>macOS, iOS</td><td>macOS, Windows, Linux</td><td data-t="r8e"></td></tr>
+          <tr><th data-t="r8"></th><td class="us">macOS (Apple Silicon)</td><td>macOS</td><td>macOS, iOS, visionOS</td><td>macOS, Windows, Linux</td><td data-t="r8e"></td></tr>
           <tr><th data-t="r9"></th><td class="us" data-t="r9a"></td><td data-t="r9b"></td><td data-t="r9c"></td><td data-t="r9d"></td><td data-t="r9e"></td></tr>
         </tbody>
       </table>
@@ -1465,16 +1465,16 @@ de:{
   cmpH:"Im Vergleich",
   cmpLede:"Es gibt gute lokale Transkriptionsprogramme für den Mac. Der Unterschied liegt weniger in der Erkennung – die kommt bei allen von Whisper – als in dem, was davor und danach passiert.",
   cCloud:"Cloud-Dienste",
-  r1:"Preis", r1a:"Kostenlos", r1b:"Kostenlos / Pro €59 einmalig; App-Store-Version im Abo", r1c:"ca. €29 einmalig", r1d:"Kostenlos", r1e:"Abo oder pro Minute",
+  r1:"Preis", r1a:"Kostenlos", r1b:"Kostenlos / Pro €64 einmalig; App-Store-Version im Abo", r1c:"ca. $24 einmalig", r1d:"Kostenlos; App-Store-Version bezahlt", r1e:"Abo oder pro Minute",
   r2:"Quellcode offen",
-  r3:"Läuft vollständig lokal", r3a:"Ja, ausschliesslich", r3b:"Ja, optional Cloud-KI",
-  r4:"Sprechertrennung", r4a:"Ja, ohne Token und Konto", r4b:"Ja, in Pro (Beta)", r4d:"Ja",
+  r3:"Läuft vollständig lokal", r3a:"Ja, ausschliesslich", r3b:"Ja, optional Cloud-KI", r3d:"Ja, optional OpenAI-API",
+  r4:"Sprechertrennung", r4a:"Ja, ohne Token und Konto", r4b:"Ja", r4d:"Ja",
   r5:"Editor mit Sprecherverwaltung", r5a:"Umbenennen, zusammenführen, neu zuweisen, Hörbeispiel", r5b:"Basis", r5c:"Nein", r5d:"Basis", r5e:"Ja",
   r6:"Export für qualitative Auswertung", r6a:"REFI-QDA (ATLAS.ti, NVivo, MAXQDA), enrich", r6e:"teilweise",
   r7:"Interface-Sprachen", r7d:"mehrere", r7e:"meist EN",
   r8:"Plattform", r8e:"Browser",
   r9:"Stärker als LocalTranscript bei", r9a:"—", r9b:"Watch-Folder, YouTube-Links, Meeting-Aufnahme, Diktat", r9c:"iPhone, Einfachheit", r9d:"Windows und Linux", r9e:"Zusammenfassungen, Teamfunktionen",
-  cmpFn:"Stand September 2026, nach Herstellerangaben. MacWhisper und Aiko sind eingetragene Produkte ihrer Entwickler. Wir haben die Tabelle nach bestem Wissen erstellt; Korrekturen nehmen wir gern per Issue entgegen.",
+  cmpFn:"Stand September 2026, geprüft an den Herstellerseiten (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko und Buzz sind Produkte ihrer Entwickler. Korrekturen nehmen wir gern per Issue entgegen.",
   yes:"Ja", no:"Nein",
   proofsH:"Sicherheit, die du selbst prüfen kannst",
   p1a:"Localhost only", p1b:"Der interne Dienst bindet ausschliesslich an localhost. Anfragen von jedem anderen Host werden mit 421 abgewiesen. Der Code dafür steht in main.py.",
@@ -1560,16 +1560,16 @@ en:{
   cmpH:"Compared",
   cmpLede:"There are good local transcription apps for the Mac. The difference is less in recognition – all of them use Whisper – than in what happens before and after.",
   cCloud:"Cloud services",
-  r1:"Price", r1a:"Free", r1b:"Free / Pro €59 one-time; App Store version as subscription", r1c:"approx. €29 one-time", r1d:"Free", r1e:"Subscription or per minute",
+  r1:"Price", r1a:"Free", r1b:"Free / Pro €64 one-time; App Store version as subscription", r1c:"approx. $24 one-time", r1d:"Free; App Store version paid", r1e:"Subscription or per minute",
   r2:"Source open",
-  r3:"Runs fully local", r3a:"Yes, exclusively", r3b:"Yes, optional cloud AI",
-  r4:"Speaker separation", r4a:"Yes, no token, no account", r4b:"Yes, in Pro (beta)", r4d:"Yes",
+  r3:"Runs fully local", r3a:"Yes, exclusively", r3b:"Yes, optional cloud AI", r3d:"Yes, optional OpenAI API",
+  r4:"Speaker separation", r4a:"Yes, no token, no account", r4b:"Yes", r4d:"Yes",
   r5:"Editor with speaker management", r5a:"Rename, merge, reassign, audio sample", r5b:"Basic", r5c:"No", r5d:"Basic", r5e:"Yes",
   r6:"Export for qualitative analysis", r6a:"REFI-QDA (ATLAS.ti, NVivo, MAXQDA), enrich", r6e:"partly",
   r7:"Interface languages", r7d:"several", r7e:"mostly EN",
   r8:"Platform", r8e:"Browser",
   r9:"Stronger than LocalTranscript at", r9a:"—", r9b:"Watch folders, YouTube links, meeting recording, dictation", r9c:"iPhone, simplicity", r9d:"Windows and Linux", r9e:"Summaries, team features",
-  cmpFn:"As of September 2026, per vendor information. MacWhisper and Aiko are products of their respective developers. Compiled to the best of our knowledge; corrections welcome as an issue.",
+  cmpFn:"As of September 2026, checked against the vendors' sites (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko and Buzz are products of their respective developers. Corrections welcome as an issue.",
   yes:"Yes", no:"No",
   proofsH:"Security you can check yourself",
   p1a:"Localhost only", p1b:"The internal service binds to localhost only. Requests from any other host are rejected with 421. The code is in main.py.",
@@ -1655,16 +1655,16 @@ fr:{
   cmpH:"En comparaison",
   cmpLede:"Il existe de bons logiciels de transcription locale pour Mac. La différence tient moins à la reconnaissance – tous utilisent Whisper – qu'à ce qui se passe avant et après.",
   cCloud:"Services cloud",
-  r1:"Prix", r1a:"Gratuit", r1b:"Gratuit / Pro 59 € une fois ; version App Store par abonnement", r1c:"env. 29 € une fois", r1d:"Gratuit", r1e:"Abonnement ou à la minute",
+  r1:"Prix", r1a:"Gratuit", r1b:"Gratuit / Pro 64 € une fois ; version App Store par abonnement", r1c:"env. 24 $ une fois", r1d:"Gratuit ; version App Store payante", r1e:"Abonnement ou à la minute",
   r2:"Code ouvert",
-  r3:"Entièrement local", r3a:"Oui, exclusivement", r3b:"Oui, IA cloud en option",
-  r4:"Séparation des locuteurs", r4a:"Oui, sans jeton ni compte", r4b:"Oui, en Pro (bêta)", r4d:"Oui",
+  r3:"Entièrement local", r3a:"Oui, exclusivement", r3b:"Oui, IA cloud en option", r3d:"Oui, API OpenAI en option",
+  r4:"Séparation des locuteurs", r4a:"Oui, sans jeton ni compte", r4b:"Oui", r4d:"Oui",
   r5:"Éditeur avec gestion des locuteurs", r5a:"Renommer, fusionner, réattribuer, extrait audio", r5b:"Basique", r5c:"Non", r5d:"Basique", r5e:"Oui",
   r6:"Export pour l'analyse qualitative", r6a:"REFI-QDA (ATLAS.ti, NVivo, MAXQDA), enrich", r6e:"en partie",
   r7:"Langues de l'interface", r7d:"plusieurs", r7e:"surtout EN",
   r8:"Plateforme", r8e:"Navigateur",
   r9:"Plus fort que LocalTranscript pour", r9a:"—", r9b:"Dossiers surveillés, liens YouTube, enregistrement de réunions, dictée", r9c:"iPhone, simplicité", r9d:"Windows et Linux", r9e:"Résumés, fonctions d'équipe",
-  cmpFn:"État en septembre 2026, selon les indications des éditeurs. MacWhisper et Aiko sont des produits de leurs développeurs respectifs. Tableau établi au mieux de nos connaissances ; corrections bienvenues par issue.",
+  cmpFn:"État en septembre 2026, vérifié sur les sites des éditeurs (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko et Buzz sont des produits de leurs développeurs respectifs. Corrections bienvenues par issue.",
   yes:"Oui", no:"Non",
   proofsH:"Une sécurité que vous pouvez vérifier vous-même",
   p1a:"Localhost only", p1b:"Le service interne se lie uniquement à localhost. Toute requête d'un autre hôte est refusée avec un 421. Le code est dans main.py.",
@@ -1750,16 +1750,16 @@ it:{
   cmpH:"A confronto",
   cmpLede:"Esistono buoni programmi di trascrizione locale per Mac. La differenza sta meno nel riconoscimento – tutti usano Whisper – che in ciò che accade prima e dopo.",
   cCloud:"Servizi cloud",
-  r1:"Prezzo", r1a:"Gratuita", r1b:"Gratuito / Pro 59 € una tantum; versione App Store in abbonamento", r1c:"ca. 29 € una tantum", r1d:"Gratuito", r1e:"Abbonamento o al minuto",
+  r1:"Prezzo", r1a:"Gratuita", r1b:"Gratuito / Pro 64 € una tantum; versione App Store in abbonamento", r1c:"ca. 24 $ una tantum", r1d:"Gratuito; versione App Store a pagamento", r1e:"Abbonamento o al minuto",
   r2:"Codice aperto",
-  r3:"Completamente locale", r3a:"Sì, esclusivamente", r3b:"Sì, IA cloud opzionale",
-  r4:"Separazione dei parlanti", r4a:"Sì, senza token né account", r4b:"Sì, in Pro (beta)", r4d:"Sì",
+  r3:"Completamente locale", r3a:"Sì, esclusivamente", r3b:"Sì, IA cloud opzionale", r3d:"Sì, API OpenAI opzionale",
+  r4:"Separazione dei parlanti", r4a:"Sì, senza token né account", r4b:"Sì", r4d:"Sì",
   r5:"Editor con gestione dei parlanti", r5a:"Rinomina, unisci, riassegna, campione audio", r5b:"Base", r5c:"No", r5d:"Base", r5e:"Sì",
   r6:"Esportazione per l'analisi qualitativa", r6a:"REFI-QDA (ATLAS.ti, NVivo, MAXQDA), enrich", r6e:"in parte",
   r7:"Lingue dell'interfaccia", r7d:"diverse", r7e:"per lo più EN",
   r8:"Piattaforma", r8e:"Browser",
   r9:"Più forte di LocalTranscript in", r9a:"—", r9b:"Cartelle monitorate, link YouTube, registrazione riunioni, dettatura", r9c:"iPhone, semplicità", r9d:"Windows e Linux", r9e:"Riassunti, funzioni di team",
-  cmpFn:"Situazione a settembre 2026, secondo le indicazioni dei produttori. MacWhisper e Aiko sono prodotti dei rispettivi sviluppatori. Tabella compilata al meglio delle nostre conoscenze; correzioni benvenute via issue.",
+  cmpFn:"Situazione a settembre 2026, verificata sui siti dei produttori (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko e Buzz sono prodotti dei rispettivi sviluppatori. Correzioni benvenute via issue.",
   yes:"Sì", no:"No",
   proofsH:"Sicurezza che puoi verificare da solo",
   p1a:"Localhost only", p1b:"Il servizio interno si collega esclusivamente a localhost. Le richieste da qualsiasi altro host vengono rifiutate con 421. Il codice è in main.py.",
