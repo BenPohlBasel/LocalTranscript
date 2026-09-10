@@ -21,3 +21,4 @@ dist/
 # lokal
 .DS_Store
 *.log
+.vite/
