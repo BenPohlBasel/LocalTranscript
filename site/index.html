@@ -37,7 +37,7 @@ a:hover{color:var(--lila-2)}
 :focus-visible{outline:2px solid var(--lila);outline-offset:3px}
 img{max-width:100%;height:auto;display:block}
 h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em;line-height:1.15}
-h1{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:640;max-width:24ch}
+h1{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:640;max-width:30ch}
 h2{font-size:clamp(1.45rem,3vw,2rem);max-width:30ch}
 h3{font-size:1.15rem}
 p{margin:0;max-width:62ch}
@@ -62,20 +62,18 @@ header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:bl
 
 /* hero */
 .hero{padding:3.5rem 0 0}
-/* Der Name steht gross am Anfang der Titelzeile — in der Kopfleiste
-   ist er nur klein, und wer hier landet, soll zuerst lesen, wie das
-   Programm heisst. */
-.wortmarke{display:flex;align-items:center;gap:.6rem;margin:0 0 1rem;font-size:1.35rem;font-weight:640;letter-spacing:-.01em;color:var(--ink)}
-.wortmarke .mark{width:2.1rem;height:2.1rem}
-.hero-top{display:grid;grid-template-columns:1.3fr 1fr;gap:2.5rem;align-items:end;margin-bottom:2.25rem}
-@media (max-width:860px){.hero-top{grid-template-columns:1fr;gap:1.25rem}}
+.hero-top{margin-bottom:2.25rem}
+/* Das Zeichen ist die Initiale der Überschrift: gleiche Zeile, so gross
+   wie die Versalien; der Name steht in derselben Schrift wie der Rest
+   des Satzes. */
+h1 .initial{width:.92em;height:.92em;display:inline-block;vertical-align:-.1em;margin-right:.22em}
 .cta-row{display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;margin-top:1.5rem}
 .btn{display:inline-block;background:var(--lila);color:#fff;text-decoration:none;padding:.7rem 1.1rem;border-radius:.45rem;font-weight:560}
 .btn:hover{background:var(--lila-2);color:#fff}
 .btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
 .btn.ghost:hover{border-color:var(--ink)}
 .small{font-size:.86rem;color:var(--ink-2)}
-.free{font-size:.95rem;color:var(--ink);max-width:36ch;padding-left:.9rem;border-left:2px solid var(--lila)}
+.req{margin-top:.9rem}
 .window{border:1px solid var(--line);border-radius:.7rem;overflow:hidden;background:var(--wash);box-shadow:0 1px 0 rgba(0,0,0,.03)}
 .window .chrome{height:1.7rem;background:#ececee;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.4rem;padding-left:.75rem}
 .window .chrome i{width:.7rem;height:.7rem;border-radius:50%;background:#d6d8db;display:block}
@@ -183,7 +181,6 @@ footer p{max-width:none}
     <a class="brand" href="#"><svg class="mark" viewBox="0 0 128 128" aria-hidden="true"><rect x="10" y="10" width="108" height="108" rx="22" fill="#6366f1"/><rect x="44" y="48" width="10" height="32" rx="5" fill="#fff"/><rect x="59" y="36" width="10" height="56" rx="5" fill="#fff"/><rect x="74" y="48" width="10" height="32" rx="5" fill="#fff"/></svg>LocalTranscript</a>
     <div class="right">
       <a class="nav" href="#guide" data-t="navGuide"></a>
-      <a class="nav" href="#compare" data-t="navCmp"></a>
       <a class="nav" href="#dpo" data-t="navDpo"></a>
       <a class="nav" href="https://github.com/BenPohlBasel/LocalTranscript">GitHub</a>
       <nav class="langs" aria-label="Sprache / Language">
@@ -201,17 +198,13 @@ footer p{max-width:none}
 <section class="hero">
   <div class="wrap">
     <div class="hero-top">
-      <div>
-        <p class="wortmarke"><svg class="mark" viewBox="0 0 128 128" aria-hidden="true"><rect x="10" y="10" width="108" height="108" rx="22" fill="#6366f1"/><rect x="44" y="48" width="10" height="32" rx="5" fill="#fff"/><rect x="59" y="36" width="10" height="56" rx="5" fill="#fff"/><rect x="74" y="48" width="10" height="32" rx="5" fill="#fff"/></svg>LocalTranscript</p>
-        <h1 data-t="h1"></h1>
-        <p class="lede" data-t="lede"></p>
-        <div class="cta-row">
-          <a class="btn" href="#download" data-t="cta"></a>
-          <a class="btn ghost" href="#guide" data-t="ctaGuide"></a>
-          <span class="small mono" data-t="req"></span>
-        </div>
+      <h1><svg class="initial" viewBox="0 0 128 128" aria-hidden="true"><rect x="10" y="10" width="108" height="108" rx="22" fill="#6366f1"/><rect x="44" y="48" width="10" height="32" rx="5" fill="#fff"/><rect x="59" y="36" width="10" height="56" rx="5" fill="#fff"/><rect x="74" y="48" width="10" height="32" rx="5" fill="#fff"/></svg><span data-t="h1"></span></h1>
+      <p class="lede" data-t="lede"></p>
+      <div class="cta-row">
+        <a class="btn" href="#download" data-t="cta"></a>
+        <a class="btn ghost" href="#guide" data-t="ctaGuide"></a>
       </div>
-      <p class="free" data-t="freeBox"></p>
+      <p class="small req" data-t="req"></p>
     </div>
 
     <div class="window">
@@ -512,11 +505,10 @@ footer p{max-width:none}
 <script>
 const T = {
 de:{
-  navGuide:"Anleitung", navCmp:"Vergleich", navDpo:"Datenschutz",
-  h1:"Interviews transkribieren, ohne dass die Aufnahme den Rechner verlässt.",
+  navGuide:"Anleitung", navDpo:"Datenschutz",
+  h1:"LocalTranscript transkribiert Interviews, ohne dass die Aufnahme den Rechner verlässt.",
   lede:"Whisper und die Sprechertrennung laufen auf deinem Mac. Kein Konto, kein Server, kein Abo. Der Quellcode ist offen, die App ist kostenlos.",
-  cta:"Herunterladen für macOS", ctaGuide:"Anleitung lesen", req:"Apple Silicon · 2 GB",
-  freeBox:"Kostenlos und Open Source unter AGPL-3.0. Nicht als Lockangebot mit Pro-Stufe, sondern als Lizenz: Du darfst die App nutzen, prüfen, verändern und weitergeben. Entwickelt am B/IAS Basel für die eigene Forschung.",
+  cta:"Herunterladen für macOS", ctaGuide:"Anleitung lesen", req:"Für Macs mit Apple Silicon · 2 GB · kostenlos und Open Source, AGPL-3.0",
   heroCap:"Der Editor mit einem erfundenen Interview zu Wohngenossenschaften, synthetisiert mit macOS «say». Kein echtes Material auf dieser Seite.",
   heroFile:"housing-cooperatives-interview.mp3 · 2 Sprecher · 02:02",
   clipTag:"Bildschirmfoto aus der App",
@@ -631,11 +623,10 @@ de:{
   footSrc:"Quellcode", footNoTrack:"Diese Seite setzt keine Cookies und misst nichts."
 },
 en:{
-  navGuide:"Guide", navCmp:"Compare", navDpo:"Privacy",
-  h1:"Transcribe interviews without the recording ever leaving your Mac.",
+  navGuide:"Guide", navDpo:"Privacy",
+  h1:"LocalTranscript transcribes interviews without the recording ever leaving your Mac.",
   lede:"Whisper and speaker separation run on your Mac. No account, no server, no subscription. The source is open and the app is free.",
-  cta:"Download for macOS", ctaGuide:"Read the guide", req:"Apple Silicon · 2 GB",
-  freeBox:"Free and open source under AGPL-3.0. Not a teaser with a Pro tier, but a licence: you may use, inspect, modify and pass the app on. Developed at B/IAS Basel for our own research.",
+  cta:"Download for macOS", ctaGuide:"Read the guide", req:"For Macs with Apple Silicon · 2 GB · free and open source, AGPL-3.0",
   heroCap:"The editor with an invented interview on housing cooperatives, synthesised with macOS “say”. No real material anywhere on this page.",
   heroFile:"housing-cooperatives-interview.mp3 · 2 speakers · 02:02",
   clipTag:"Screenshot from the app",
@@ -750,11 +741,10 @@ en:{
   footSrc:"Source code", footNoTrack:"This page sets no cookies and measures nothing."
 },
 fr:{
-  navGuide:"Guide", navCmp:"Comparatif", navDpo:"Données",
-  h1:"Transcrire des entretiens sans que l'enregistrement ne quitte jamais votre Mac.",
+  navGuide:"Guide", navDpo:"Données",
+  h1:"LocalTranscript transcrit des entretiens sans que l'enregistrement ne quitte jamais votre Mac.",
   lede:"Whisper et la séparation des locuteurs tournent sur votre Mac. Pas de compte, pas de serveur, pas d'abonnement. Le code est ouvert, l'application est gratuite.",
-  cta:"Télécharger pour macOS", ctaGuide:"Lire le guide", req:"Apple Silicon · 2 Go",
-  freeBox:"Gratuit et open source sous AGPL-3.0. Pas un appât avec un niveau Pro, mais une licence : vous pouvez utiliser, examiner, modifier et redistribuer l'application. Développée au B/IAS de Bâle pour notre propre recherche.",
+  cta:"Télécharger pour macOS", ctaGuide:"Lire le guide", req:"Pour Mac avec Apple Silicon · 2 Go · gratuit et open source, AGPL-3.0",
   heroCap:"L'éditeur avec un entretien fictif sur les coopératives d'habitation, synthétisé avec « say » de macOS. Aucun matériel réel sur cette page.",
   heroFile:"housing-cooperatives-interview.mp3 · 2 locuteurs · 02:02",
   clipTag:"Capture d'écran de l'application",
@@ -869,11 +859,10 @@ fr:{
   footSrc:"Code source", footNoTrack:"Cette page ne pose aucun cookie et ne mesure rien."
 },
 it:{
-  navGuide:"Guida", navCmp:"Confronto", navDpo:"Dati",
-  h1:"Trascrivere interviste senza che la registrazione lasci mai il tuo Mac.",
+  navGuide:"Guida", navDpo:"Dati",
+  h1:"LocalTranscript trascrive interviste senza che la registrazione lasci mai il tuo Mac.",
   lede:"Whisper e la separazione dei parlanti girano sul tuo Mac. Nessun account, nessun server, nessun abbonamento. Il codice è aperto, l'app è gratuita.",
-  cta:"Scarica per macOS", ctaGuide:"Leggi la guida", req:"Apple Silicon · 2 GB",
-  freeBox:"Gratuita e open source sotto AGPL-3.0. Non un'esca con un livello Pro, ma una licenza: puoi usare, esaminare, modificare e ridistribuire l'app. Sviluppata al B/IAS di Basilea per la nostra ricerca.",
+  cta:"Scarica per macOS", ctaGuide:"Leggi la guida", req:"Per Mac con Apple Silicon · 2 GB · gratuita e open source, AGPL-3.0",
   heroCap:"L'editor con un'intervista inventata sulle cooperative di abitazione, sintetizzata con « say » di macOS. Nessun materiale reale in questa pagina.",
   heroFile:"housing-cooperatives-interview.mp3 · 2 parlanti · 02:02",
   clipTag:"Schermata dell'app",
