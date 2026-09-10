@@ -37,7 +37,8 @@ Zeile.
 
 ## Bildschirmfotos
 
-`img/<motiv>-<sprache>.png`, acht Motive mal vier Sprachen. Beim
+`img/<motiv>-<sprache>.png`, neun Motive mal vier Sprachen — zu jedem
+Schritt der Anleitung eines. Beim
 Sprachwechsel tauscht das Skript die Quelle jedes `img[data-img]` aus,
 die Seite zeigt die App also immer in der gerade gewählten Sprache.
 
@@ -49,6 +50,13 @@ Neu aufnehmen: App in der gewünschten Sprache starten, Motive schießen,
 mit Pillow auf Breite bringen und als PNG-8 sichern (256 Farben ohne
 Dithering — UI-Flächen sind flach, das spart zwei Drittel, ohne dass die
 Schriftkanten leiden).
+
+## Farbe
+
+Ein Ton, in Stufen: `--lila-600` (#4f46e5) trägt Knöpfe und Links,
+`--lila-700` den Zeigezustand, `--lila-300` die Links auf dunklem Grund,
+`--lila-050` die eigene Spalte der Vergleichstabelle. Der Ton kommt aus
+dem App-Zeichen (#6366f1) — Seite und Programm tragen dieselbe Farbe.
 
 ## Zeichen
 
