@@ -38,7 +38,7 @@ a:hover{color:var(--lila-2)}
 :focus-visible{outline:2px solid var(--lila);outline-offset:3px}
 img{max-width:100%;height:auto;display:block}
 h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em;line-height:1.15}
-h1{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:640;max-width:30ch}
+h1{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:640}
 h2{font-size:clamp(1.45rem,3vw,2rem)}
 h3{font-size:1.15rem}
 p{margin:0}
@@ -48,30 +48,41 @@ li{margin:.35rem 0}
 .small{font-size:.86rem;color:var(--ink-2)}
 .wrap{max-width:var(--w);margin:0 auto;padding:0 1.25rem}
 
-/* ---------- DAS Raster ----------
-   Jeder Abschnitt ist eine Folge von Zeilen. Jede Zeile hat zwei
-   Spalten: links 5 Zwölftel (Titel, Label), rechts 7 Zwölftel
-   (Inhalt). Der Abschnittskopf ist auch nur so eine Zeile: Überschrift
-   links, Einleitung rechts. Unter 860 px fällt alles untereinander. */
+/* ---------- DAS Raster: inhaltsgesteuert ----------
+   Eine Zeile hat ein Label (17 rem) und einen Inhalt (mindestens
+   30 rem). Haben beide Platz, stehen sie nebeneinander; sonst fällt
+   der Inhalt unter das Label. Das entscheidet die Breite des
+   Behälters, nicht ein Breakpoint. Die Schrift wächst mit dem
+   Fenster, damit eine Zeile in der breiten Spalte bei ~85 Zeichen
+   bleibt — Text füllt die Breite, ohne unlesbar lang zu werden. */
+body{font-size:clamp(1rem,.85rem + .35vw,1.15rem)}
 section{padding:4.5rem 0}
 @media (max-width:640px){section{padding:3rem 0}}
 section+section{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:1.25rem 3rem;align-items:start}
-.row+.row{margin-top:2rem;padding-top:2rem;border-top:1px solid var(--line)}
-.row.kopf{margin-bottom:3rem}
-.row.kopf+.row{border-top:0;padding-top:0;margin-top:0}
-.row.voll{grid-template-columns:minmax(0,1fr)}
-.row .t h3{margin-bottom:.4rem}
-.row .t p{max-width:62ch;color:var(--ink-2)}
+.hero+section{border-top:0}   /* keine Linie unter dem Hero-Fenster */
+.row{display:flex;flex-wrap:wrap;gap:.9rem 3rem;align-items:flex-start}
+.row>:first-child{flex:0 0 min(100%,17rem)}
+.row>:last-child{flex:1 1 30rem;min-width:0}
+/* Abschnittskopf: Überschrift, darunter die Einleitung — beides links */
+.row.kopf{display:block}
+.row.kopf .t{margin-top:.9rem}
+.row.voll>*{flex:1 1 100%}
+.row.schritt>:first-child{flex:1 1 26rem}
+.row.schritt>:last-child{flex:1 1 30rem}
+.row+.row{margin-top:1.6rem}
+.row.gross+.row.gross{margin-top:2.25rem;padding-top:2.25rem;border-top:1px solid var(--line)}
+.row.kopf{margin-bottom:2.5rem}
+.row.kopf+.row.gross{border-top:0;padding-top:0;margin-top:0}
+.row .t h3{margin-bottom:.35rem}
+.row .t p{max-width:85ch;color:var(--ink-2)}
 .row .t p+p,.row .t ul,.row .t ol{margin-top:.6rem}
 .row .t li{color:var(--ink-2)}
 .row .t li b{color:var(--ink);font-weight:560}
-.row h3 .nr{font-variation-settings:'MONO' 1;font-weight:400;color:var(--lila);margin-right:.5rem}
-.lede{font-size:1.15rem;color:var(--ink-2);max-width:56ch}
-@media (max-width:860px){
-  .row{grid-template-columns:minmax(0,1fr);gap:.9rem}
-  .row.kopf{margin-bottom:2rem}
-}
+.row>:first-child h3{font-size:1.05rem}
+.row code{display:inline-block;margin-bottom:.4rem}
+/* Schrittzahl im Kreis (User: «die Zahlen mit Kreis waren besser») */
+.row h3 .nr{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;margin-right:.6rem;border:1px solid var(--line);border-radius:50%;background:var(--wash);font-variation-settings:'MONO' 1;font-size:.9rem;font-weight:400;color:var(--lila);vertical-align:-.45rem}
+.lede{font-size:clamp(1.15rem,1rem + .5vw,1.4rem);line-height:1.4;color:var(--ink-2);max-width:60ch}
 
 /* Kopfleiste */
 header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:5}
@@ -91,7 +102,9 @@ header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:bl
 .hero{padding-top:3.5rem}
 .hero h1{margin-bottom:2rem}
 h1 .initial{width:.92em;height:.92em;display:inline-block;vertical-align:-.1em;margin-right:.22em}
-.hero .row{align-items:end}
+.hero .row{align-items:flex-end}
+.hero .row>:first-child{flex:1 1 30rem}
+.hero .row>:last-child{flex:0 1 auto}
 .cta{display:flex;flex-wrap:wrap;gap:.75rem 1rem}
 .hero .small{margin-top:.9rem}
 .window{margin-top:3rem;border:1px solid var(--line);border-radius:.7rem;overflow:hidden;background:var(--wash);box-shadow:0 1px 2px rgba(31,35,38,.05),0 8px 20px rgba(31,35,38,.08),0 32px 64px -16px rgba(31,35,38,.22)}
@@ -150,6 +163,8 @@ tbody tr:last-child td,tbody tr:last-child th{border-bottom:1px solid var(--line
 
 /* Fusszeile: dieselbe Zeile, kleiner */
 footer{padding:2.5rem 0 3rem;font-size:.88rem;color:var(--ink-2);border-top:1px solid var(--line)}
+footer .row>:first-child{flex:1 1 24rem}
+footer .row>:last-child{flex:1 1 20rem}
 footer address{font-style:normal}
 footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
 </style>
@@ -202,7 +217,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div><h2 data-t="guideH"></h2></div>
       <div class="t"><p class="lede" data-t="guideLede"></p></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">1</span><span data-t="g1h"></span></h3>
         <p data-t="g1a"></p>
@@ -211,7 +226,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="batch" src="img/batch-de.png"
         width="1200" height="750" alt="" data-alt="altBatch"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">2</span><span data-t="g2h"></span></h3>
         <p data-t="g2a"></p>
@@ -220,7 +235,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="library" src="img/library-de.png"
         width="1200" height="750" alt="" data-alt="altLibrary"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">3</span><span data-t="g3h"></span></h3>
         <p data-t="g3a"></p>
@@ -235,7 +250,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="edit" src="img/edit-de.png"
         width="1200" height="750" alt="" data-alt="altEdit"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">4</span><span data-t="g4h"></span></h3>
         <p data-t="g4a"></p>
@@ -244,7 +259,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="find" src="img/find-de.png"
         width="1200" height="750" alt="" data-alt="altFind"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">5</span><span data-t="g5h"></span></h3>
         <p data-t="g5a"></p>
@@ -256,7 +271,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="export" src="img/export-de.png"
         width="1200" height="750" alt="" data-alt="altExport"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">6</span><span data-t="g6h"></span></h3>
         <p data-t="g6a"></p>
@@ -269,7 +284,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="import" src="img/import-de.png"
         width="1200" height="750" alt="" data-alt="altImport"></div>
     </div>
-    <div class="row">
+    <div class="row schritt gross">
       <div class="t">
         <h3><span class="nr">7</span><span data-t="g7h"></span></h3>
         <p data-t="g7a"></p>
@@ -278,7 +293,6 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <div class="shot"><img data-img="settings" src="img/settings-de.png"
         width="1200" height="750" alt="" data-alt="altSettings"></div>
     </div>
-    <p class="small" style="margin-top:2rem" data-t="shotNote"></p>
   </div>
 </section>
 
@@ -382,18 +396,18 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       </div>
       <p class="small viewer-note" data-t="dpoDocNote"></p>
     </div>
-    <div class="row">
+    <div class="row gross">
       <div><h3 data-t="flowT"></h3></div>
       <div class="t"><ol><li data-t="d1"></li><li data-t="d2"></li><li data-t="d3"></li><li data-t="d4"></li><li data-t="d5"></li></ol></div>
     </div>
-    <div class="row">
+    <div class="row gross">
       <div><h3 data-t="yoursH"></h3></div>
       <div class="t"><ul><li data-t="y1"></li><li data-t="y2"></li><li data-t="y3"></li><li data-t="y4"></li></ul><p class="small" style="margin-top:1rem" data-t="dpoNote"></p></div>
     </div>
   </div>
 </section>
 
-<section class="limits">
+<section id="limits">
   <div class="wrap">
     <div class="row kopf">
       <div><h2 data-t="limH"></h2></div>
@@ -1438,7 +1452,6 @@ de:{
   g7h:"Einstellungen",
   g7a:"Speicherort, Standardmodell und -sprache, Oberflächensprache und die Zahl gleichzeitiger Läufe. Dazu die vollständige Liste der mitgelieferten Bausteine mit ihren Lizenzen und der Austauschformate mit den ihren.",
   g7b:"Dieselben Texte stehen im Dialog «Über LocalTranscript» im App-Menü.",
-  shotNote:"Alle Bildschirmfotos zeigen die App in der Sprache, die oben rechts gewählt ist.",
 
   licH:"Warum kostenlos",
   licLede:"Wir haben die App für unsere eigenen Interviewstudien gebaut. Sie ist fertig, sie ist bezahlt, und sie ist am meisten wert, wenn viele sie prüfen können.",
@@ -1542,7 +1555,6 @@ en:{
   g7h:"Settings",
   g7a:"Storage location, default model and language, interface language and the number of simultaneous runs. Plus the full list of bundled components with their licences and the interchange formats with theirs.",
   g7b:"The same texts appear in the “About LocalTranscript” dialog in the app menu.",
-  shotNote:"All screenshots show the app in the language selected at the top right.",
 
   licH:"Why free",
   licLede:"We built the app for our own interview studies. It's finished, it's paid for, and it's worth most when many people can inspect it.",
@@ -1646,7 +1658,6 @@ fr:{
   g7h:"Réglages",
   g7a:"Emplacement, modèle et langue par défaut, langue de l'interface et nombre d'exécutions simultanées. Plus la liste complète des composants livrés avec leurs licences et des formats d'échange avec les leurs.",
   g7b:"Les mêmes textes figurent dans la fenêtre « À propos de LocalTranscript » du menu de l'application.",
-  shotNote:"Toutes les captures montrent l'application dans la langue choisie en haut à droite.",
 
   licH:"Pourquoi gratuit",
   licLede:"Nous avons construit l'application pour nos propres études par entretiens. Elle est terminée, elle est payée, et elle vaut le plus quand beaucoup peuvent l'examiner.",
@@ -1750,7 +1761,6 @@ it:{
   g7h:"Impostazioni",
   g7a:"Posizione di archiviazione, modello e lingua predefiniti, lingua dell'interfaccia e numero di esecuzioni simultanee. Più l'elenco completo dei componenti inclusi con le loro licenze e dei formati di scambio con le proprie.",
   g7b:"Gli stessi testi compaiono nella finestra « Informazioni su LocalTranscript » nel menu dell'app.",
-  shotNote:"Tutte le schermate mostrano l'app nella lingua scelta in alto a destra.",
 
   licH:"Perché gratuita",
   licLede:"Abbiamo costruito l'app per i nostri studi basati su interviste. È finita, è pagata, e vale di più quando molti possono esaminarla.",

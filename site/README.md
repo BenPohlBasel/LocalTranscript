@@ -22,15 +22,18 @@ img/                Bildschirmfotos, je Motiv in vier Sprachen
 
 ## Raster
 
-Ein Raster für alles: jede Zeile hat links fünf Zwölftel (Titel, Label)
-und rechts sieben (Inhalt). Der Abschnittskopf ist auch nur so eine
-Zeile — Überschrift links, Einleitung rechts. Anleitungsschritt: Text
-links, Bildschirmfoto rechts. Lizenz, Prüfpunkte, Grenzen, Datenfluss,
-Verantwortung: Label links, Text rechts, Zeilen durch Haarlinien
-getrennt. Nur die Hero-Überschrift, die Vergleichstabelle und das
-Vorschaufenster laufen über die volle Breite. Unter 860 px fällt alles
-untereinander. Die Klasse heisst `.row`; eine Kopfzeile `.row.kopf`,
-eine volle Zeile `.row.voll`. Mehr Layoutklassen gibt es nicht.
+Inhaltsgesteuert, nicht per Breakpoint: Eine Zeile (`.row`) hat ein
+Label (17 rem) und einen Inhalt (mindestens 30 rem). Haben beide Platz,
+stehen sie nebeneinander, sonst fällt der Inhalt unter das Label.
+Anleitungsschritte (`.row.schritt`) teilen sich die Breite zwischen
+Text und Bildschirmfoto; grosse Zeilen (`.row.gross`) tragen eine
+Haarlinie; der Abschnittskopf (`.row.kopf`) ist Überschrift plus
+Einleitung, beides links. Tabelle und Vorschaufenster laufen voll
+(`.row.voll`).
+
+Die Schrift wächst mit dem Fenster (17 → 19,5 px), damit eine Zeile in
+der breiten Spalte bei ~85 Zeichen bleibt: Text füllt die Breite, ohne
+unlesbar lang zu werden. Mehr Layoutklassen gibt es nicht.
 
 ## Sprachen
 
