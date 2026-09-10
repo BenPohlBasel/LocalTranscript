@@ -37,8 +37,11 @@ Zeile.
 
 ## Bildschirmfotos
 
-`img/<motiv>-<sprache>.png`, neun Motive mal vier Sprachen — zu jedem
-Schritt der Anleitung eines. Beim
+`img/<motiv>-<sprache>.png`, acht Motive mal vier Sprachen — das
+Hero-Bild und zu jedem Schritt der Anleitung eines. Die Anleitungsbilder
+stammen aus einem auf 800 × 500 verkleinerten Fenster: neben dem Text
+bleibt so alles lesbar, was in einem 1280er-Fenster zu Fliegendreck
+würde (Vorschlag des Users). Beim
 Sprachwechsel tauscht das Skript die Quelle jedes `img[data-img]` aus,
 die Seite zeigt die App also immer in der gerade gewählten Sprache.
 
