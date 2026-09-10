@@ -5,11 +5,10 @@ Datenschutz-Folgenabschätzung, einen Ethikantrag oder einen
 Datenmanagementplan. Stand 10. September 2026, LocalTranscript 2.2.0.
 Angaben in `[eckigen Klammern]` ergänzt die verantwortliche Stelle.
 
-Hinweis vorab: Ein Programm kann nicht «DSGVO-konform» sein — konform
-ist eine Verarbeitung. Dieser Text beschreibt, was die Software tut
-und was sie nicht tut. Ob die damit vorgenommene Verarbeitung der DSGVO
-oder dem revidierten Schweizer DSG genügt, beurteilt die verantwortliche
-Stelle. Der Text ist keine Rechtsberatung.
+Der Text beschreibt, was die Software tut und was sie nicht tut. Die
+rechtliche Einordnung der eigenen Verarbeitung — nach DSGVO oder
+revidiertem Schweizer DSG — nimmt die verantwortliche Stelle vor; der
+Text ersetzt keine Rechtsberatung.
 
 ---
 

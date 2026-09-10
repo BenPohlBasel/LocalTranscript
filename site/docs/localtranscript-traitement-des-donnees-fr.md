@@ -6,11 +6,10 @@ au comité d'éthique ou un plan de gestion des données. État au
 10 septembre 2026, LocalTranscript 2.2.0. Les mentions entre
 `[crochets]` sont complétées par le responsable du traitement.
 
-Remarque préalable : un programme ne peut pas être « conforme au
-RGPD » — un traitement peut l'être. Ce texte décrit ce que le logiciel
-fait et ne fait pas. Il appartient au responsable du traitement de juger
-si le traitement effectué avec ce logiciel satisfait au RGPD ou à la
-nLPD suisse. Ce texte ne constitue pas un avis juridique.
+Ce texte décrit ce que le logiciel fait et ne fait pas. La
+qualification juridique de son propre traitement — au regard du RGPD ou
+de la nLPD suisse — revient au responsable du traitement ; le texte ne
+remplace pas un avis juridique.
 
 ---
 
