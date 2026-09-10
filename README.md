@@ -32,6 +32,17 @@ Sprecher-Diarisierung — Neubau des LocalTranscript-Prototyps als
 - **Privat:** Loopback only (127.0.0.1:5628 — „LOCT" auf der
   Telefontastatur; `LT_SERVE_PORT` überschreibt), keine Netz-Calls.
 
+## Dokumentation
+
+- **Diese Datei** — was die App ist und kann, Architektur, Entwicklung,
+  Bauen, Lizenzen.
+- **[CHANGELOG.md](CHANGELOG.md)** — Versionsgeschichte. Die
+  Release-Notizen auf GitHub sind der jeweilige Abschnitt daraus;
+  Änderungen gehören zuerst hierher, nicht in die Release-Maske.
+- **In der App** — Einstellungen und der Über-Dialog führen
+  Speicherort, Formate, mitgelieferte Werkzeuge und ihre Lizenzen,
+  viersprachig.
+
 ## Architektur
 
 ```
