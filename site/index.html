@@ -211,7 +211,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
           <a class="btn" href="https://github.com/BenPohlBasel/LocalTranscript/releases" data-t="cta"></a>
           <a class="btn ghost" href="#guide" data-t="ctaGuide"></a>
         </div>
-        <p class="small" data-t="req"></p>
+        <p class="small"><b data-v></b> · <span data-t="req"></span></p>
       </div>
     </div>
     <div class="window">
@@ -460,6 +460,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
       <span data-t="footDev"></span>
     </address>
     <p class="links">
+      <span data-v></span> ·
       <a href="https://github.com/BenPohlBasel/LocalTranscript" data-t="footSrc"></a> ·
       <a href="https://github.com/BenPohlBasel/LocalTranscript/blob/main/CHANGELOG.md">Changelog</a> ·
       <a href="https://github.com/BenPohlBasel/LocalTranscript/issues">Issues</a> ·
@@ -1400,6 +1401,11 @@ Fonte: <https://github.com/BenPohlBasel/LocalTranscript> (cartella
 <!-- docs:end -->
 
 <script>
+/* Aktuelle Version — EINE Stelle. Bei jedem Release nachziehen
+   (frontend/src-tauri/tauri.conf.json ist die Quelle). */
+const VERSION = "2.2.0";
+document.querySelectorAll('[data-v]').forEach(e => e.textContent = 'LocalTranscript ' + VERSION);
+
 const T = {
 de:{
   navGuide:"Anleitung", navDpo:"Datenschutz",
