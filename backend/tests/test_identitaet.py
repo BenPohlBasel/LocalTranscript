@@ -46,13 +46,13 @@ def test_export_traegt_app_install_und_email(client, eintrag):
     client.post("/api/settings", json={"user_email": "nora@uni.ch"})
     inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
     z = zipfile.ZipFile(io.BytesIO(inhalt))
-    tj = json.loads(_teil(z, "transkript.json"))
-    wer = tj["exportiert_von"]
+    tj = json.loads(_teil(z, "transcript.json"))
+    wer = json.loads(_teil(z, "manifest.json"))["producer"]
     assert wer["user"] == "nora@uni.ch"
     assert wer["app"].startswith("localtranscript/")
     assert wer["install"].startswith("ins-")
     manifest = _teil(z, "manifest.json").decode()
-    assert "nora@uni.ch" in manifest          # Gate-Freigaben tragen die Person
+    assert "nora@uni.ch" in manifest          # producer + Gate-Freigaben
     host = socket.gethostname()               # nie eine Geräte-Kennung
     assert host not in manifest and host not in json.dumps(tj)
 
@@ -60,5 +60,5 @@ def test_export_traegt_app_install_und_email(client, eintrag):
 def test_ohne_email_steht_die_app_im_dossier(client, eintrag):
     inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
     z = zipfile.ZipFile(io.BytesIO(inhalt))
-    assert json.loads(_teil(z, "transkript.json"))["exportiert_von"]["user"] is None
+    assert "user" not in json.loads(_teil(z, "manifest.json"))["producer"]
     assert f"localtranscript/{config.APP_VERSION}" in _teil(z, "manifest.json").decode()

@@ -2,6 +2,8 @@
 (mit enrich_core zurückgelesen: T1, Zeitkarte, narrative Kette)."""
 from __future__ import annotations
 
+import io
+import json
 import zipfile
 
 
@@ -37,33 +39,33 @@ def test_txt(client, eintrag):
     assert "\n\nBen: " in text
 
 
-def test_enrich_export_ist_echtes_dossier(client, eintrag, tmp_path):
+def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
+    """Der Export ist ein Format-2-Container (FORMAT.md): eine Wurzel,
+    Konvention source/ text/, Schicht-Köpfe, Inventar mit Hash für
+    JEDE Datei. Der Inhalt der Text-Schichten ist der aus textsatz:
+    main = reine Rede, Label-Zeilen im other-Strom."""
     r = client.get(f"/api/transcripts/{eintrag}/export/enrich")
     assert r.status_code == 200, r.text
-    zp = tmp_path / "e.enrich.zip"
-    zp.write_bytes(r.content)
-    assert zipfile.is_zipfile(zp)
-
-    from enrich_core.dossier import Dossier
-    d = Dossier.unpack(zp, tmp_path / "aus")
-    m = d.manifest
-    assert m.analyse_kette == "narrativ"
-    assert "2z-zeitkarte.json" in m.current
-    t1 = d.read_layer("3-text-clean.json")
-    haupt = t1.streams["main"]
-    # Sprecher-Strom-Umbau (2026-08-30): main = REINE REDE; die
-    # Label-Zeilen (Name + hh:mm:ss) leben sichtbar im other-Strom
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    wurzeln = {n.split("/", 1)[0] for n in z.namelist()}
+    assert len(wurzeln) == 1 and next(iter(wurzeln)).endswith(".enrich")
+    w = next(iter(wurzeln))
+    m = json.loads(z.read(f"{w}/manifest.json"))
+    assert m["format"] == 2 and m["analyse_kette"] == "narrativ"
+    assert m["source"] == {"kind": "transcript",
+                           "canonical": "source/transcript.json",
+                           "rendered": "source/document.pdf"}
+    t1 = json.loads(z.read(f"{w}/text/clean.json"))
+    assert t1["kind"] == "text-clean" and t1["origin"] == "machine"
+    haupt = t1["streams"]["main"]
     assert haupt.startswith("Hallo und willkommen")
     assert "Anna" not in haupt and "[00:" not in haupt
-    other = t1.streams.get("other", "")
+    other = t1["streams"].get("other", "")
     assert "Anna" in other and "[00:00:00]" in other
-    assert "Ben" in other and "[00:00:04]" in other
-    zk = d.read_layer("2z-zeitkarte.json")
-    assert len(zk.einheiten) == 2
-    assert zk.einheiten[1].speaker == "Ben"
-    # PDF liegt und ist eines
-    pdf = d.path / "source.pdf"
-    assert pdf.is_file() and pdf.read_bytes()[:5] == b"%PDF-"
+    zk = json.loads(z.read(f"{w}/text/timemap.json"))
+    assert len(zk["einheiten"]) == 2 and zk["einheiten"][1]["speaker"] == "Ben"
+    assert z.read(f"{w}/source/document.pdf")[:5] == b"%PDF-"
+    assert m["files"]["source/document.pdf"]["role"] == "rendered"
 
 
 def test_export_in_datei(client, eintrag, tmp_path):

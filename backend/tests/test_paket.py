@@ -29,16 +29,18 @@ def test_rundlauf_ist_verlustfrei(client, eintrag):
            [s["id"] for s in orig["segmente"]]
 
 
-def test_beilage_liegt_im_dossier_ohne_layer_zu_sein(client, eintrag):
+def test_transkript_ist_registrierte_quelle(client, eintrag):
+    """Format 2: das Transkript ist die Quelle — eine Schicht mit Kopf,
+    im Inventar mit Hash, nicht mehr eine Beilage ohne Eintrag."""
     inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
     z = zipfile.ZipFile(io.BytesIO(inhalt))
-    tj = next(n for n in z.namelist()
-              if n.endswith("/transkript.json"))
-    manifest = next(n for n in z.namelist() if n.endswith("/manifest.json"))
-    current = json.loads(z.read(manifest))["current"]
-    # Beilage wie audio.mp3 und source.pdf: im Ordner, NICHT im Manifest
-    assert "transkript.json" not in current
-    assert json.loads(z.read(tj))["segmente"]
+    w = z.namelist()[0].split("/", 1)[0]
+    m = json.loads(z.read(f"{w}/manifest.json"))
+    f = m["files"]["source/transcript.json"]
+    assert f["role"] == "layer" and f["layer"] in m["layers"]
+    t = json.loads(z.read(f"{w}/source/transcript.json"))
+    assert t["kind"] == "transcript" and t["schema"] == "transcript/1.0.0"
+    assert t["segments"] and all("origin" in s for s in t["segments"])
 
 
 def test_import_endpunkt_legt_eintrag_an(client, eintrag):
@@ -55,33 +57,49 @@ def test_import_endpunkt_legt_eintrag_an(client, eintrag):
     assert neu["quelle"]["erzeugt"] == "import-enrich"
 
 
-def _ohne(inhalt: bytes, blatt: str) -> bytes:
-    """Dasselbe Zip ohne eine bestimmte Datei."""
-    alt = zipfile.ZipFile(io.BytesIO(inhalt))
+def _format1(mit_beilage: bool, mit_zeitkarte: bool) -> bytes:
+    """Ein Dossier, wie enrich und frühere LocalTranscript-Versionen es
+    schrieben: Format 1, transkript.json als Beilage, Zeitkarte + T1."""
     aus = io.BytesIO()
-    with zipfile.ZipFile(aus, "w", zipfile.ZIP_DEFLATED) as neu:
-        for i in alt.infolist():
-            if i.filename.rsplit("/", 1)[-1] != blatt:
-                neu.writestr(i, alt.read(i.filename))
+    with zipfile.ZipFile(aus, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("alt.enrich/manifest.json", json.dumps(
+            {"format": 1, "schema": "manifest/0.1.0", "current": {}, "runs": []}))
+        if mit_beilage:
+            z.writestr("alt.enrich/transkript.json", json.dumps(
+                {"schema": 1, "name": "Alt", "sprecher": [{"id": "sp1", "name": "Anna"}],
+                 "segmente": [{"id": "a", "start": 0.0, "end": 2.0,
+                               "sprecher": "sp1", "text": "Hallo."}]}))
+        if mit_zeitkarte:
+            z.writestr("alt.enrich/3-text-clean.json", json.dumps(
+                {"schema": "text-clean/0.1.0", "revision": "r1",
+                 "streams": {"main": "Hallo."}}))
+            z.writestr("alt.enrich/2z-zeitkarte.json", json.dumps(
+                {"schema": "zeitkarte/0.1.0", "revision": "r1", "audio": "audio.mp3",
+                 "einheiten": [{"start": 0, "end": 6, "speaker": "Anna",
+                                "t0_s": 0.0, "t1_s": 2.0}]}))
     return aus.getvalue()
 
 
-def test_rueckfall_auf_die_zeitkarte(client, eintrag):
+def test_format1_mit_beilage_wird_gelesen_und_geflaggt():
+    p = paket.lies(_format1(True, True))
+    assert p["genau"] is True
+    assert p["segmente"][0]["origin"] == "machine"       # Schema 1: Maschine
+    assert p["sprecher"][0]["origin"] == "human"         # benannt: Mensch
+
+
+def test_rueckfall_auf_die_zeitkarte():
     """Ohne Beilage: gröber, aber MIT Wortlaut — leere Segmente wären
     schlimmer als eine Absage."""
-    inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
-    p = paket.lies(_ohne(inhalt, "transkript.json"))
+    p = paket.lies(_format1(False, True))
     assert p["genau"] is False
-    assert p["segmente"]
-    assert all(s["text"].strip() for s in p["segmente"])
+    assert p["segmente"] and all(s["text"].strip() for s in p["segmente"])
+    assert p["segmente"][0]["origin"] == "source"
     assert p["sprecher"]
 
 
-def test_ohne_zeitkarte_und_beilage_klare_absage(client, eintrag):
-    inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
-    roh = _ohne(_ohne(inhalt, "transkript.json"), "2z-zeitkarte.json")
+def test_ohne_zeitkarte_und_beilage_klare_absage():
     with pytest.raises(paket.PaketFehler, match="transkript.json"):
-        paket.lies(roh)
+        paket.lies(_format1(False, False))
 
 
 def test_kein_zip_wird_abgewiesen():
@@ -141,11 +159,17 @@ def test_import_altes_enrich_zip_geht_weiter(client, eintrag, tmp_path):
     assert r.status_code == 200, r.text
 
 
-def test_enrich_kann_die_datei_entpacken(eintrag, tmp_path):
-    """Gegenprobe mit enrich selbst: Dossier.unpack nimmt die flache
-    .enrich an — sie ist ein Zip am Inhalt, nicht am Namen."""
-    from enrich_core.dossier import Dossier
-    inhalt, name, _m = exporte.export_bytes(eintrag, "enrich")
-    datei = tmp_path / name; datei.write_bytes(inhalt)
-    d = Dossier.unpack(datei, tmp_path / "aus")
-    assert (d.path / "transkript.json").is_file()
+def test_inventar_erkennt_veraenderte_datei(client, eintrag):
+    """Format 2: jede Datei steht mit Hash im Manifest. Wird eine
+    verändert, ist der Container nicht mehr lesbar — laut, nicht still."""
+    inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
+    alt = zipfile.ZipFile(io.BytesIO(inhalt))
+    aus = io.BytesIO()
+    with zipfile.ZipFile(aus, "w", zipfile.ZIP_STORED) as neu:
+        for i in alt.infolist():
+            roh = alt.read(i.filename)
+            if i.filename.endswith("/text/clean.json"):
+                roh = roh.replace(b"Hallo", b"Hallx")
+            neu.writestr(i, roh)
+    with pytest.raises(paket.PaketFehler, match="clean.json ver"):
+        paket.lies(aus.getvalue())

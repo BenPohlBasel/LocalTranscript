@@ -84,10 +84,13 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 
 - **VTT** — WebVTT with standard voice tags `<v Name>`.
 - **CSV**, **TXT** — plain derived text.
-- **enrich dossier (`.enrich`)** — a complete enrich dossier: T0=T1
-  byte-identical, a PDF typeset in Recursive, a time map linking
-  offsets ↔ seconds ↔ speakers, a copy of the audio, and the analysis
-  chain marked "narrative". Import it into enrich directly.
+- **enrich dossier (`.enrich`)** — one uncompressed file in Format 2
+  of the enrich dossier (`FORMAT.md` in the enrich repository): the
+  transcript as the source with `origin` on every segment and speaker,
+  a PDF typeset in Recursive as the rendered form, T0/T1 and a time map
+  under `text/`, the audio, and a manifest that inventories every file
+  with its hash and carries the chained journal of who wrote what and
+  when. Import it into enrich directly.
 - **REFI-QDA for ATLAS.ti (`.qdpx.zip`)** — the transcript as a
   `TextSource` *and* as the `Transcript` of an `AudioSource` with one
   `SyncPoint` per utterance, speakers as codes. Verified against a
@@ -99,8 +102,10 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 made elsewhere and turns it into a library entry.
 
 **A `.enrich` is one step.** It is one file — a zip like `.docx` —
-that already carries its audio, so the app takes `transkript.json`
-and `audio.mp3` out of it and is done. The same works for a dossier
+that already carries its audio, so the app takes the transcript and
+the audio out of it and is done; the origin flags and the journal come
+along, and a container whose files no longer match their hashes is
+refused. The same works for a dossier
 folder as enrich keeps it (a package on macOS): pick it or drop it. Everything else in the dossier is dropped on purpose: after the
 first edit no analysis layer would line up with the text any more.
 

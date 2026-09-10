@@ -98,21 +98,11 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
             zeiten=zeiten, audio=audio,
             zeiten_quelle="localtranscript")
         d.set_analyse_kette("narrativ", "localtranscript")
-        # BEILAGE: die kanonische Wahrheit (ein VTT als JSON — dieselben
-        # Cues, dazu die Sprecher als Entitäten mit stabilen ids, was
-        # VTT nicht ausdrücken kann). Kein Layer, kein Manifest-Eintrag
-        # — dieselbe Sorte Datei wie audio.mp3 und source.pdf daneben.
-        import json as _json
-        beilage = dict(daten)
-        beilage["exportiert_von"] = wer         # app · install · user
-        (d.path / "transkript.json").write_text(
-            _json.dumps(beilage, ensure_ascii=False, indent=2),
-            encoding="utf-8")
-        # Nicht d.pack(): das komprimiert (DEFLATE), und im Dossier ist
-        # das Grösste die mp3, die sich nicht komprimieren lässt — nur
-        # Zeit kostet. STORED, Wurzel «<stamm>.enrich/», wie enrich.unpack
-        # es erwartet (genau EIN Wurzelverzeichnis).
-        return packe_verzeichnis(d.path)
+        # Aus dem Format-1-Verzeichnis den Format-2-Container bauen:
+        # Konvention, Schicht-Köpfe, Transkript als Quelle mit origin je
+        # Record, Inventar mit Hash für jede Datei, Journal verkettet.
+        from .format2 import baue_container
+        return baue_container(daten, d.path, audio, stamm)
 
 
 def packe_verzeichnis(ordner: Path) -> bytes:
