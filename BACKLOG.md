@@ -5,37 +5,22 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
 
 ## Offen (nach Priorität)
 
-1. **`origin` je Segment und je Sprecher in `transkript.json` (Auftrag
-   2026-09-10, Format 2 des enrich-Dossiers — `../enrich/FORMAT.md` §0.1
-   und §5).** Whisper schreibt `machine`; jedes Segment, das eine Person
-   im Editor anfasst (Text, Sprecher, Grenzen, Teilen/Verbinden), wird
-   `human` und behält den ersetzten Stand als `supersedes`; ein Sprecher
-   wird `human`, sobald benannt. `human` gewinnt und ist nie ableitbar:
-   nur der Editor setzt es, nie ein Import oder ein Lauf. Der Kopf der
-   Datei nach dem Schicht-Vertrag: `schema: transcript/1.0.0`, `kind`,
-   `origin: mixed`, `by` (Whisper-Modell, Diarisierung, App-Version),
-   `did` (ein Satz). Kanonisches JSON (sortierte Schlüssel, `\n` am
-   Ende) — heute `indent=2`, nicht hash-stabil. Der enrich-Export legt
-   die Schicht als `source/transcript.json` mit Hash ins Manifest
-   (`files`, `layers`), die Zeitkarte wird daraus abgeleitet.
-   Bibliothek: Lesen alter `transkript.json` ohne `origin` → alle
-   Segmente `machine`, Sprecher mit Name ≠ «Sprecher n» → `human`.
-   Tests: Rundlauf hält die Flags; Import aus einem Dossier ebnet sie
-   nicht ein.
+1. ~~**`origin` je Segment und je Sprecher**~~ — GEBAUT 2026-09-10/11
+   (Schema 2 der Bibliothek, `transcript.json` als Quelle im Container;
+   CHANGELOG «Unreleased»).
 
-2. **Journal im Transkript (`../enrich/FORMAT.md` §3.1).** Jede
-   Schreibung im Editor ist ein Run mit `origin: human`, `who`
-   (`app: localtranscript/2.2.0` immer; `install`: zufällige ULID,
-   beim ersten Start in die Config geschrieben, in den Einstellungen
-   sichtbar und neu würfelbar — NIE Hardware-UUID oder Hostname;
-   Person nur, wenn in den Einstellungen eine E-Mail steht — unbekannt
-   ist kein Fehler), `started`/`finished`, `changed` (Segment-/Sprecher-
-   IDs mit Art der Änderung), je Sitzung gebündelt (10 min Ruhe oder
-   Verlassen des Editors). Der Whisper-Lauf ist ein Run mit `origin:
-   machine` (Modell, Diarisierung, Version). Die `history/`-
-   Schnappschüsse bleiben und werden vom Run referenziert. Beim
-   enrich-Export gehen die Runs ins Manifest. Klein halten: IDs und
-   Hashes, nie Texte oder Diffs; Richtwert unter 2 KB je Run.
+2. ~~**Journal im Transkript**~~ — GEBAUT 2026-09-10/11 (Runs je
+   Whisper-Lauf, Import, Editor-Sitzung; im Container als RunRecords
+   mit enrichs Kette). Offen daraus: der Hinweis in der App, dass ein
+   Run offen ist, und `enrich_core`-Umzug von `zotero.py` abwarten für
+   die Metadaten-Schicht (enrich-Backlog 000).
+
+2a. **Neu vendoren, sobald enrich die Kopfzeile committet.** Der
+   Drift-Guard `test_textsatz_drift` schlägt an, weil enrichs
+   `textsatz.py` gerade offen ist (+69 Zeilen, Kopfzeile Titel · Datum
+   · Interviewer:in · Citekey). Dann `textsatz.py` neu kopieren
+   (Import-Patch laut Kopfkommentar) und die Kopfzeilen-Felder aus dem
+   Transkript durchreichen.
 
 3. **Import-Dialog für Ordner-Dossiers ohne enrich.app.** Ohne die UTI
    (kommt mit dem nächsten Build über `src-tauri/Info.plist`) ist ein
