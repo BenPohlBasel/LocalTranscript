@@ -23,13 +23,23 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Tests: Rundlauf hält die Flags; Import aus einem Dossier ebnet sie
    nicht ein.
 
-2. **Import-Dialog für Ordner-Dossiers ohne enrich.app.** Ohne die UTI
+2. **Journal im Transkript (`../enrich/FORMAT.md` §3.1).** Jede
+   Schreibung im Editor ist ein Run mit `origin: human`, `who`
+   (angemeldete Person — heute gibt es keine; E-Mail aus den
+   Einstellungen), `started`/`finished`, `changed` (Segment-/Sprecher-
+   IDs mit Art der Änderung), je Sitzung gebündelt (10 min Ruhe oder
+   Verlassen des Editors). Der Whisper-Lauf ist ein Run mit `origin:
+   machine` (Modell, Diarisierung, Version). Die `history/`-
+   Schnappschüsse bleiben und werden vom Run referenziert. Beim
+   enrich-Export gehen die Runs ins Manifest.
+
+3. **Import-Dialog für Ordner-Dossiers ohne enrich.app.** Ohne die UTI
    (kommt mit dem nächsten Build über `src-tauri/Info.plist`) ist ein
    `.enrich`-Verzeichnis im Dateidialog nicht wählbar; Drag & Drop
    geht. Nach dem Build prüfen, ob der Dialog das Package anbietet;
    sonst zweiter Knopf «Ordner wählen …» (`pickOrdner` gibt es).
 
-3. **Anleitung, Schritt Exportieren:** Satz zum `.qdpx.zip` — vor dem
+4. **Anleitung, Schritt Exportieren:** Satz zum `.qdpx.zip` — vor dem
    Import in ATLAS.ti entpacken; `.qdpx` und `Media`-Ordner müssen
    nebeneinander liegen (User 2026-09-10). Viersprachig, Seite und
    App-Blatt.
