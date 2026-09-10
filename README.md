@@ -139,6 +139,10 @@ the app menu.
 
 - **This file** — what the app is and does, architecture, development,
   building, licences.
+- **[`site/`](site/)** — the project website: a static package with no
+  cookies, no dependencies and no build step (fonts and screenshots in
+  their own folders), carrying the user guide in German, English,
+  French and Italian.
 - **[CHANGELOG.md](CHANGELOG.md)** — version history. The GitHub release
   notes are the matching section from it; changes belong here first, not
   in the release form.
