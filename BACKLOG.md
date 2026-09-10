@@ -25,8 +25,11 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
 
 2. **Journal im Transkript (`../enrich/FORMAT.md` §3.1).** Jede
    Schreibung im Editor ist ein Run mit `origin: human`, `who`
-   (App-Kennung `localtranscript/2.2.0` immer; Person nur, wenn in den
-   Einstellungen eine E-Mail steht — unbekannt ist kein Fehler), `started`/`finished`, `changed` (Segment-/Sprecher-
+   (`app: localtranscript/2.2.0` immer; `install`: zufällige ULID,
+   beim ersten Start in die Config geschrieben, in den Einstellungen
+   sichtbar und neu würfelbar — NIE Hardware-UUID oder Hostname;
+   Person nur, wenn in den Einstellungen eine E-Mail steht — unbekannt
+   ist kein Fehler), `started`/`finished`, `changed` (Segment-/Sprecher-
    IDs mit Art der Änderung), je Sitzung gebündelt (10 min Ruhe oder
    Verlassen des Editors). Der Whisper-Lauf ist ein Run mit `origin:
    machine` (Modell, Diarisierung, Version). Die `history/`-
