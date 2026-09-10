@@ -50,6 +50,14 @@ mit Pillow auf Breite bringen und als PNG-8 sichern (256 Farben ohne
 Dithering — UI-Flächen sind flach, das spart zwei Drittel, ohne dass die
 Schriftkanten leiden).
 
+## Zeichen
+
+Das Zeichen in der Kopfzeile und das Favicon sind dasselbe wie das
+App-Symbol (`frontend/src-tauri/icons/`), nur als Inline-SVG
+nachgezeichnet: drei Balken auf lila Quadrat, `#6366f1`. Kein
+zusätzlicher Abruf, scharf in jeder Grösse. Gegen das PNG geprüft —
+die Abweichung liegt bei 2,4 von 255 und steckt in den Kantenglättungen.
+
 ## Schrift
 
 Recursive Variable Font, **SIL OFL 1.1** — Lizenztext in
