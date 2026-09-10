@@ -85,8 +85,9 @@ main>section:nth-child(even){background:var(--wash)}
 .row h3 .nr{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;margin-right:.65rem;border-radius:50%;background:var(--lila);font-variation-settings:'MONO' 1;font-size:.95rem;font-weight:560;color:#fff;vertical-align:-.5rem}
 .lede{font-size:clamp(1.15rem,1rem + .5vw,1.4rem);line-height:1.4;color:var(--ink-2);max-width:60ch}
 /* Grosses Zitat (Warum kostenlos): der Satz trägt den Abschnitt */
-.zitat{margin:.5rem 0 0;padding:0}
-.zitat p{font-size:clamp(1.6rem,1.1rem + 1.6vw,2.6rem);line-height:1.2;letter-spacing:-.015em;font-weight:480;color:var(--ink);max-width:34ch}
+/* So gross wie die Seiten-Überschrift, danach erst der Titel */
+.zitat{margin:0 0 3rem;padding:0}
+.zitat p{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.15;letter-spacing:-.01em;font-weight:640;color:var(--ink);max-width:none}
 .zitat p::before{content:"«";margin-right:.05em}
 .zitat p::after{content:"»";margin-left:.05em}
 .zitat footer{margin-top:1.1rem;padding:0;background:none;font-size:1rem;color:var(--ink-2)}
@@ -304,14 +305,13 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
 
 <section id="license">
   <div class="wrap">
+    <blockquote class="zitat">
+      <p data-t="licLede"></p>
+      <footer>— B/IAS, Basel Institut für angewandte Stadtforschung</footer>
+    </blockquote>
     <div class="row kopf">
       <div><h2 data-t="licH"></h2></div>
-      <div class="t">
-        <blockquote class="zitat">
-          <p data-t="licLede"></p>
-          <footer>— B/IAS, Basel Institut für angewandte Stadtforschung</footer>
-        </blockquote>
-      </div>
+      <div class="t"></div>
     </div>
     <div class="row">
       <div><h3 data-t="l1h"></h3></div>
