@@ -61,7 +61,7 @@ header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:bl
 .langs button[aria-pressed="true"]{color:var(--ink);border-color:var(--line);background:var(--wash)}
 
 /* hero */
-.hero{padding:3.5rem 0 0}
+.hero{padding:3.5rem 0 2rem}   /* unten Luft für den Schatten des Fensters */
 .hero-top{margin-bottom:2.25rem}
 /* Das Zeichen ist die Initiale der Überschrift: gleiche Zeile, so gross
    wie die Versalien; der Name steht in derselben Schrift wie der Rest
@@ -84,7 +84,6 @@ h1 .initial{width:.92em;height:.92em;display:inline-block;vertical-align:-.1em;m
 
 
 /* guide */
-.guide{border-top:1px solid var(--line)}
 .steps{list-style:none;margin:2.5rem 0 0;padding:0;counter-reset:s}
 .steps>li{border-top:1px solid var(--line);padding:2.25rem 0 3rem;display:grid;grid-template-columns:2.5rem 1fr;gap:0 1.25rem}
 .steps>li::before{counter-increment:s;content:counter(s);font-variation-settings:'MONO' 1;font-size:.95rem;color:var(--lila);border:1px solid var(--line);border-radius:50%;width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;background:var(--wash)}
