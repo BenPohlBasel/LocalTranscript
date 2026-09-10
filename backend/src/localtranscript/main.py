@@ -233,9 +233,11 @@ def _import_turns(turns: list[dict], name: str, quelle_art: str,
     segmente = [{"start": t["t0_s"], "end": t["t1_s"],
                  "sprecher": sid.get((t.get("speaker") or "").strip()),
                  "text": t["text"]} for t in turns]
+    # Eine fremde VTT/CSV ist die Quelle, wie sie kam — `source`
     eintrag = bibliothek.anlegen(
         name=name, segmente=segmente, sprecher=sprecher,
-        quelle={"datei": name, "erzeugt": quelle_art}, audio=audio)
+        quelle={"datei": name, "erzeugt": quelle_art}, audio=audio,
+        origin="source")
     return {"eintrag": eintrag["id"], "segmente": len(segmente),
             "sprecher": len(sprecher)}
 
@@ -255,13 +257,16 @@ def _import_paket(daten: bytes, fallback: str) -> dict:
             audio_tmp = _tmpdatei(Path(p["audio_name"]).suffix,
                                   "lt-paket-")
             audio_tmp.write_bytes(p["audio_bytes"])
+        # Herkunftsflags kommen aus dem Paket mit (FORMAT.md §5); das
+        # Journal wird übernommen und um den Import-Run verlängert.
         eintrag = bibliothek.anlegen(
             name=p["name"] or fallback,
             segmente=p["segmente"], sprecher=p["sprecher"],
             quelle={"datei": f"{fallback}.enrich",
                     "erzeugt": "import-enrich",
                     "genau": p["genau"]},
-            audio=audio_tmp)
+            audio=audio_tmp, origin="source",
+            journal=p.get("journal") or [])
     finally:
         if audio_tmp is not None:
             audio_tmp.unlink(missing_ok=True)
@@ -362,6 +367,9 @@ def transcript_get(eid: str) -> dict:
 class SprecherReq(ApiModel):
     id: str
     name: str
+    #: kommt vom GET zurück; beim Schreiben ignoriert — die Bibliothek
+    #: entscheidet, was `human` wird (FORMAT.md §0.1: nie ableitbar)
+    origin: str | None = None
 
 
 class SegmentReq(ApiModel):
@@ -370,6 +378,7 @@ class SegmentReq(ApiModel):
     end: float
     sprecher: str | None = None
     text: str
+    origin: str | None = None
 
 
 class SaveReq(ApiModel):
@@ -389,8 +398,15 @@ def transcript_put(eid: str, req: SaveReq) -> dict:
             raise HTTPException(status_code=422,
                                 detail=f"Unbekannter Sprecher: "
                                        f"{seg.sprecher}")
-    d["sprecher"] = [s.model_dump() for s in req.sprecher]
-    d["segmente"] = [s.model_dump() for s in req.segmente]
+    # Der Editor schickt Records ohne origin — die Bibliothek setzt
+    # `human` auf alles, was sich gegenüber dem alten Stand geändert
+    # hat, und lässt den Rest, wie er war.
+    alt_seg = {s["id"]: s for s in d.get("segmente", [])}
+    alt_sp = {p["id"]: p for p in d.get("sprecher", [])}
+    d["sprecher"] = [{**alt_sp.get(s.id, {}), **s.model_dump(exclude={"origin"})}
+                     for s in req.sprecher]
+    d["segmente"] = [{**alt_seg.get(s.id, {}), **s.model_dump(exclude={"origin"})}
+                     for s in req.segmente]
     d = bibliothek.schreibe(eid, d)
     return {"status": "saved", "updated": d["updated"]}
 

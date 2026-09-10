@@ -274,7 +274,9 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             quelle={"datei": job["filename"], "model": p["model"],
                     "language": p["language"], "diarize": p["diarize"],
                     "erzeugt": "transcription"},
-            audio=quelle)
+            audio=quelle, origin="machine",
+            by={"tool": "whisper.cpp", "model": p["model"],
+                **({"diarization": "speechbrain-ecapa"} if p["diarize"] else {})})
         _setze(job, status="completed", progress=100, message="fertig",
                eintrag=eintrag["id"])
     except Abbruch:

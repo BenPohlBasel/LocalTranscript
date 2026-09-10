@@ -135,9 +135,10 @@ DEFAULTS = {
 }
 
 
-def neue_install_id() -> str:
-    """`ins-<ULID>` — 48 Bit Zeit + 80 Bit Zufall, Crockford-Base32,
-    sortierbar, ohne jeden Bezug zu Gerät oder Person."""
+def ulid() -> str:
+    """26 Zeichen Crockford-Base32: 48 Bit Zeit + 80 Bit Zufall —
+    sortierbar, kollisionsfrei, ohne Bezug zu Gerät oder Person
+    (FORMAT.md §2: Record-IDs sind `<typ>-<ULID>`)."""
     import secrets
     import time
     alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -146,7 +147,11 @@ def neue_install_id() -> str:
     for _ in range(26):
         zeichen.append(alphabet[wert & 31])
         wert >>= 5
-    return "ins-" + "".join(reversed(zeichen))
+    return "".join(reversed(zeichen))
+
+
+def neue_install_id() -> str:
+    return "ins-" + ulid()
 
 
 def read_config() -> dict:

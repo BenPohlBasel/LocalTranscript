@@ -7,6 +7,31 @@ a version are the corresponding section of this file.
 
 ### Added
 
+- **Export and import follow Format 2 of the enrich dossier**
+  (`FORMAT.md` in the enrich repository). The container is one
+  uncompressed `.enrich` file with the convention `source/ text/`: the
+  transcript is the source (`source/transcript.json`, schema
+  `transcript/1.0.0`), the typeset PDF is `rendered`, every layer
+  carries the header `kind · id · origin · from · by · did · result`,
+  and the manifest is a complete inventory — every file, including the
+  audio, with hash and size — plus lineage (`layers`) and a chained
+  journal (`runs`). Import verifies the inventory and refuses a
+  container whose files no longer match their hashes. Format-1
+  dossiers (enrich as it is today, earlier LocalTranscript exports)
+  are still read.
+- **Origin on every record.** Each segment and speaker carries
+  `origin`: `machine` for what Whisper and the diarisation produced,
+  `source` for a VTT/CSV imported from elsewhere, `human` for anything
+  a person touched in the editor — text, speaker, boundaries, a name.
+  Only the editor sets `human`; imports carry the flags over and never
+  flatten them. Older library entries are upgraded on read.
+- **Journal.** Every write is a run: the Whisper job (model,
+  diarisation), an import, and each editor session (bundled — ten
+  minutes of quiet or leaving the editor close a run) with the ids of
+  the records it changed and the kind of change. Runs name the app, the
+  installation id and, if set, the e-mail; they are chained by the hash
+  of the preceding entry and travel with the dossier.
+
 - **Identity in the dossier** (Settings). An optional e-mail address as
   the app's user ID: it is written into every enrich dossier you export
   — as the person in the journal of who edited what and when — and

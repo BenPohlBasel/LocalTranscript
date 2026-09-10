@@ -6,7 +6,7 @@ import json
 
 def test_import_und_kanonisches_modell(client, eintrag):
     d = client.get(f"/api/transcripts/{eintrag}").json()
-    assert d["schema"] == 1
+    assert d["schema"] == 2          # origin je Record + Journal (2026-09-10)
     assert [s["name"] for s in d["sprecher"]] == ["Anna", "Ben"]
     seg = d["segmente"]
     assert len(seg) == 2  # präfixloser Cue setzt Bens Turn fort

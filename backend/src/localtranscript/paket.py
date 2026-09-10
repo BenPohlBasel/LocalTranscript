@@ -128,6 +128,13 @@ def lies(daten: bytes) -> dict:
         raise PaketFehler(f"Kein lesbares Zip: {e}") from e
 
     with z:
+        from . import format2
+        m2 = format2.ist_format2(z)
+        if m2 is not None:
+            try:
+                return format2.lies(z, m2)
+            except ValueError as e:
+                raise PaketFehler(str(e)) from e
         tj = _mitglied(z, "transkript.json")
         name = ""
         genau = tj is not None
@@ -168,8 +175,17 @@ def lies(daten: bytes) -> dict:
                 audio_name, audio_bytes = blatt, z.read(m)
                 break
 
+    # Format 1: Flags wie Schema 1 der Bibliothek ergänzen — Segmente
+    # von der Maschine, benannte Sprecher von Menschen; ohne Beilage
+    # (Zeitkarte) ist alles `source`, die Zeitkarte ist die Quelle.
+    from .bibliothek import _STANDARDNAME
+    for seg in segmente:
+        seg.setdefault("origin", "machine" if genau else "source")
+    for sp in sprecher:
+        sp.setdefault("origin", "machine" if _STANDARDNAME.match(
+            sp.get("name", "")) else "human")
     return {"name": name, "segmente": segmente, "sprecher": sprecher,
             "audio_name": audio_name, "audio_bytes": audio_bytes,
-            "genau": genau}
+            "genau": genau, "journal": []}
 
 
