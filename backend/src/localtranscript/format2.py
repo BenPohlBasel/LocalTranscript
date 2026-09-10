@@ -1,153 +1,88 @@
-"""Der .enrich-Container nach FORMAT.md, Format 2.
+"""Der .enrich-Container nach FORMAT.md, Format 2 — enrich-core schreibt,
+LocalTranscript ergänzt.
 
 Das gevendorte enrich-Werkzeug (`enrich_export.textsatz`) setzt aus dem
-Transkript ein Format-1-Dossier: PDF, Layout, T0, T1, Zeitkarte — mit
-Manifest und Läufen, genau wie enrich selbst. Dieser Modul nimmt das
-Ergebnis und macht daraus den Format-2-Container:
+Transkript das Dossier: PDF, Layout, T0, T1, Zeitkarte — und enrich-core
+führt dabei das Manifest nach Format 2 (Inventar `files`, Lineage
+`layers`, `source`, `producer`, Journal mit `prev`-Kette). Dieser Modul
+legt darauf NUR, was enrich nicht wissen kann (Stand enrich@08a0e78,
+2026-09-11):
 
-- Dateien in die Konvention (Anhang A): source/ text/ — keine Nummern.
-- Jede Schicht bekommt den Kopf des Schicht-Vertrags (§2): kind,
-  id, origin, from, by, did, result. Der Inhalt bleibt, wie enrich
-  ihn schreibt — additiv.
-- Das Transkript wird die Quelle: source/transcript.json, Schema
-  transcript/1.0.0, mit `origin` je Segment und Sprecher (§5).
-- Das Manifest (§3) ist Inventar (`files` mit Hash für JEDE Datei —
-  auch das Audio), Lineage (`layers`) und Journal (`runs`, verkettet).
-- Profil `handover`: keine _history, Läufe nur, soweit sie einen
-  gültigen Stand erzeugt haben — hier: alle, es gibt keine anderen.
-- ZIP_STORED, genau ein Wurzelverzeichnis `<name>.enrich/`.
+- `transcript.json` — die Quelle: das kanonische Transkript mit
+  `origin` je Segment und Sprecher, Kopf nach dem Schicht-Vertrag (§2),
+  als Schicht registriert (Inventar + Lineage) und in `source.canonical`
+  eingetragen. Das gesetzte PDF bleibt `rendered`.
+- Das Journal der Bibliothek — Whisper-Lauf, Import, Editor-Sitzungen —
+  als `RunRecord`s VOR den Läufen des Textsatzes (das Transkript ist
+  die Quelle aller anderen Schichten); die Kette wird über alle
+  Einträge neu geschlossen, mit enrichs eigener Hash-Funktion.
+- `producer` = LocalTranscript, `profile` = handover, `title`.
 
-Das Verzeichnis ist enrichs Arbeitsform; das hier ist die Sendung.
+Alles über die Modelle von enrich-core, damit das Manifest von enrichs
+Leser validiert wird — der Kompatibilitätstest öffnet den Container mit
+`Dossier.open` und prüft Inventar und Kette (tests/test_format2.py).
+Dateinamen bleiben, wie enrich sie heute schreibt (Nummern, Wurzel);
+Anhang A der FORMAT.md ist enrichs Schritt, nicht unserer.
 """
 from __future__ import annotations
 
-import hashlib
 import io
 import json
 import zipfile
 from pathlib import Path
 
+from enrich_core.canonical import content_hash
+from enrich_core.dossier import Dossier, run_eintrag_hash
+from enrich_core.ids import new_id
+from enrich_core.schemas.common import Agent
+from enrich_core.schemas.manifest import (
+    FileEntry,
+    LayerInfo,
+    Producer,
+    RunRecord,
+    SourceInfo,
+    Who,
+)
+
 from . import bibliothek
-from .config import identitaet, ulid
+from .config import APP_VERSION, identitaet
 
-FORMAT = 2
-MANIFEST_SCHEMA = "manifest/1.0.0"
+TRANSCRIPT_DATEI = "transcript.json"
 TRANSCRIPT_SCHEMA = "transcript/1.0.0"
+TOOL = "localtranscript"
 
-#: Format 1 → Konvention Format 2 (FORMAT.md Anhang A)
-ALIAS = {
-    "0-intake.json": "source/intake.json",
-    "1-layout.json": "text/layout.json",
-    "2-text-raw.json": "text/raw.json",
-    "2z-zeitkarte.json": "text/timemap.json",
-    "3-text-clean.json": "text/clean.json",
-    "source.pdf": "source/document.pdf",
-}
-#: kind je Schicht und der eine Satz für Menschen
-KIND = {
-    "source/intake.json": ("intake", "Quelle geprüft und angenommen."),
-    "text/layout.json": ("layout", "Blöcke und Lesefluss des gesetzten PDFs."),
-    "text/raw.json": ("text-raw", "T0: Rohtext in Lesereihenfolge, nie normalisiert."),
-    "text/clean.json": ("text-clean", "T1: bereinigter Text mit Diff-Map zu T0."),
-    "text/timemap.json": ("timemap", "Turns: T1-Offsets ↔ Sekunden ↔ Sprecher, aus dem Transkript abgeleitet."),
-}
-
-
-def _sha(daten: bytes) -> str:
-    return "sha256:" + hashlib.sha256(daten).hexdigest()
+#: Bibliotheks-Herkunft → enrich `agent.type` (Format 1, weiter Pflicht)
+_AGENT_TYPE = {"source": "extracted", "machine": "derived",
+               "llm": "llm", "human": "human"}
 
 
 def _kanon(d: dict) -> bytes:
     return bibliothek.kanonisch(d).encode("utf-8")
 
 
-def _origin_aus_agent(agent: dict | None) -> str:
-    t = (agent or {}).get("type", "derived")
-    return {"extracted": "machine", "derived": "machine",
-            "llm": "llm", "human": "human"}.get(t, "machine")
+# ---------- Schreiben ----------
 
-
-def baue_container(daten: dict, dossier_dir: Path, audio: Path | None,
-                   stamm: str) -> bytes:
-    """Format-1-Dossierverzeichnis (aus textsatz) + kanonisches
-    Transkript → Format-2-Container als Bytes."""
-    wer = identitaet()
-    manifest1 = json.loads((dossier_dir / "manifest.json").read_text("utf-8"))
-    runs1 = manifest1.get("runs", [])
-    wurzel = f"{stamm}.enrich"
-
-    # ---- Schichten: verschieben, Kopf setzen, IDs vergeben ----
-    layer_id: dict[str, str] = {}          # neuer Pfad → lay-ID
-    alt_zu_id: dict[str, str] = {}         # alter Name → lay-ID
-    for alt, neu in ALIAS.items():
-        if (dossier_dir / alt).is_file() and neu.endswith(".json"):
-            lid = f"lay-{ulid()}"
-            layer_id[neu] = lid
-            alt_zu_id[alt] = lid
-    transcript_id = f"lay-{ulid()}"
-
-    dateien: dict[str, bytes] = {}          # Pfad im Container → Bytes
-    layers: dict[str, dict] = {}
-    runs2: list[dict] = []
-
-    def run_fuer(alt: str) -> dict | None:
-        for r in reversed(runs1):
-            if r.get("layer") == alt:
-                return r
-        return None
-
-    for alt, neu in ALIAS.items():
-        quelle = dossier_dir / alt
-        if not quelle.is_file():
-            continue
-        if not neu.endswith(".json"):
-            dateien[neu] = quelle.read_bytes()
-            continue
-        inhalt = json.loads(quelle.read_text("utf-8"))
-        r = run_fuer(alt) or {}
-        kind, did = KIND[neu]
-        von = {alt_zu_id[a]: h for a, h in (r.get("inputs") or {}).items()
-               if a in alt_zu_id}
-        if neu == "text/timemap.json":
-            von[transcript_id] = "(kanonisch, s. source/transcript.json)"
-        kopf = {"kind": kind, "id": layer_id[neu],
-                "origin": _origin_aus_agent(inhalt.get("agent")),
-                "from": von,
-                "by": {"tool": r.get("tool", "enrich-textimport"),
-                       "version": r.get("tool_version", ""),
-                       "app": wer["app"], "install": wer["install"]},
-                "did": did,
-                "result": r.get("summary") or {}}
-        inhalt = {**kopf, **inhalt}      # Kopf voran, Inhalt bleibt
-        dateien[neu] = _kanon(inhalt)
-        layers[layer_id[neu]] = {"path": neu, "kind": kind,
-                                 "schema": inhalt.get("schema", ""),
-                                 "origin": kopf["origin"], "from": von,
-                                 "current": True}
-        if r:
-            runs2.append({"id": r.get("id", f"run-{ulid()}"),
-                          "origin": kopf["origin"],
-                          "who": {"app": wer["app"], "install": wer["install"],
-                                  "tool": r.get("tool"), "version": r.get("tool_version")},
-                          "started": r.get("started"), "finished": r.get("finished"),
-                          "layer": layer_id[neu], "did": did,
-                          "from": von, "result": r.get("summary") or {}})
-
-    # ---- die Quelle: das Transkript ----
+def transkript_schicht(daten: dict, layer_id: str, wer: dict) -> dict:
+    """`transcript.json`: Kopf nach FORMAT.md §2 (in der Form, die enrichs
+    LayerHead liest) plus Sprecher und Segmente mit `origin`."""
     daten = bibliothek._ergaenze_schema1(dict(daten))
     origins = {s.get("origin") for s in daten["segmente"]} | \
               {p.get("origin") for p in daten["sprecher"]}
-    transcript = {
-        "schema": TRANSCRIPT_SCHEMA, "kind": "transcript", "id": transcript_id,
+    quelle = daten.get("quelle", {})
+    by = {"tool": TOOL, "version": APP_VERSION, "model": None,
+          "prompt": None, "user": wer.get("user"),
+          "config": {k: quelle[k] for k in ("model", "language", "diarize")
+                     if k in quelle}}
+    if quelle.get("model"):
+        by["model"] = f"whisper {quelle['model']}"
+    return {
+        "schema": TRANSCRIPT_SCHEMA, "kind": "transcript", "id": layer_id,
         "origin": next(iter(origins)) if len(origins) == 1 else "mixed",
-        "from": {}, "by": {"app": wer["app"], "install": wer["install"],
-                           **({"user": wer["user"]} if wer["user"] else {}),
-                           **_whisper_by(daten.get("quelle", {}))},
-        "did": _did_transkript(daten),
-        "result": {"segments": len(daten["segmente"]),
-                   "speakers": len(daten["sprecher"])},
-        "name": daten.get("name", stamm),
-        "language": daten.get("quelle", {}).get("language"),
+        "from": {}, "by": by, "did": _did(daten),
+        "result": {"records": len(daten["segmente"]) + len(daten["sprecher"]),
+                   "relations": None, "warnings": []},
+        "name": daten.get("name", ""),
+        "language": quelle.get("language"),
         "speakers": [{"id": p["id"], "name": p["name"],
                       "origin": p.get("origin", "machine")}
                      for p in daten["sprecher"]],
@@ -156,141 +91,182 @@ def baue_container(daten: dict, dossier_dir: Path, audio: Path | None,
                       "origin": s.get("origin", "machine")}
                      for s in daten["segmente"]],
     }
-    dateien["source/transcript.json"] = _kanon(transcript)
-    layers[transcript_id] = {"path": "source/transcript.json",
-                             "kind": "transcript", "schema": TRANSCRIPT_SCHEMA,
-                             "origin": transcript["origin"], "from": {},
-                             "current": True}
-    # Das Journal der Bibliothek geht ins Manifest — zuerst, denn das
-    # Transkript ist die Quelle aller anderen Läufe.
-    fuer_manifest = []
-    for r in daten.get("journal", []):
-        r2 = dict(r)
-        r2["layer"] = transcript_id
-        fuer_manifest.append(r2)
-    runs = fuer_manifest + runs2
 
-    # ---- Audio ----
-    media = None
-    if audio is not None and audio.is_file():
-        media = f"source/audio{audio.suffix.lower()}"
-        dateien[media] = audio.read_bytes()
 
-    # ---- Kette: jeder Run trägt den Hash des vorangehenden ----
-    vorher = None
-    for r in runs:
-        r["prev"] = vorher
-        vorher = _sha(_kanon(r))
+def _did(daten: dict) -> str:
+    art = daten.get("quelle", {}).get("erzeugt", "")
+    korrigiert = any(s.get("origin") == "human" for s in daten["segmente"])
+    kern = ("Whisper-Transkript mit Sprechertrennung" if art == "transcription"
+            else f"Importiert aus {daten.get('quelle', {}).get('datei', '?')}")
+    return kern + (", danach von Hand korrigiert." if korrigiert else ".")
 
-    # ---- Manifest ----
-    files = {}
-    for pfad, inhalt in dateien.items():
-        rolle = ("media" if pfad == media
-                 else "rendered" if pfad == "source/document.pdf"
-                 else "layer")
-        eintrag = {"role": rolle, "hash": _sha(inhalt), "bytes": len(inhalt)}
-        if rolle == "layer":
-            eintrag["layer"] = layer_id.get(pfad) or transcript_id
-        if rolle == "rendered":
-            eintrag["from"] = "source/transcript.json"
-        files[pfad] = eintrag
-    manifest = {
-        "format": FORMAT, "schema": MANIFEST_SCHEMA,
-        "dossier_id": f"dos-{ulid()}",
-        "title": daten.get("name", stamm),
-        "created": daten.get("created") or runs[0].get("started") if runs else None,
-        "producer": {"app": wer["app"], "install": wer["install"],
-                     **({"user": wer["user"]} if wer["user"] else {})},
-        "source": {"kind": "transcript", "canonical": "source/transcript.json",
-                   **({"media": media} if media else {}),
-                   "rendered": "source/document.pdf"},
-        "profile": "handover",
-        "analyse_kette": manifest1.get("analyse_kette", "narrativ"),
-        "license_mode": manifest1.get("license_mode", "full"),
-        "gates": manifest1.get("gates", {}),
-        "files": files, "layers": layers, "runs": runs,
-    }
-    manifest_bytes = _kanon(manifest)
 
-    # ---- Container ----
+def _run_aus_journal(r: dict, wer: dict) -> RunRecord:
+    """Bibliotheks-Run → enrich RunRecord. Nur die vier Fragen (wann,
+    was, wer, wo); `did` steht als einziger Satz in `summary`."""
+    origin = r.get("origin", "machine")
+    who = dict(r.get("who") or {})
+    return RunRecord(
+        id=r.get("id") or new_id("run"), tool=TOOL, tool_version=APP_VERSION,
+        layer=TRANSCRIPT_DATEI,
+        # enrichs Agent (Format 1) verlangt bei human eine Adresse; FORMAT.md
+        # §3.1 sagt «unbekannte Person ist kein Fehler». Bis enrich das
+        # angleicht: die Installations-Kennung als stabile Adresse —
+        # unterscheidbar, nicht rückführbar (wie in `who`).
+        agent=Agent(type=_AGENT_TYPE.get(origin, "derived"),
+                    tool=f"{TOOL}/{APP_VERSION}",
+                    model=who.get("model"),
+                    user=who.get("user") or (
+                        who.get("install", wer.get("install"))
+                        if origin == "human" else None)),
+        started=r.get("started") or bibliothek._jetzt(),
+        finished=r.get("finished"),
+        summary={"did": r.get("did", "")},
+        origin=origin,
+        # Bibliothek führt `app` als «localtranscript/2.2.0»; enrichs Who
+        # trennt app und version
+        who=Who(app=TOOL, version=(who.get("app") or f"{TOOL}/{APP_VERSION}").split("/", 1)[-1],
+                install=who.get("install", wer.get("install")),
+                user=who.get("user")),
+        changed=dict(r.get("changed") or {}),
+    )
+
+
+def baue_container(daten: dict, d: Dossier, stamm: str) -> bytes:
+    """Dossier (von textsatz gebaut) + kanonisches Transkript → Container."""
+    wer = identitaet()
+    layer_id = new_id("lay")
+    schicht = _kanon(transkript_schicht(daten, layer_id, wer))
+    (d.path / TRANSCRIPT_DATEI).write_bytes(schicht)
+
+    m = d.manifest
+    # Journal: Bibliothek zuerst, dann der Textsatz; Kette neu schliessen
+    eigene = [_run_aus_journal(r, wer) for r in daten.get("journal", [])]
+    alle = eigene + list(m.runs)
+    vorher: RunRecord | None = None
+    for run in alle:
+        run.prev = run_eintrag_hash(vorher) if vorher is not None else None
+        vorher = run
+    m.runs = alle
+    m.layers[layer_id] = LayerInfo(
+        path=TRANSCRIPT_DATEI, kind="transcript", origin=schicht_origin(schicht),
+        current=True, hash=content_hash(schicht),
+        run=eigene[-1].id if eigene else None,
+        **{"schema": TRANSCRIPT_SCHEMA, "from": {}})
+    m.files[TRANSCRIPT_DATEI] = FileEntry(
+        role="layer", hash=content_hash(schicht), bytes=len(schicht),
+        layer=layer_id)
+    alt = m.source
+    m.source = SourceInfo(kind="transcript", canonical=TRANSCRIPT_DATEI,
+                          media=alt.media if alt else None,
+                          rendered=alt.rendered if alt else "source.pdf")
+    # enrich trägt source.pdf beim Anlegen als `source` ein, bevor es
+    # weiss, dass die Quelle ein Transkript ist — für uns ist das PDF die
+    # Lesefassung (FORMAT.md §3), aus dem Transkript gesetzt.
+    pdf = m.files.get("source.pdf")
+    if pdf is not None:
+        m.files["source.pdf"] = FileEntry(role="rendered", hash=pdf.hash,
+                                          bytes=pdf.bytes, layer=None,
+                                          **{"from": TRANSCRIPT_DATEI})
+    m.producer = Producer(app=TOOL, version=APP_VERSION)
+    m.profile = "handover"
+    m.title = daten.get("name") or stamm
+    d._write_manifest(m)   # dieselbe kanonische Form wie enrich selbst
+
+    # Container: eine Wurzel, unkomprimiert, nur das Inventar + Manifest
+    # (Profil handover: keine _history, keine Sperrdateien)
+    wurzel = f"{stamm}.enrich"
     puffer = io.BytesIO()
     with zipfile.ZipFile(puffer, "w", zipfile.ZIP_STORED) as z:
-        z.writestr(f"{wurzel}/manifest.json", manifest_bytes)
-        for pfad in sorted(dateien):
-            z.writestr(f"{wurzel}/{pfad}", dateien[pfad])
+        z.write(d.path / "manifest.json", f"{wurzel}/manifest.json")
+        for rel in sorted(m.files):
+            z.write(d.path / rel, f"{wurzel}/{rel}")
     return puffer.getvalue()
 
 
-def _whisper_by(quelle: dict) -> dict:
-    aus = {}
-    if quelle.get("model"):
-        aus["model"] = f"whisper {quelle['model']}"
-    if quelle.get("diarize"):
-        aus["diarization"] = "speechbrain-ecapa"
-    return aus
-
-
-def _did_transkript(daten: dict) -> str:
-    art = daten.get("quelle", {}).get("erzeugt", "")
-    korrigiert = any(s.get("origin") == "human" for s in daten["segmente"])
-    if art == "transcription":
-        return ("Whisper-Transkript mit Sprechertrennung"
-                + (", danach von Hand korrigiert." if korrigiert else "."))
-    return f"Importiert aus {daten.get('quelle', {}).get('datei', '?')}" \
-        + (", danach von Hand korrigiert." if korrigiert else ".")
+def schicht_origin(schicht: bytes) -> str:
+    return json.loads(schicht.decode("utf-8")).get("origin", "mixed")
 
 
 # ---------- Lesen ----------
 
-def ist_format2(z: zipfile.ZipFile) -> dict | None:
-    """Manifest, wenn der Container Format 2 ist — sonst None."""
+def manifest_format2(z: zipfile.ZipFile) -> tuple[str, dict] | None:
+    """(Wurzel, Manifest), wenn der Container ein Format-2-Inventar
+    trägt — erkannt an `files` + `source`, nicht an `format` (enrich
+    schreibt beides schon mit `format: 1`)."""
     for n in z.namelist():
         if n.endswith("/manifest.json") and n.count("/") == 1:
             try:
                 m = json.loads(z.read(n).decode("utf-8"))
             except (ValueError, UnicodeDecodeError):
                 return None
-            return m if m.get("format", 1) >= 2 else None
+            if isinstance(m.get("files"), dict) and m.get("source"):
+                return n.split("/", 1)[0], m
+            return None
     return None
 
 
-def lies(z: zipfile.ZipFile, manifest: dict) -> dict:
-    """Format-2-Container → {name, segmente, sprecher, audio_name,
-    audio_bytes, genau, journal}. Die Herkunftsflags werden ÜBERNOMMEN,
-    nie eingeebnet (FORMAT.md §5)."""
-    wurzel = next(n for n in z.namelist() if n.endswith("/manifest.json")).split("/", 1)[0]
-    quelle = manifest.get("source", {})
-    kanon = quelle.get("canonical", "source/transcript.json")
-    try:
-        t = json.loads(z.read(f"{wurzel}/{kanon}").decode("utf-8"))
-    except KeyError as e:
-        raise ValueError(f"Container ohne {kanon}") from e
-    # Integrität: jede Datei im Inventar mit passendem Hash
+def inventar_pruefen(z: zipfile.ZipFile, wurzel: str, m: dict) -> None:
+    """Jede Datei des Inventars da und unverändert — ausser `_history/`
+    (enrich-Entscheid 2026-09-11: Betriebsmittel, reist nicht mit)."""
     verletzt = []
-    for pfad, eintrag in manifest.get("files", {}).items():
+    for pfad, eintrag in m["files"].items():
+        if eintrag.get("role") == "history" or pfad.startswith("_history/"):
+            continue
         try:
             inhalt = z.read(f"{wurzel}/{pfad}")
         except KeyError:
             verletzt.append(f"{pfad} fehlt"); continue
-        if _sha(inhalt) != eintrag.get("hash"):
+        if content_hash(inhalt) != eintrag.get("hash"):
             verletzt.append(f"{pfad} verändert")
     if verletzt:
         raise ValueError("Inventar stimmt nicht: " + ", ".join(verletzt))
+
+
+def lies(z: zipfile.ZipFile, wurzel: str, m: dict) -> dict | None:
+    """Format-2-Container → Bibliotheksform. None, wenn die Quelle kein
+    Transkript in unserer Form ist (ein enrich-eigenes Transkript-Dossier
+    hat `source.canonical = 2-text-raw.json`) — dann greift der
+    Format-1-Weg über die Zeitkarte. Die Herkunftsflags werden
+    ÜBERNOMMEN, nie eingeebnet (FORMAT.md §5)."""
+    inventar_pruefen(z, wurzel, m)
+    quelle = m.get("source") or {}
+    kanon = quelle.get("canonical") or ""
+    try:
+        t = json.loads(z.read(f"{wurzel}/{kanon}").decode("utf-8"))
+    except (KeyError, ValueError):
+        return None
+    if not isinstance(t.get("segments"), list):
+        return None
     segmente = [{"id": s["id"], "start": s["t0_s"], "end": s["t1_s"],
                  "sprecher": s.get("speaker"), "text": s.get("text", ""),
                  "origin": s.get("origin", "machine")}
-                for s in t.get("segments", [])]
+                for s in t["segments"]]
     sprecher = [{"id": p["id"], "name": p["name"],
                  "origin": p.get("origin", "machine")}
                 for p in t.get("speakers", [])]
     audio_name = audio_bytes = None
-    media = quelle.get("media")
-    if media:
-        audio_name = Path(media).name
-        audio_bytes = z.read(f"{wurzel}/{media}")
-    journal = [r for r in manifest.get("runs", [])
-               if r.get("layer") == t.get("id")]
-    return {"name": manifest.get("title") or t.get("name") or "",
+    if quelle.get("media"):
+        audio_name = Path(quelle["media"]).name
+        audio_bytes = z.read(f"{wurzel}/{quelle['media']}")
+    journal = [_journal_aus_run(r) for r in m.get("runs", [])
+               if r.get("tool") == TOOL]
+    return {"name": m.get("title") or t.get("name") or "",
             "segmente": segmente, "sprecher": sprecher,
             "audio_name": audio_name, "audio_bytes": audio_bytes,
             "genau": True, "journal": journal}
+
+
+def _journal_aus_run(r: dict) -> dict:
+    """enrich RunRecord → Bibliotheks-Run (die Kette wird in der
+    Bibliothek neu geschlossen; `prev` aus dem Container gilt dort nicht)."""
+    who = r.get("who") or {}
+    aus = {"id": r["id"], "prev": None, "origin": r.get("origin", "machine"),
+           "who": {"app": f"{who.get('app', TOOL)}/{who.get('version', '')}".rstrip("/"),
+                   "install": who.get("install"), "user": who.get("user")},
+           "started": r.get("started"), "finished": r.get("finished"),
+           "layer": "transcript", "did": (r.get("summary") or {}).get("did", ""),
+           "result": {"records": len(r.get("changed") or {})}}
+    if r.get("changed"):
+        aus["changed"] = dict(r["changed"])
+    return aus

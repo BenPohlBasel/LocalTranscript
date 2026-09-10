@@ -8,17 +8,19 @@ a version are the corresponding section of this file.
 ### Added
 
 - **Export and import follow Format 2 of the enrich dossier**
-  (`FORMAT.md` in the enrich repository). The container is one
-  uncompressed `.enrich` file with the convention `source/ text/`: the
-  transcript is the source (`source/transcript.json`, schema
-  `transcript/1.0.0`), the typeset PDF is `rendered`, every layer
+  (`FORMAT.md` in the enrich repository), built on enrich-core's own
+  manifest models so enrich reads it. The container is one uncompressed
+  `.enrich` file, laid out as enrich writes dossiers today: the
+  transcript is the source (`transcript.json`, schema
+  `transcript/1.0.0`, registered in inventory and lineage,
+  `source.canonical`), the typeset PDF is `rendered`, every layer
   carries the header `kind · id · origin · from · by · did · result`,
   and the manifest is a complete inventory — every file, including the
   audio, with hash and size — plus lineage (`layers`) and a chained
   journal (`runs`). Import verifies the inventory and refuses a
   container whose files no longer match their hashes. Format-1
-  dossiers (enrich as it is today, earlier LocalTranscript exports)
-  are still read.
+  dossiers (earlier exports, enrich's own transcript dossiers) are
+  still read.
 - **Origin on every record.** Each segment and speaker carries
   `origin`: `machine` for what Whisper and the diarisation produced,
   `source` for a VTT/CSV imported from elsewhere, `human` for anything

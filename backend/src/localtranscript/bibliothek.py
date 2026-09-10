@@ -167,6 +167,17 @@ def journal_eintrag(daten: dict, *, origin: str, did: str,
     return run
 
 
+def _kette_schliessen(journal: list[dict]) -> list[dict]:
+    """Mitgebrachte Runs (Import) in UNSERER Kette neu verketten — der
+    `prev` aus dem Container bezog sich auf dessen Reihenfolge."""
+    aus, vorher = [], None
+    for r in journal:
+        r = dict(r)
+        r["prev"] = _run_hash(vorher) if vorher is not None else None
+        aus.append(r); vorher = r
+    return aus
+
+
 def _sekunden_seit(iso: str | None) -> float:
     if not iso:
         return float("inf")
@@ -266,7 +277,7 @@ def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
     daten = {"schema": SCHEMA, "id": ordner.name, "name": name,
              "created": jetzt, "updated": jetzt, "audio": audio_name,
              "quelle": quelle, "sprecher": sprecher,
-             "segmente": segmente, "journal": list(journal or [])}
+             "segmente": segmente, "journal": _kette_schliessen(journal or [])}
     art = quelle.get("erzeugt", "")
     did = ("Whisper-Transkript mit Sprechertrennung" if art == "transcription"
            else f"Import aus {quelle.get('datei', '?')}")

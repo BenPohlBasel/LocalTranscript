@@ -87,10 +87,11 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 - **enrich dossier (`.enrich`)** — one uncompressed file in Format 2
   of the enrich dossier (`FORMAT.md` in the enrich repository): the
   transcript as the source with `origin` on every segment and speaker,
-  a PDF typeset in Recursive as the rendered form, T0/T1 and a time map
-  under `text/`, the audio, and a manifest that inventories every file
-  with its hash and carries the chained journal of who wrote what and
-  when. Import it into enrich directly.
+  a PDF typeset in Recursive as the rendered form, T0/T1 and a time
+  map, the audio, and a manifest — written with enrich-core's own
+  models — that inventories every file with its hash and carries the
+  chained journal of who wrote what and when. Import it into enrich
+  directly.
 - **REFI-QDA for ATLAS.ti (`.qdpx.zip`)** — the transcript as a
   `TextSource` *and* as the `Transcript` of an `AudioSource` with one
   `SyncPoint` per utterance, speakers as codes. Verified against a

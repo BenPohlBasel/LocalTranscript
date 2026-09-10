@@ -44,15 +44,19 @@ def test_journal_ist_verkettet(client, eintrag):
     _z, _w, m = _container(eintrag)
     runs = m["runs"]
     assert runs and runs[0]["prev"] is None
+    from enrich_core.dossier import run_eintrag_hash
+    from enrich_core.schemas.manifest import RunRecord
     for vor, nach in itertools.pairwise(runs):
-        erwartet = "sha256:" + hashlib.sha256(
-            bibliothek.kanonisch(vor).encode("utf-8")).hexdigest()
-        assert nach["prev"] == erwartet
-    for r in runs:
+        assert nach["prev"] == run_eintrag_hash(RunRecord.model_validate(vor))
+    eigene = [r for r in runs if r["tool"] == "localtranscript"]
+    assert eigene and runs[:len(eigene)] == eigene       # Bibliothek zuerst
+    for r in eigene:
         assert r["origin"] in ("source", "machine", "llm", "human")
-        assert r["who"]["app"].startswith("localtranscript/")
+        assert r["who"]["app"] == "localtranscript"
         assert r["who"]["install"].startswith("ins-")
-        assert r["did"] and r["started"]
+        assert r["summary"]["did"] and r["started"]
+        for verboten in ("did", "from", "by", "result"):     # FORMAT.md §3.1
+            assert verboten not in r
 
 
 def test_editor_macht_records_human_und_schreibt_ins_journal(client, eintrag):
@@ -109,3 +113,21 @@ def test_schema1_wird_beim_lesen_ergaenzt(client, eintrag, tmp_path):
     assert all(s["origin"] == "machine" for s in d["segmente"])
     by = {sp["name"]: sp["origin"] for sp in d["sprecher"]}
     assert by["Sprecher 3"] == "machine" and by["Anna"] == "human"
+
+
+def test_enrich_liest_den_container(client, eintrag, tmp_path):
+    """Der Kompatibilitätstest: enrich-core öffnet das Dossier aus dem
+    Container, Inventar und Kette sind sauber, die Transkript-Schicht
+    steht als deklarierte unbekannte Datei im Inventar."""
+    from enrich_core.dossier import Dossier
+    inhalt, name, _m = exporte.export_bytes(eintrag, "enrich")
+    datei = tmp_path / name; datei.write_bytes(inhalt)
+    d = Dossier.uebernehmen(datei, tmp_path / "arbeit")
+    inv = d.inventar_pruefen()
+    assert inv == {"fehlend": [], "undeklariert": [], "abweichend": []}, inv
+    kette = d.journal_pruefen()
+    assert not kette.get("kette"), kette
+    m = d.manifest
+    assert m.source.kind == "transcript" and m.source.canonical == "transcript.json"
+    assert m.files["transcript.json"].role == "layer"
+    assert any(li.kind == "transcript" and li.current for li in m.layers.values())
