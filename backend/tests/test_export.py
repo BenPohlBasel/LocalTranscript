@@ -63,6 +63,8 @@ def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
     assert "Anna" not in haupt and "[00:" not in haupt
     other = t1["streams"].get("other", "")
     assert "Anna" in other and "[00:00:00]" in other
+    # Kopfzeile (Titel · Datum) steht im other-Strom, nie in main
+    assert "probe" in other and "probe" not in haupt
     zk = json.loads(z.read(f"{w}/2z-zeitkarte.json"))
     assert len(zk["einheiten"]) == 2 and zk["einheiten"][1]["speaker"] == "Ben"
     assert z.read(f"{w}/source.pdf")[:5] == b"%PDF-"

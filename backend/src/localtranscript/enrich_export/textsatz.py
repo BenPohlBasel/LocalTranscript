@@ -1,5 +1,5 @@
 # VENDORED aus enrich (privates Repo BenPohlBasel/PDFenrichCLI),
-# Stand enrich@c2f4358 — packages/enrich-serve/src/enrich_serve/textsatz.py.
+# Stand enrich@94ba895 — packages/enrich-serve/src/enrich_serve/textsatz.py.
 # Einzige Abweichung: der Import von _FONT_DIR/_sichtbar zeigt auf
 # .schrift (lokaler Extrakt aus refi_text.py). Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude).
@@ -78,6 +78,9 @@ _TYP_STIL = {
     "note": (9.5, False, 4.0),
     # Sprecher-Label-Zeile (2026-08-30): kompakt, dicht am Rede-Absatz
     "sprecher": (9.5, False, 1.0),
+    # Kopfzeile (2026-09-11): Titel · Datum · Interviewer:in · Citekey —
+    # klein und grau über dem Text auf Seite 1, mit Luft nach unten
+    "kopfzeile": (8.5, False, 16.0),
 }
 
 _STREAM_VON = {"title": "main", "h1": "main", "h2": "main",
@@ -85,9 +88,19 @@ _STREAM_VON = {"title": "main", "h1": "main", "h2": "main",
                "quote": "main", "list-item": "main",
                "caption": "captions", "toc": "other",
                "bibref": "other",
-               "sprecher": "other"}
+               "sprecher": "other",
+               # Die Kopfzeile ist Beiwerk der gerenderten Sicht, kein
+               # Inhalt: sie geht in den other-Strom (wie STREAM_OF es
+               # für frontmatter tut) — NIE nach main. Damit sieht die
+               # Analyse (Chunks/Sätze/Übersetzung) sie nicht, und die
+               # main-Offsets der Zeitkarte bleiben unberührt.
+               "kopfzeile": "other"}
 _BLOCKTYP = {"quote": "paragraph", "note": "footnote",
-             "sprecher": "speaker-label"}
+             "sprecher": "speaker-label",
+             "kopfzeile": "frontmatter"}
+
+#: Grau der Kopfzeile (wie der Timecode im Sprecher-Label)
+_KOPF_GRAU = "#8a8a8a"
 
 
 def _clamp_groesse(g: float) -> float:
@@ -371,8 +384,18 @@ def _face(fett: bool, kursiv: bool, mono: bool) -> str:
     return "regular"
 
 
-def setze_struktur(struktur: dict) -> dict:
+def setze_struktur(struktur: dict, *,
+                   kopfzeile: str | None = None) -> dict:
     """Struktur (docx_lesen-Modell) → PDF + alle Schichten-Zutaten.
+
+    `kopfzeile` (2026-09-11, BACKLOG 000): eine Zeile «Titel · Datum ·
+    Interviewer:in · Citekey» über dem Text auf Seite 1 — damit ein
+    ausgedrucktes/weitergegebenes Transkript sagt, was es ist. Sie ist
+    LAYOUT, nicht Inhalt: eigener Block (`frontmatter`) im other-Strom,
+    nie in main. Der Render-Canary bleibt gültig, WEIL sie mitgezeichnet
+    und mitgezählt wird (er vergleicht die Zeichen-Multimenge des PDF
+    gegen die gezeichneten Tokens — was gedruckt, aber nicht gezählt
+    würde, wäre eine Abweichung).
 
     Rückgabe: {pdf, seiten, streams, rects, bloecke, block_spans,
     note_markers, marker_ops, ranking, gezeichnet_canary}.
@@ -462,6 +485,12 @@ def setze_struktur(struktur: dict) -> dict:
         s.absatz(typ, tokens, stream, einzug=einzug)
         return start, ende
 
+    if kopfzeile and kopfzeile.strip():
+        absatz_setzen("kopfzeile", [{
+            "text": " ".join(kopfzeile.split()), "fett": False,
+            "kursiv": False, "farbe": _KOPF_GRAU, "groesse": 0.0,
+            "mono": False}], [], _STREAM_VON["kopfzeile"])
+
     for el in struktur["absaetze"]:
         if el["typ"] == "tabelle":
             s.tabelle(el["zeilen"])
@@ -507,6 +536,37 @@ def setze_struktur(struktur: dict) -> dict:
             "gezeichnet": "".join(s.gezeichnet)}
 
 
+def kopfzeile_aus_meta(meta: dict | None) -> str | None:
+    """«Titel · Datum · Interviewer:in · Citekey» aus einer Metadaten-
+    Zeile (Form von `enrich_core.zotero.items_with_pdfs` bzw. der
+    zotero.json). FAIL-SOFT: fehlt alles, kommt None zurück — dann wird
+    keine Kopfzeile gesetzt; einzelne fehlende Teile fallen einfach weg.
+
+    Interviewer:in kommt aus den Creators mit Zotero-Rolle `interviewer`
+    (Item-Typ Interview); ohne solche Rolle bleibt der Platz leer — wir
+    erfinden keine Zuschreibung."""
+    if not meta:
+        return None
+    teile: list[str] = []
+    titel = str(meta.get("title") or "").strip()
+    if titel:
+        teile.append(titel)
+    datum = str(meta.get("date") or meta.get("year") or "").strip()
+    if datum:
+        teile.append(datum)
+    namen = [" ".join(x for x in (str(c.get("first") or "").strip(),
+                                  str(c.get("last") or "").strip()) if x)
+             for c in (meta.get("creators") or [])
+             if str(c.get("role") or "") == "interviewer"]
+    namen = [n for n in namen if n]
+    if namen:
+        teile.append(", ".join(namen))
+    citekey = str(meta.get("citekey") or "").strip()
+    if citekey:
+        teile.append(citekey)
+    return " · ".join(teile) or None
+
+
 def canary(pdf: bytes, gezeichnet: str) -> int:
     """Extraktion gegen die gezeichneten Tokens — als ZEICHEN-
     MULTIMENGE: der Content-Stream ist nach (Schnitt, Farbe)
@@ -531,10 +591,12 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
                           user: str,
                           zeiten: list[dict] | None = None,
                           audio: Path | None = None,
-                          zeiten_quelle: str = "") -> tuple[Dossier,
-                                                            dict]:
+                          zeiten_quelle: str = "",
+                          kopfzeile: str | None = None
+                          ) -> tuple[Dossier, dict]:
     """Vollständiges Dossier aus einer Struktur; optional Zeitkarte
-    (Transkript) + Audio-Kopie. Gibt (Dossier, bericht)."""
+    (Transkript) + Audio-Kopie sowie eine `kopfzeile` fürs gesetzte PDF
+    (s. setze_struktur). Gibt (Dossier, bericht)."""
     import shutil
     import tempfile
 
@@ -542,7 +604,7 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
     from enrich_core.diffmap import project_span
     from enrich_core.schemas.zeitkarte import ZeitEinheit, ZeitkarteLayer
 
-    satz = setze_struktur(struktur)
+    satz = setze_struktur(struktur, kopfzeile=kopfzeile)
     can = canary(satz["pdf"], satz["gezeichnet"])
     with tempfile.NamedTemporaryFile(suffix=".pdf") as tf:
         tf.write(satz["pdf"])

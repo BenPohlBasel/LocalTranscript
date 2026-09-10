@@ -15,12 +15,16 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Run offen ist, und `enrich_core`-Umzug von `zotero.py` abwarten für
    die Metadaten-Schicht (enrich-Backlog 000).
 
-2a. **Neu vendoren, sobald enrich die Kopfzeile committet.** Der
-   Drift-Guard `test_textsatz_drift` schlägt an, weil enrichs
-   `textsatz.py` gerade offen ist (+69 Zeilen, Kopfzeile Titel · Datum
-   · Interviewer:in · Citekey). Dann `textsatz.py` neu kopieren
-   (Import-Patch laut Kopfkommentar) und die Kopfzeilen-Felder aus dem
-   Transkript durchreichen.
+2a. ~~**Neu vendoren nach enrichs Kopfzeile**~~ — ERLEDIGT 2026-09-11
+   (textsatz@94ba895; Kopfzeile «Titel · Datum» aus dem Transkript).
+   OFFEN daraus: **Metadaten-Panel mit Zotero** — `enrich_core.zotero`
+   liegt jetzt in enrich-core (24333d4): Einwilligung als Einstellung
+   (Semantik `zotero_consent`, im Datenfluss nennen), lokale
+   `zotero.sqlite` immutable lesen, Kandidaten nach Titel-Nähe (kein
+   PDF-Hash), Typ Interview bevorzugt, Rollenwahl je Creator wegen
+   Pseudonymisierung, Snapshot als `zotero.json` (`origin: source`,
+   Verknüpfung als Run `human`), im Export registriert; Kopfzeile dann
+   mit Interviewer:in und Citekey über `kopfzeile_aus_meta`.
 
 3. **Import-Dialog für Ordner-Dossiers ohne enrich.app.** Ohne die UTI
    (kommt mit dem nächsten Build über `src-tauri/Info.plist`) ist ein
