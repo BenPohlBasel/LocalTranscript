@@ -141,8 +141,10 @@ th,td{text-align:left;padding:.7rem .75rem;border-top:1px solid var(--line);vert
 thead th{border-top:0;border-bottom:1px solid var(--ink);font-weight:600;padding-top:0}
 tbody th{font-weight:520;color:var(--ink);width:15rem}
 td{color:var(--ink-2)}
-td.us{background:var(--lila-050);color:var(--ink)}
-thead th.us{background:var(--lila-050);color:var(--ink)}
+/* Die eigene Spalte: weiss mit lila Rahmen links und rechts */
+td.us,thead th.us{background:var(--paper);border-left:2px solid var(--lila);border-right:2px solid var(--lila)}
+thead th.us{border-top:2px solid var(--lila)}
+tbody tr:last-child td.us{border-bottom:2px solid var(--lila)}
 tbody tr:last-child td,tbody tr:last-child th{border-bottom:1px solid var(--line)}
 .fn{font-size:.82rem;margin-top:1rem}
 
