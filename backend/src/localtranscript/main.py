@@ -230,7 +230,7 @@ def _import_turns(turns: list[dict], name: str, quelle_art: str,
 
 
 def _import_paket(daten: bytes, fallback: str) -> dict:
-    """.enrich.zip → Eintrag. NUR transkript.json und Audio werden
+    """.enrich (Datei, Verzeichnis oder .zip) → Eintrag. NUR transkript.json und Audio werden
     gezogen; Analyse-Schichten fallen weg — nach dem ersten Edit
     stimmte keine davon mehr (User-Regel 2026-09-09)."""
     from . import paket
@@ -247,7 +247,7 @@ def _import_paket(daten: bytes, fallback: str) -> dict:
         eintrag = bibliothek.anlegen(
             name=p["name"] or fallback,
             segmente=p["segmente"], sprecher=p["sprecher"],
-            quelle={"datei": f"{fallback}.enrich.zip",
+            quelle={"datei": f"{fallback}.enrich",
                     "erzeugt": "import-enrich",
                     "genau": p["genau"]},
             audio=audio_tmp)
@@ -266,7 +266,7 @@ def _parse_import(daten: bytes, endung: str) -> list[dict]:
         return parse_transkript_csv(daten)
     raise HTTPException(
         status_code=400,
-        detail=f"Nur .vtt/.csv/.zip (enrich-Paket) — nicht {endung}")
+        detail=f"Nur .vtt/.csv/.enrich — nicht {endung}")
 
 
 @app.post("/api/import")
@@ -274,7 +274,7 @@ async def import_upload(datei: UploadFile = File(...),
                         audio: UploadFile | None = File(None)) -> dict:
     name = Path(datei.filename or "transkript")
     roh = await datei.read()
-    if name.suffix.lower() == ".zip":
+    if name.suffix.lower() == ".enrich" or name.name.lower().endswith(".enrich.zip"):
         return _import_paket(roh, name.stem.removesuffix(".enrich"))
     turns = _parse_import(roh, name.suffix.lower())
     audio_tmp: Path | None = None
@@ -299,12 +299,23 @@ class ImportPathReq(ApiModel):
 
 @app.post("/api/import-path")
 def import_path(req: ImportPathReq) -> dict:
+    from . import paket
     p = Path(req.path).expanduser()
-    if not p.is_file():
+    if not p.exists():
         raise HTTPException(status_code=404, detail=f"{p} fehlt")
-    if p.suffix.lower() == ".zip":
-        return _import_paket(p.read_bytes(),
-                             p.stem.removesuffix(".enrich"))
+    if paket.ist_paket(p):
+        # Datei, Verzeichnis (macOS-Package) oder .zip — ein Leser
+        try:
+            daten = p.read_bytes() if p.is_file() else None
+        except OSError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if daten is None:
+            from .exporte import packe_verzeichnis
+            daten = packe_verzeichnis(p)
+        return _import_paket(daten, p.stem.removesuffix(".enrich"))
+    if not p.is_file():
+        raise HTTPException(status_code=400,
+                            detail=f"{p.name} ist ein Ordner, kein Transkript")
     turns = _parse_import(p.read_bytes(), p.suffix.lower())
     audio: Path | None = None
     if req.audio_path:
@@ -480,7 +491,7 @@ def export_datei(eid: str, req: ExportReq) -> dict:
     # überschreiben (~/.zshrc, LaunchAgents) — die Endung muss zum
     # Format passen, mehr Constraint erlaubt der freie Save-Dialog nicht
     erlaubt = {"vtt": ".vtt", "csv": ".csv", "txt": ".txt",
-               "enrich": ".zip", "qdpx": ".zip"}[req.format]
+               "enrich": ".enrich", "qdpx": ".zip"}[req.format]
     if ziel.suffix.lower() != erlaubt:
         raise HTTPException(status_code=409,
                             detail=f"Zieldatei muss auf {erlaubt} enden")

@@ -63,7 +63,7 @@ particulières de données personnelles peuvent être concernées
    (HTTP 421). Les données de diagnostic du système macOS relèvent de
    ses réglages système, non du logiciel.
 5. **Sortie.** Les fichiers d'export (WebVTT, CSV, texte brut, REFI-QDA
-   `.qdpx`, dossier enrich `.enrich.zip`) sont écrits là où
+   `.qdpx`, dossier enrich `.enrich`) sont écrits là où
    l'utilisateur·rice les enregistre. **Les exports REFI-QDA et enrich
    contiennent l'enregistrement audio.** Les transmettre, c'est
    transmettre l'enregistrement.

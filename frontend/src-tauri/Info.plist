@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Tauri mischt diese Datei in das erzeugte Info.plist.
+
+  Das enrich-Dossier in zwei Formen unter EINER Endung — genau wie
+  Numbers/Pages: als Verzeichnis (macOS-Package, enrichs Arbeitsform)
+  und als flache Zip-Datei (die Weitergabeform, die LocalTranscript
+  exportiert). Die Package-UTI stammt von enrich.app; LocalTranscript
+  IMPORTIERT sie identisch, damit ein .enrich auch ohne enrich.app ein
+  Package bleibt (2026-09-10). enrich bleibt Exporteur der UTI und damit
+  Vorzugs-Öffner; ist es nicht installiert, öffnet LocalTranscript.
+-->
+<plist version="1.0">
+<dict>
+  <key>UTImportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>com.benpohl.enrich.dossier</string>
+      <key>UTTypeDescription</key>
+      <string>enrich Dossier (Package)</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>com.apple.package</string>
+      </array>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array><string>enrich</string></array>
+      </dict>
+    </dict>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>com.benpohl.enrich.dossier-file</string>
+      <key>UTTypeDescription</key>
+      <string>enrich Dossier</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.zip-archive</string>
+      </array>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array><string>enrich</string></array>
+      </dict>
+    </dict>
+  </array>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>enrich Dossier</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSHandlerRank</key>
+      <string>Alternate</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.benpohl.enrich.dossier</string>
+        <string>com.benpohl.enrich.dossier-file</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>

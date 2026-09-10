@@ -77,7 +77,7 @@ folder inside a synchronised folder synchronises the recordings.
 - **What the app does not decide:** which details to replace — places,
   employers, events. That remains the researcher's decision.
 - **The recording stays what it is.** Pseudonymisation applies to the
-  text. Exports as REFI-QDA (`.qdpx`) and enrich dossier (`.enrich.zip`)
+  text. Exports as REFI-QDA (`.qdpx.zip`) and enrich dossier (`.enrich`)
   contain the audio file with voice and real names; WebVTT, CSV and
   plain text contain text only. Whoever wants to pass on pseudonymised
   data only passes on a text format.

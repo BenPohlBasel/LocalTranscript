@@ -12,7 +12,7 @@ import {
   type EintragMeta,
 } from "../lib/api";
 import { useT } from "../lib/i18n";
-import { isTauri, pickAudio, pickTranskript } from "../lib/tauri";
+import { isTauri, onFileDrop, pickAudio, pickTranskript } from "../lib/tauri";
 
 export default function HumanEditorModule({ onOpen }: {
   onOpen: (id: string) => void;
@@ -30,6 +30,24 @@ export default function HumanEditorModule({ onOpen }: {
     } catch (e) { setFehler(errMsg(e)); }
   }, []);
   useEffect(() => { void lade(); }, [lade]);
+  // Drop auf die Liste: .enrich (Datei oder Package-Ordner), .vtt,
+  // .csv — die Shell liefert Pfade, das Backend erkennt die Form.
+  useEffect(() => {
+    let ab: (() => void) | undefined;
+    let weg = false;
+    void onFileDrop((pfade) => {
+      setFehler("");
+      void (async () => {
+        for (const p of pfade) {
+          if (!/\.(enrich|vtt|webvtt|csv)$/i.test(p)) continue;
+          try { await apiSend("/api/import-path", { path: p }); }
+          catch (e) { setFehler(errMsg(e)); }
+        }
+        void lade();
+      })();
+    }).then((f) => { if (weg) f(); else ab = f; });
+    return () => { weg = true; ab?.(); };
+  }, [lade]);
 
   const importiere = useCallback(async () => {
     setFehler("");
@@ -37,9 +55,9 @@ export default function HumanEditorModule({ onOpen }: {
       if (isTauri()) {
         const p = await pickTranskript();
         if (!p) return;
-        // Ein .enrich.zip trägt sein Audio schon mit sich — nur bei
-        // vtt/csv lohnt die Nachfrage (User 2026-09-09).
-        const audio = p.toLowerCase().endsWith(".zip")
+        // Ein .enrich (Datei oder Package) trägt sein Audio schon mit
+        // sich — nur bei vtt/csv lohnt die Nachfrage (User 2026-09-09).
+        const audio = /\.enrich$/i.test(p)
           ? null : await pickAudio(tr("he.audiowahl"), false);
         await apiSend("/api/import-path", { path: p,
           audio_path: audio?.[0] ?? null });
@@ -56,7 +74,7 @@ export default function HumanEditorModule({ onOpen }: {
       <Flex gap="3" align="center" wrap="wrap">
         <Button variant="soft" onClick={() => void importiere()}>
           <Icon name="text" /> {tr("bib.import")}</Button>
-        <input ref={importRef} type="file" hidden accept=".vtt,.csv,.zip"
+        <input ref={importRef} type="file" hidden accept=".vtt,.csv,.enrich"
                onChange={(e) => {
                  const f = e.target.files?.[0];
                  e.target.value = "";

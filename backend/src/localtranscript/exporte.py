@@ -35,20 +35,29 @@ def export_bytes(eid: str, format: str) -> tuple[bytes, str, str]:
         return (ausgabe.build_txt(seg).encode("utf-8"),
                 f"{stamm}.txt", "text/plain")
     if format == "enrich":
-        return (_enrich_zip(eid, daten, seg, stamm),
-                f"{stamm}.enrich.zip", "application/zip")
+        # EINE Datei mit Endung .enrich — ein Zip ohne Kompression, wie
+        # .docx oder .qdpx (User 2026-09-10). enrich öffnet sie am Inhalt
+        # (is_zipfile), macOS zeigt sie als Datei, egal ob enrich.app
+        # installiert ist. Das Verzeichnis-Dossier bleibt enrichs
+        # Arbeitsform; das hier ist die Weitergabeform.
+        return (_enrich_paket(eid, daten, seg, stamm),
+                f"{stamm}.enrich", "application/zip")
     if format == "qdpx":
         from . import qdpx
         if not seg:
             raise ValueError("Leeres Transkript — nichts zu exportieren")
+        # Bleibt .qdpx.zip: das Archiv enthält <Name>.qdpx UND daneben
+        # <Name> Media/ mit dem Audio — so exportiert ATLAS.ti selbst,
+        # das Audio liegt per Standard AUSSERHALB des .qdpx (relative:///).
+        # Ein Zip im Zip, darum heisst das äussere ehrlich .zip.
         return (qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
                               bibliothek.audio_pfad(eid)),
                 f"{stamm}.qdpx.zip", "application/zip")
     raise ValueError(f"Unbekanntes Format: {format}")
 
 
-def _enrich_zip(eid: str, daten: dict, seg: list[dict],
-                stamm: str) -> bytes:
+def _enrich_paket(eid: str, daten: dict, seg: list[dict],
+                  stamm: str) -> bytes:
     from .enrich_export.textsatz import baue_struktur_dossier
     from .enrich_export.turns import turns_zu_struktur
 
@@ -91,6 +100,22 @@ def _enrich_zip(eid: str, daten: dict, seg: list[dict],
         (d.path / "transkript.json").write_text(
             _json.dumps(daten, ensure_ascii=False, indent=2),
             encoding="utf-8")
-        zip_pfad = Path(td) / f"{stamm}.enrich.zip"
-        d.pack(zip_pfad)
-        return zip_pfad.read_bytes()
+        # Nicht d.pack(): das komprimiert (DEFLATE), und im Dossier ist
+        # das Grösste die mp3, die sich nicht komprimieren lässt — nur
+        # Zeit kostet. STORED, Wurzel «<stamm>.enrich/», wie enrich.unpack
+        # es erwartet (genau EIN Wurzelverzeichnis).
+        return packe_verzeichnis(d.path)
+
+
+def packe_verzeichnis(ordner: Path) -> bytes:
+    """Verzeichnis → Zip-Bytes, unkomprimiert, mit dem Ordnernamen als
+    einziger Wurzel. Dient dem Export und dem Import eines Dossiers,
+    das als Verzeichnis (macOS-Package) vorliegt."""
+    import io
+    import zipfile
+    puffer = io.BytesIO()
+    with zipfile.ZipFile(puffer, "w", zipfile.ZIP_STORED) as zf:
+        for fp in sorted(ordner.rglob("*")):
+            if fp.is_file():
+                zf.write(fp, f"{ordner.name}/{fp.relative_to(ordner)}")
+    return puffer.getvalue()

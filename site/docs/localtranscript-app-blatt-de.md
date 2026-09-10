@@ -83,7 +83,7 @@ die Aufnahmen.
   Orte, Arbeitgeber, Ereignisse. Das bleibt eine Entscheidung der
   Forschenden.
 - **Die Aufnahme bleibt, was sie ist.** Pseudonymisiert wird der Text.
-  Exporte als REFI-QDA (`.qdpx`) und enrich-Dossier (`.enrich.zip`)
+  Exporte als REFI-QDA (`.qdpx.zip`) und enrich-Dossier (`.enrich`)
   enthalten die Audiodatei mit Stimme und Klarnamen; WebVTT, CSV und
   Text enthalten nur den Text. Wer nur pseudonymisierte Daten weitergeben
   will, gibt ein Textformat weiter.

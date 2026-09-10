@@ -58,8 +58,8 @@ betroffen sein `[ja / nein: …]`.
    Anfragen anderer Hosts ab (HTTP 421). Diagnosedaten des
    Betriebssystems macOS unterliegen dessen Systemeinstellungen, nicht
    der Software.
-5. **Ausgabe.** Exportdateien (WebVTT, CSV, Text, REFI-QDA `.qdpx`,
-   enrich-Dossier `.enrich.zip`) werden dorthin geschrieben, wo die
+5. **Ausgabe.** Exportdateien (WebVTT, CSV, Text, REFI-QDA `.qdpx.zip`,
+   enrich-Dossier `.enrich`) werden dorthin geschrieben, wo die
    bedienende Person sie speichert. **REFI-QDA- und enrich-Exporte
    enthalten die Audioaufnahme.** Ihre Weitergabe ist eine Weitergabe
    der Aufnahme.

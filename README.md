@@ -84,7 +84,7 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 
 - **VTT** — WebVTT with standard voice tags `<v Name>`.
 - **CSV**, **TXT** — plain derived text.
-- **enrich dossier (`.enrich.zip`)** — a complete enrich dossier: T0=T1
+- **enrich dossier (`.enrich`)** — a complete enrich dossier: T0=T1
   byte-identical, a PDF typeset in Recursive, a time map linking
   offsets ↔ seconds ↔ speakers, a copy of the audio, and the analysis
   chain marked "narrative". Import it into enrich directly.
@@ -98,9 +98,10 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 *Import transcript* in the Human Editor takes a transcript that was
 made elsewhere and turns it into a library entry.
 
-**A `.enrich.zip` is one step.** The dossier already carries its audio,
-so the app takes `transkript.json` and `audio.mp3` out of it and is
-done. Everything else in the dossier is dropped on purpose: after the
+**A `.enrich` is one step.** It is one file — a zip like `.docx` —
+that already carries its audio, so the app takes `transkript.json`
+and `audio.mp3` out of it and is done. The same works for a dossier
+folder as enrich keeps it (a package on macOS): pick it or drop it. Everything else in the dossier is dropped on purpose: after the
 first edit no analysis layer would line up with the text any more.
 
 **A `.vtt` or `.csv` is two steps**, because those formats hold text and
@@ -120,7 +121,7 @@ imports in one step after all.
 
 ## Handing a transcript to a colleague
 
-The same `.enrich.zip` does both jobs: it feeds enrich, and it hands a
+The same `.enrich` does both jobs: it feeds enrich, and it hands a
 transcript to someone else who continues in their own Human Editor.
 Text and audio travel together in one file, the timecodes stay exact,
 and nothing is lost on the way out or back in.
@@ -235,7 +236,7 @@ release.
 
 ## Interchange formats and their licences
 
-**REFI-QDA (`.qdpx`).** LocalTranscript *supports export to REFI-QDA*.
+**REFI-QDA (`.qdpx.zip`).** LocalTranscript *supports export to REFI-QDA*.
 The specification is under the **MIT licence, Copyright 2019 REFI-QDA**
 (<https://www.qdasoftware.org/>). There is no official certification for
 REFI-QDA, and the MIT licence of the specification does not cover
@@ -244,7 +245,7 @@ trademarks — no such claim is made here. The REFI schemas (XSD) are
 references the schema URL, so the MIT attribution requirement does not
 apply.
 
-**enrich dossier (`.enrich.zip`).** The format specification is under
+**enrich dossier (`.enrich`).** The format specification is under
 the **MIT licence** (BIAS.City).
 
 **WebVTT** (W3C) · **CSV** · **TXT** are open and unrestricted.
