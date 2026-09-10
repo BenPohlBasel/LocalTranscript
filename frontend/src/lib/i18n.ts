@@ -235,10 +235,13 @@ const W: Record<string, Eintrag> = {
     en: "Literal — no translation, no stemming.",
     fr: "À la lettre — sans traduction ni lemmatisation.",
     it: "Alla lettera — nessuna traduzione né lemmatizzazione." },
+  // Das Beispiel ist je Sprache ein ANDERES — es soll zeigen, wie ein
+  // getrenntes Wort in DIESER Sprache aussieht, nicht das deutsche
+  // „Werk- statt" übersetzt stehen lassen (Befund 2026-09-10).
   "ed.suche.weich": { de: "Worttrennung überlesen (Werk- statt)",
-    en: "Ignore hyphenation (Werk- statt)",
-    fr: "Ignorer la césure (Werk- statt)",
-    it: "Ignora la sillabazione (Werk- statt)" },
+    en: "Ignore hyphenation (coope- rative)",
+    fr: "Ignorer la césure (coopé- rative)",
+    it: "Ignora la sillabazione (coope- rativa)" },
   "ed.suche.gross": { de: "Groß-/Kleinschreibung beachten",
     en: "Match case", fr: "Respecter la casse",
     it: "Distingui maiuscole" },
