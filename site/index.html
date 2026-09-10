@@ -141,6 +141,11 @@ tbody tr:last-child td,tbody tr:last-child th{border-bottom:1px solid var(--line
 .dpo ul{margin:.6rem 0 0;padding-left:1.1rem;color:#c9cfd4;font-size:.95rem}
 .dpo li{margin:.4rem 0}
 .note{border-left:2px solid var(--rec);padding-left:.9rem;margin-top:1.5rem;font-size:.9rem;color:#b8bec4}
+.dpo .docs{margin-top:2.5rem;padding-top:2rem;border-top:1px solid #3a4046}
+.dpo .btn{color:#fff}
+.dpo .btn.ghost{border-color:#3a4046}
+.dpo .btn.ghost:hover{border-color:#fff}
+.dpo .dl-meta{color:#b8bec4;max-width:52ch}
 
 /* limits + download + contact */
 .limits ul{margin:1.5rem 0 0;padding:0;list-style:none;max-width:60ch}
@@ -366,6 +371,13 @@ footer p{max-width:none}
         <p class="note" data-t="dpoNote"></p>
       </div>
     </div>
+    <div class="dl-row docs">
+      <a class="btn" data-doc="verfahren" download
+         href="docs/localtranscript-datenverarbeitung-de.md" data-t="dpoDoc1"></a>
+      <a class="btn ghost" data-doc="blatt" download
+         href="docs/localtranscript-app-blatt-de.md" data-t="dpoDoc2"></a>
+      <p class="dl-meta" data-t="dpoDocNote"></p>
+    </div>
   </div>
 </section>
 
@@ -515,6 +527,8 @@ de:{
   y3:"Verschlüsselung des Datenträgers, etwa mit FileVault.",
   y4:"Löschfristen. Verlaufsschnappschüsse und der Bibliotheks-Papierkorb halten Kopien vor, bis du sie endgültig entfernst.",
   dpoNote:"Kein Auftragsverarbeiter, kein Drittlandtransfer, weil nichts übermittelt wird. Ob deine Verarbeitung damit DSGVO oder revDSG genügt, entscheidet deine Stelle. Wir sind keine Juristen.",
+  dpoDoc1:"Verfahrensbeschreibung (.md)", dpoDoc2:"App-Blatt für Forschende (.md)",
+  dpoDocNote:"Zwei Textbausteine zum Einfügen. Die Verfahrensbeschreibung in Sachform für Verfahrensverzeichnis, DSFA und Ethikantrag — mit Lücken für das, was nur die Stelle weiss. Das App-Blatt sagt, welche KI was tut, wo der Code liegt, wie Namen ersetzt werden, und bringt einen fertigen Satz für den Methodenteil mit.",
   limH:"Was die App nicht kann",
   lim1k:"Nur Apple Silicon", lim1v:"Kein Intel-Mac, kein Windows, kein Linux. Die Erkennung läuft über Metal.",
   lim2k:"2 GB Download", lim2v:"Modelle, Python-Laufzeit und ffmpeg sind im Paket. Dafür ist nach dem Download Schluss mit Laden.",
@@ -617,6 +631,8 @@ en:{
   y3:"Disk encryption, for instance with FileVault.",
   y4:"Retention periods. History snapshots and the library trash keep copies until you remove them for good.",
   dpoNote:"No processor, no third-country transfer, because nothing is transmitted. Whether your processing therefore meets GDPR or the Swiss FADP is for your organisation to decide. We are not lawyers.",
+  dpoDoc1:"Processing description (.md)", dpoDoc2:"Fact sheet for researchers (.md)",
+  dpoDocNote:"Two text blocks to paste. The processing description in neutral form for the record of processing, a DPIA and an ethics application — with gaps for what only the controller knows. The fact sheet says which AI does what, where the code lives, how names are replaced, and brings a ready sentence for the methods section.",
   limH:"What the app doesn't do",
   lim1k:"Apple Silicon only", lim1v:"No Intel Mac, no Windows, no Linux. Recognition runs on Metal.",
   lim2k:"2 GB download", lim2v:"Models, Python runtime and ffmpeg are in the package. In return, nothing loads after the download.",
@@ -719,6 +735,8 @@ fr:{
   y3:"Le chiffrement du disque, par exemple avec FileVault.",
   y4:"Les délais de conservation. Instantanés et corbeille gardent des copies jusqu'à suppression définitive.",
   dpoNote:"Pas de sous-traitant, pas de transfert hors UE, puisque rien n'est transmis. Que votre traitement satisfasse au RGPD ou à la nLPD, c'est à votre organisation d'en juger. Nous ne sommes pas juristes.",
+  dpoDoc1:"Description du traitement (.md)", dpoDoc2:"Fiche pour chercheur·euse·s (.md)",
+  dpoDocNote:"Deux blocs de texte à insérer. La description du traitement, en forme neutre, pour le registre des traitements, une AIPD et une demande au comité d'éthique — avec des blancs pour ce que seul le responsable sait. La fiche dit quelle IA fait quoi, où se trouve le code, comment les noms sont remplacés, et fournit une phrase prête pour la partie méthodologique.",
   limH:"Ce que l'application ne fait pas",
   lim1k:"Apple Silicon seulement", lim1v:"Pas de Mac Intel, pas de Windows, pas de Linux. La reconnaissance passe par Metal.",
   lim2k:"2 Go à télécharger", lim2v:"Modèles, environnement Python et ffmpeg sont dans le paquet. En contrepartie, plus rien ne se charge après.",
@@ -821,6 +839,8 @@ it:{
   y3:"Cifratura del disco, ad esempio con FileVault.",
   y4:"Termini di conservazione. Istantanee e cestino conservano copie finché non le elimini definitivamente.",
   dpoNote:"Nessun responsabile del trattamento, nessun trasferimento verso paesi terzi, perché nulla viene trasmesso. Se il tuo trattamento soddisfi GDPR o nLPD lo decide la tua organizzazione. Non siamo giuristi.",
+  dpoDoc1:"Descrizione del trattamento (.md)", dpoDoc2:"Scheda per ricercatori (.md)",
+  dpoDocNote:"Due blocchi di testo da inserire. La descrizione del trattamento, in forma neutra, per il registro dei trattamenti, una DPIA e una domanda al comitato etico — con spazi per ciò che solo il titolare sa. La scheda dice quale IA fa che cosa, dove si trova il codice, come si sostituiscono i nomi, e porta con sé una frase pronta per la sezione metodologica.",
   limH:"Cosa l'app non fa",
   lim1k:"Solo Apple Silicon", lim1v:"Nessun Mac Intel, nessun Windows, nessun Linux. Il riconoscimento gira su Metal.",
   lim2k:"2 GB di download", lim2v:"Modelli, runtime Python e ffmpeg sono nel pacchetto. In cambio, dopo il download non si carica più nulla.",
@@ -837,6 +857,17 @@ it:{
   footDev:"Sviluppato a Basilea. Costruito da persone che conducono interviste in prima persona.",
   footSrc:"Codice sorgente", footNoTrack:"Questa pagina non imposta cookie e non misura nulla."
 }
+};
+
+const DOCS = {
+  verfahren: { de:"localtranscript-datenverarbeitung-de.md",
+               en:"localtranscript-data-processing-en.md",
+               fr:"localtranscript-traitement-des-donnees-fr.md",
+               it:"localtranscript-trattamento-dei-dati-it.md" },
+  blatt:     { de:"localtranscript-app-blatt-de.md",
+               en:"localtranscript-fact-sheet-en.md",
+               fr:"localtranscript-fiche-fr.md",
+               it:"localtranscript-scheda-it.md" }
 };
 
 /* Schlüssel, deren Text Auszeichnung enthält — nur diese als HTML. */
@@ -858,6 +889,10 @@ function setLang(l, inDieUrl){
     im.src = 'img/' + im.dataset.img + '-' + l + '.png';
     const a = im.dataset.alt;
     if(a) im.alt = (a in t) ? t[a] : (T.de[a] || im.alt);
+  });
+  /* Die Textbausteine liegen je Sprache als eigene Datei in docs/ */
+  document.querySelectorAll('a[data-doc]').forEach(a=>{
+    const d = DOCS[a.dataset.doc]; if(d && d[l]) a.href = 'docs/' + d[l];
   });
   document.querySelectorAll('.langs button').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.lang===l)));
