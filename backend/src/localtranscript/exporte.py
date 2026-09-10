@@ -92,11 +92,19 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
         # Einstellungen sagen, dass die Adresse hier landet.
         from .config import identitaet
         wer = identitaet()
+        # Kopfzeile auf Seite 1 des gesetzten PDFs (enrich@24333d4):
+        # «Titel · Datum · Interviewer:in · Citekey». Heute liefert das
+        # Transkript Titel und Datum; Interviewer:in und Citekey kommen,
+        # sobald die Zotero-Schicht in LocalTranscript entsteht.
+        from .enrich_export.textsatz import kopfzeile_aus_meta
+        meta = {"title": daten.get("name") or stamm,
+                "date": (daten.get("created") or "")[:10]}
         d, _bericht = baue_struktur_dossier(
             dp, struktur, quelle=daten["name"],
             user=wer["user"] or wer["app"],
             zeiten=zeiten, audio=audio,
-            zeiten_quelle="localtranscript")
+            zeiten_quelle="localtranscript",
+            kopfzeile=kopfzeile_aus_meta(meta))
         d.set_analyse_kette("narrativ", "localtranscript")
         # Aus dem Format-1-Verzeichnis den Format-2-Container bauen:
         # Konvention, Schicht-Köpfe, Transkript als Quelle mit origin je
