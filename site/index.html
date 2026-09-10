@@ -97,9 +97,9 @@ main>section.dpo{background:var(--dunkel)}
 /* Kopfleiste */
 header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:5}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:3.5rem}
-.brand{display:flex;align-items:center;gap:.55rem;font-weight:640;color:var(--ink);text-decoration:none;font-size:1.05rem}
-.mark{display:block;flex:none}
-.brand .mark{width:1.5rem;height:1.5rem}
+/* Seitenmarke oben links: B/IAS als Wortmarke, serifenlos (Recursive Sans) */
+.brand{font-variation-settings:'CASL' 0,'MONO' 0;font-weight:700;letter-spacing:.01em;color:#000;text-decoration:none;font-size:1.15rem}
+.brand:hover{text-decoration:none}
 .right{display:flex;align-items:center;gap:1.25rem}
 .right a.nav{font-size:.92rem;color:#000;text-decoration:none}
 .right a.nav:hover{text-decoration:underline;text-decoration-color:var(--lila)}
@@ -184,7 +184,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
 
 <header>
   <div class="wrap bar">
-    <a class="brand" href="#"><svg class="mark" viewBox="0 0 128 128" aria-hidden="true"><rect x="10" y="10" width="108" height="108" rx="22" fill="#6366f1"/><rect x="44" y="48" width="10" height="32" rx="5" fill="#fff"/><rect x="59" y="36" width="10" height="56" rx="5" fill="#fff"/><rect x="74" y="48" width="10" height="32" rx="5" fill="#fff"/></svg>LocalTranscript</a>
+    <a class="brand" href="https://bias.city">B/IAS</a>
     <div class="right">
       <a class="nav" href="#guide" data-t="navGuide"></a>
       <a class="nav" href="#dpo" data-t="navDpo"></a>
