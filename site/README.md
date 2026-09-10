@@ -60,7 +60,9 @@ dem App-Zeichen (#6366f1) — Seite und Programm tragen dieselbe Farbe.
 
 ## Zeichen
 
-Das Zeichen in der Kopfzeile und das Favicon sind dasselbe wie das
+Das Zeichen ist die Initiale der Überschrift — der Name steht als
+Subjekt im Satz, in derselben Schrift wie der Rest. Kopfzeile und
+Favicon tragen dasselbe Zeichen; es ist das App-Symbol
 App-Symbol (`frontend/src-tauri/icons/`), nur als Inline-SVG
 nachgezeichnet: drei Balken auf lila Quadrat, `#6366f1`. Kein
 zusätzlicher Abruf, scharf in jeder Grösse. Gegen das PNG geprüft —
