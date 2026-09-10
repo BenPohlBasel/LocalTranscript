@@ -103,6 +103,17 @@ class SettingsReq(ApiModel):
 @app.post("/api/settings")
 def settings_post(req: SettingsReq) -> dict:
     aend = req.model_dump()
+    mail = aend.get("user_email")
+    if mail is not None:
+        mail = str(mail).strip()
+        if mail and ("@" not in mail or " " in mail):
+            raise HTTPException(status_code=422,
+                                detail="Keine E-Mail-Adresse")
+        aend["user_email"] = mail
+    if aend.get("install_id") == "neu":          # Einstellungen: «Neu erzeugen»
+        aend["install_id"] = config.neue_install_id()
+    elif "install_id" in aend:
+        aend.pop("install_id")                    # sonst nie von aussen setzbar
     root = aend.get("library_root")
     if root == "default":
         p = config.default_library_root()

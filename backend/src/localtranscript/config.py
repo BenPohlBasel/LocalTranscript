@@ -124,7 +124,29 @@ DEFAULTS = {
     # parallel sind nicht schneller als vier nacheinander, nur
     # unübersichtlicher.
     "max_parallel": 1,
+    # Identität im Dossier (User 2026-09-10, FORMAT.md §3.1): Wer im
+    # Journal eines enrich-Dossiers steht. `user_email` ist freiwillig
+    # und wird beim Export ins Dossier geschrieben — die Einstellungen
+    # sagen das dazu. `install_id` ist eine zufällige Kennung dieser
+    # Installation, beim ersten Start erzeugt, in den Einstellungen
+    # sichtbar und neu würfelbar — NIE Hardware-UUID oder Hostname.
+    "user_email": "",
+    "install_id": "",
 }
+
+
+def neue_install_id() -> str:
+    """`ins-<ULID>` — 48 Bit Zeit + 80 Bit Zufall, Crockford-Base32,
+    sortierbar, ohne jeden Bezug zu Gerät oder Person."""
+    import secrets
+    import time
+    alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    wert = (int(time.time() * 1000) << 80) | secrets.randbits(80)
+    zeichen = []
+    for _ in range(26):
+        zeichen.append(alphabet[wert & 31])
+        wert >>= 5
+    return "ins-" + "".join(reversed(zeichen))
 
 
 def read_config() -> dict:
@@ -137,7 +159,22 @@ def read_config() -> dict:
     root = cfg.get("library_root") or ""
     if root and not Path(root).is_dir():
         cfg["library_root"] = ""
+    # Installations-Kennung beim ersten Lesen erzeugen und festschreiben
+    if not cfg.get("install_id"):
+        cfg["install_id"] = neue_install_id()
+        try:
+            write_config({"install_id": cfg["install_id"]})
+        except OSError:
+            pass
     return cfg
+
+
+def identitaet() -> dict:
+    """Wer im Journal eines Dossiers steht: App, Installation, Person."""
+    cfg = read_config()
+    return {"app": f"localtranscript/{APP_VERSION}",
+            "install": cfg["install_id"],
+            "user": cfg.get("user_email") or None}
 
 
 def write_config(aenderungen: dict) -> dict:

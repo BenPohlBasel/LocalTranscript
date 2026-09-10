@@ -87,8 +87,14 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
             if r.returncode == 0 and mp3.is_file():
                 audio = mp3
         dp = Path(td) / f"{stamm}.enrich"
+        # Wer steht im Journal des Dossiers: die E-Mail aus den
+        # Einstellungen, wenn eine hinterlegt ist — sonst die App. Die
+        # Einstellungen sagen, dass die Adresse hier landet.
+        from .config import identitaet
+        wer = identitaet()
         d, _bericht = baue_struktur_dossier(
-            dp, struktur, quelle=daten["name"], user="localtranscript",
+            dp, struktur, quelle=daten["name"],
+            user=wer["user"] or wer["app"],
             zeiten=zeiten, audio=audio,
             zeiten_quelle="localtranscript")
         d.set_analyse_kette("narrativ", "localtranscript")
@@ -97,8 +103,10 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
         # VTT nicht ausdrücken kann). Kein Layer, kein Manifest-Eintrag
         # — dieselbe Sorte Datei wie audio.mp3 und source.pdf daneben.
         import json as _json
+        beilage = dict(daten)
+        beilage["exportiert_von"] = wer         # app · install · user
         (d.path / "transkript.json").write_text(
-            _json.dumps(daten, ensure_ascii=False, indent=2),
+            _json.dumps(beilage, ensure_ascii=False, indent=2),
             encoding="utf-8")
         # Nicht d.pack(): das komprimiert (DEFLATE), und im Dossier ist
         # das Grösste die mp3, die sich nicht komprimieren lässt — nur

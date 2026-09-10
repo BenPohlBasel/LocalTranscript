@@ -5,6 +5,18 @@ a version are the corresponding section of this file.
 
 ## Unreleased
 
+### Added
+
+- **Identity in the dossier** (Settings). An optional e-mail address as
+  the app's user ID: it is written into every enrich dossier you export
+  — as the person in the journal of who edited what and when — and
+  leaves the computer only inside the file you pass on yourself. The
+  settings say so next to the field. Alongside it a random
+  installation ID (`ins-…`), generated on first launch, shown and
+  regenerable in Settings; it tells two installations apart in a
+  journal without naming a device or a person. Never a hardware UUID or
+  hostname.
+
 ### Changed
 
 - **The enrich dossier is one file: `.enrich`.** The export no longer
