@@ -57,8 +57,12 @@ Schriftkanten leiden).
 ## Textbausteine (docs/)
 
 Zwei Markdown-Dateien je Sprache, im Datenschutz-Abschnitt zum
-Herunterladen verlinkt (`download`-Attribut, Datei je Sprache über
-`data-doc` im Skript):
+Herunterladen. Die Knöpfe speichern die Datei als Blob aus Text, der
+in `index.html` eingebettet ist — das `download`-Attribut allein tut
+das nur von einem Server aus; von `file://` öffnen Chromium und WebKit
+die .md im Fenster. Die Dateien in `docs/` bleiben die Quelle; nach
+jeder Änderung daran `python3 site/docs/einbetten.py` laufen lassen,
+sonst lädt der Knopf den alten Stand:
 
 - **Verfahrensbeschreibung** — in Sachform, zehn Abschnitte nach dem
   Muster eines Verfahrensverzeichnisses, mit `[eckigen Klammern]` für

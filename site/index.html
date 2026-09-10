@@ -439,6 +439,930 @@ footer p{max-width:none}
   </div>
 </footer>
 
+<!-- docs:start -->
+<script type="text/plain" data-md="verfahren-de" data-name="localtranscript-datenverarbeitung-de.md">
+# LocalTranscript — Beschreibung der Datenverarbeitung
+
+Textbaustein zum Einfügen in ein Verfahrensverzeichnis, eine
+Datenschutz-Folgenabschätzung, einen Ethikantrag oder einen
+Datenmanagementplan. Stand 10. September 2026, LocalTranscript 2.2.0.
+Angaben in `[eckigen Klammern]` ergänzt die verantwortliche Stelle.
+
+Hinweis vorab: Ein Programm kann nicht «DSGVO-konform» sein — konform
+ist eine Verarbeitung. Dieser Text beschreibt, was die Software tut
+und was sie nicht tut. Ob die damit vorgenommene Verarbeitung der DSGVO
+oder dem revidierten Schweizer DSG genügt, beurteilt die verantwortliche
+Stelle. Der Text ist keine Rechtsberatung.
+
+---
+
+## 1. Eingesetzte Software
+
+LocalTranscript, Version `[2.2.0]`. Freie Software unter
+AGPL-3.0-or-later, entwickelt am B/IAS – Basel Institut für angewandte
+Stadtforschung. Quellcode öffentlich unter
+<https://github.com/BenPohlBasel/LocalTranscript>. Die Software läuft
+als lokale Anwendung auf macOS (Apple Silicon) und wird von der
+verantwortlichen Stelle selbst installiert und betrieben.
+
+## 2. Zweck der Verarbeitung
+
+Umwandlung von Audioaufnahmen `[z. B. leitfadengestützte Interviews im
+Projekt …]` in Text mit Zeitmarken und Sprecherzuordnung, zur
+anschliessenden qualitativen Auswertung `[in ATLAS.ti / MAXQDA / NVivo /
+enrich / …]`.
+
+## 3. Betroffene Personen und Datenkategorien
+
+Betroffen sind die aufgenommenen Personen `[Interviewpartner:innen,
+Teilnehmende an Gruppengesprächen, …]`. Verarbeitet werden
+Sprachaufnahmen (Stimme und Gesprächsinhalt) sowie die daraus erzeugten
+Transkripte mit Zeitmarken und Sprecherzuordnung. Je nach
+Gesprächsinhalt können besondere Kategorien personenbezogener Daten
+betroffen sein `[ja / nein: …]`.
+
+## 4. Datenfluss einer Transkription
+
+1. **Eingabe.** Die Audiodatei wird vom lokalen Dateisystem des
+   Endgeräts eingelesen (MP3, WAV, M4A, OGG, FLAC).
+2. **Verarbeitung.** Spracherkennung (whisper.cpp, Modell
+   large-v3-turbo) und Sprechertrennung (silero-vad, SpeechBrain ECAPA)
+   laufen im Prozess der Anwendung auf dem Prozessor bzw. der Grafikkarte
+   des Endgeräts. Sämtliche Modelle sind im Programmpaket enthalten; beim
+   ersten Start wird nichts nachgeladen.
+3. **Ablage.** Je Transkript entsteht ein Ordner am gewählten
+   Speicherort `[Pfad, z. B. ~/Documents/LocalTranscript]` mit einer
+   Kopie des Audios, der kanonischen Transkriptdatei (JSON),
+   Verlaufsschnappschüssen bei jedem Speichern und den abgeleiteten
+   Exporten. Temporäre Arbeitsdateien werden nach jedem Lauf entfernt.
+4. **Netz.** Die Software baut keine ausgehenden Netzverbindungen auf:
+   keine Telemetrie, keine Nutzungsstatistik, keine Update-Prüfung,
+   keine eigenen Absturzberichte. Der interne Dienst der Anwendung
+   bindet ausschliesslich an die Loopback-Adresse `127.0.0.1` und weist
+   Anfragen anderer Hosts ab (HTTP 421). Diagnosedaten des
+   Betriebssystems macOS unterliegen dessen Systemeinstellungen, nicht
+   der Software.
+5. **Ausgabe.** Exportdateien (WebVTT, CSV, Text, REFI-QDA `.qdpx`,
+   enrich-Dossier `.enrich.zip`) werden dorthin geschrieben, wo die
+   bedienende Person sie speichert. **REFI-QDA- und enrich-Exporte
+   enthalten die Audioaufnahme.** Ihre Weitergabe ist eine Weitergabe
+   der Aufnahme.
+
+## 5. Ort der Verarbeitung
+
+Ausschliesslich auf dem Endgerät `[Gerät, Standort]` in der Sitzung der
+angemeldeten Person. Es gibt keinen Server, keinen Cloud-Dienst und kein
+Benutzerkonto.
+
+## 6. Empfänger, Auftragsverarbeitung, Drittlandübermittlung
+
+Keine. Da keine Daten übermittelt werden, gibt es weder Empfänger noch
+Auftragsverarbeiter noch eine Übermittlung in ein Drittland. Eine
+Weitergabe findet nur statt, wenn die verantwortliche Stelle
+Exportdateien selbst weitergibt `[an …, auf dem Weg …]`.
+
+## 7. Speicherdauer und Löschung
+
+Aufbewahrung der Aufnahmen und Transkripte: `[Frist, Grundlage]`.
+Löschen in der Anwendung verschiebt einen Eintrag in einen
+Papierkorb-Ordner innerhalb der Bibliothek (`_papierkorb`); endgültig
+entfernt wird er erst durch Leeren dieses Ordners `[durch wen, wann]`.
+Verlaufsschnappschüsse liegen im Ordner des jeweiligen Transkripts und
+werden mit ihm gelöscht. Sicherungskopien des Endgeräts `[Time Machine,
+…]` unterliegen der Löschregel der Stelle.
+
+## 8. Technische und organisatorische Massnahmen
+
+Von der verantwortlichen Stelle zu erbringen, da die Software selbst
+keine Zugriffssteuerung mitbringt:
+
+- Verschlüsselung des Datenträgers, z. B. FileVault: `[aktiv seit …]`
+- Zugriffsschutz des Endgeräts (Anmeldung, Bildschirmsperre): `[…]`
+- Pseudonymisierung vor jeder Weitergabe — im Editor der Anwendung
+  lassen sich Sprecher umbenennen und Namen im Text per Suchen und
+  Ersetzen tauschen; die Entscheidung, was zu ersetzen ist, trifft die
+  bearbeitende Person: `[Verfahren, Zuständigkeit]`
+- Regel für Sicherungskopien: `[…]`
+- Regel für die Weitergabe von Exportdateien, insbesondere solcher mit
+  Audio: `[…]`
+
+## 9. Rechtsgrundlage und Information der Betroffenen
+
+`[Einwilligung / berechtigtes Interesse / Forschungsprivileg nach …;
+Informationsschreiben vom …]`. Die Software trägt hierzu nichts bei.
+
+## 10. Nachprüfbarkeit
+
+Die Aussagen in Abschnitt 4 lassen sich am Quellcode prüfen: Die
+Bindung des internen Dienstes an `127.0.0.1` und die Abweisung fremder
+Hosts stehen in `backend/src/localtranscript/main.py`. Das Repository
+enthält die vollständige Build-Kette bis zum signierten Installations-
+paket; wer der ausgelieferten Binärdatei nicht traut, kann sie selbst
+erzeugen.
+
+---
+
+Quelle dieses Textes: <https://github.com/BenPohlBasel/LocalTranscript>
+(Ordner `site/docs`). Er darf frei verwendet und angepasst werden.
+</script>
+<script type="text/plain" data-md="verfahren-en" data-name="localtranscript-data-processing-en.md">
+# LocalTranscript — Description of the data processing
+
+A text block to paste into a record of processing activities, a data
+protection impact assessment, an ethics application or a data
+management plan. As of 10 September 2026, LocalTranscript 2.2.0. Items
+in `[square brackets]` are completed by the controller.
+
+A note first: a program cannot be "GDPR compliant" — processing can.
+This text describes what the software does and does not do. Whether the
+processing carried out with it satisfies the GDPR or the revised Swiss
+FADP is for the controller to judge. The text is not legal advice.
+
+---
+
+## 1. Software used
+
+LocalTranscript, version `[2.2.0]`. Free software under
+AGPL-3.0-or-later, developed at B/IAS – Basel Institut für angewandte
+Stadtforschung. Source code public at
+<https://github.com/BenPohlBasel/LocalTranscript>. The software runs as
+a local application on macOS (Apple Silicon) and is installed and
+operated by the controller itself.
+
+## 2. Purpose of the processing
+
+Conversion of audio recordings `[e.g. semi-structured interviews in the
+project …]` into text with timecodes and speaker attribution, for
+subsequent qualitative analysis `[in ATLAS.ti / MAXQDA / NVivo /
+enrich / …]`.
+
+## 3. Data subjects and categories of data
+
+The data subjects are the recorded persons `[interviewees, participants
+in group discussions, …]`. Processed are voice recordings (voice and
+content of the conversation) and the transcripts generated from them,
+with timecodes and speaker attribution. Depending on the content of the
+conversation, special categories of personal data may be involved
+`[yes / no: …]`.
+
+## 4. Data flow of one transcription
+
+1. **Input.** The audio file is read from the local file system of the
+   device (MP3, WAV, M4A, OGG, FLAC).
+2. **Processing.** Speech recognition (whisper.cpp, model
+   large-v3-turbo) and speaker separation (silero-vad, SpeechBrain
+   ECAPA) run inside the application's process on the device's
+   processor or graphics unit. All models are contained in the
+   application package; nothing is downloaded on first launch.
+3. **Storage.** For each transcript a folder is created at the chosen
+   location `[path, e.g. ~/Documents/LocalTranscript]` holding a copy of
+   the audio, the canonical transcript file (JSON), history snapshots
+   written on every save, and the derived exports. Temporary working
+   files are removed after each run.
+4. **Network.** The software opens no outbound network connections: no
+   telemetry, no usage statistics, no update check, no crash reports of
+   its own. The application's internal service binds exclusively to the
+   loopback address `127.0.0.1` and rejects requests from any other host
+   (HTTP 421). Diagnostic data of the macOS operating system is governed
+   by its system settings, not by the software.
+5. **Output.** Export files (WebVTT, CSV, plain text, REFI-QDA `.qdpx`,
+   enrich dossier `.enrich.zip`) are written wherever the operator saves
+   them. **REFI-QDA and enrich exports contain the audio recording.**
+   Passing them on is passing on the recording.
+
+## 5. Location of the processing
+
+Exclusively on the device `[device, location]` in the session of the
+logged-in user. There is no server, no cloud service and no user
+account.
+
+## 6. Recipients, processors, transfers to third countries
+
+None. Since no data is transmitted, there are neither recipients nor
+processors nor a transfer to a third country. Data leaves the device
+only if the controller itself passes on export files `[to …, by …]`.
+
+## 7. Retention and deletion
+
+Retention of recordings and transcripts: `[period, basis]`. Deleting in
+the application moves an entry to a trash folder inside the library
+(`_papierkorb`); it is removed for good only when that folder is emptied
+`[by whom, when]`. History snapshots live in the folder of the
+respective transcript and are deleted with it. Backups of the device
+`[Time Machine, …]` are subject to the controller's deletion rule.
+
+## 8. Technical and organisational measures
+
+To be provided by the controller, as the software itself brings no
+access control:
+
+- Disk encryption, e.g. FileVault: `[active since …]`
+- Access protection of the device (login, screen lock): `[…]`
+- Pseudonymisation before any transfer — in the application's editor,
+  speakers can be renamed and names in the text swapped with find and
+  replace; the decision of what to replace is made by the editing
+  person: `[procedure, responsibility]`
+- Backup rule: `[…]`
+- Rule for passing on export files, in particular those containing
+  audio: `[…]`
+
+## 9. Legal basis and information of the data subjects
+
+`[consent / legitimate interest / research privilege under …;
+information letter of …]`. The software contributes nothing here.
+
+## 10. Verifiability
+
+The statements in section 4 can be checked against the source code: the
+binding of the internal service to `127.0.0.1` and the rejection of
+foreign hosts are in `backend/src/localtranscript/main.py`. The
+repository contains the complete build chain up to the signed
+installation package; anyone who does not trust the distributed binary
+can build it.
+
+---
+
+Source of this text: <https://github.com/BenPohlBasel/LocalTranscript>
+(folder `site/docs`). It may be used and adapted freely.
+</script>
+<script type="text/plain" data-md="verfahren-fr" data-name="localtranscript-traitement-des-donnees-fr.md">
+# LocalTranscript — Description du traitement des données
+
+Bloc de texte à insérer dans un registre des activités de traitement,
+une analyse d'impact relative à la protection des données, une demande
+au comité d'éthique ou un plan de gestion des données. État au
+10 septembre 2026, LocalTranscript 2.2.0. Les mentions entre
+`[crochets]` sont complétées par le responsable du traitement.
+
+Remarque préalable : un programme ne peut pas être « conforme au
+RGPD » — un traitement peut l'être. Ce texte décrit ce que le logiciel
+fait et ne fait pas. Il appartient au responsable du traitement de juger
+si le traitement effectué avec ce logiciel satisfait au RGPD ou à la
+nLPD suisse. Ce texte ne constitue pas un avis juridique.
+
+---
+
+## 1. Logiciel utilisé
+
+LocalTranscript, version `[2.2.0]`. Logiciel libre sous
+AGPL-3.0-or-later, développé au B/IAS – Basel Institut für angewandte
+Stadtforschung. Code source public :
+<https://github.com/BenPohlBasel/LocalTranscript>. Le logiciel
+fonctionne comme application locale sous macOS (Apple Silicon) et est
+installé et exploité par le responsable du traitement lui-même.
+
+## 2. Finalité du traitement
+
+Conversion d'enregistrements audio `[p. ex. entretiens semi-directifs
+dans le projet …]` en texte avec codes temporels et attribution des
+locuteurs, en vue d'une analyse qualitative ultérieure `[dans ATLAS.ti /
+MAXQDA / NVivo / enrich / …]`.
+
+## 3. Personnes concernées et catégories de données
+
+Les personnes concernées sont les personnes enregistrées `[personnes
+interrogées, participant·e·s à des discussions de groupe, …]`. Sont
+traités les enregistrements vocaux (voix et contenu de l'échange) ainsi
+que les transcriptions qui en sont produites, avec codes temporels et
+attribution des locuteurs. Selon le contenu, des catégories
+particulières de données personnelles peuvent être concernées
+`[oui / non : …]`.
+
+## 4. Flux de données d'une transcription
+
+1. **Entrée.** Le fichier audio est lu depuis le système de fichiers
+   local de l'appareil (MP3, WAV, M4A, OGG, FLAC).
+2. **Traitement.** La reconnaissance vocale (whisper.cpp, modèle
+   large-v3-turbo) et la séparation des locuteurs (silero-vad,
+   SpeechBrain ECAPA) s'exécutent dans le processus de l'application, sur
+   le processeur ou la carte graphique de l'appareil. Tous les modèles
+   sont contenus dans le paquet de l'application ; rien n'est téléchargé
+   au premier lancement.
+3. **Stockage.** Pour chaque transcription, un dossier est créé à
+   l'emplacement choisi `[chemin, p. ex. ~/Documents/LocalTranscript]`
+   contenant une copie de l'audio, le fichier canonique de transcription
+   (JSON), des instantanés d'historique à chaque enregistrement et les
+   exports dérivés. Les fichiers de travail temporaires sont supprimés
+   après chaque exécution.
+4. **Réseau.** Le logiciel n'ouvre aucune connexion réseau sortante :
+   pas de télémétrie, pas de statistiques d'utilisation, pas de
+   vérification de mise à jour, pas de rapports de plantage propres. Le
+   service interne de l'application se lie exclusivement à l'adresse de
+   bouclage `127.0.0.1` et rejette les requêtes de tout autre hôte
+   (HTTP 421). Les données de diagnostic du système macOS relèvent de
+   ses réglages système, non du logiciel.
+5. **Sortie.** Les fichiers d'export (WebVTT, CSV, texte brut, REFI-QDA
+   `.qdpx`, dossier enrich `.enrich.zip`) sont écrits là où
+   l'utilisateur·rice les enregistre. **Les exports REFI-QDA et enrich
+   contiennent l'enregistrement audio.** Les transmettre, c'est
+   transmettre l'enregistrement.
+
+## 5. Lieu du traitement
+
+Exclusivement sur l'appareil `[appareil, lieu]`, dans la session de la
+personne connectée. Il n'y a ni serveur, ni service cloud, ni compte
+utilisateur.
+
+## 6. Destinataires, sous-traitants, transferts vers des pays tiers
+
+Aucun. Comme aucune donnée n'est transmise, il n'y a ni destinataire,
+ni sous-traitant, ni transfert vers un pays tiers. Les données ne
+quittent l'appareil que si le responsable du traitement transmet
+lui-même des fichiers d'export `[à …, par …]`.
+
+## 7. Durée de conservation et suppression
+
+Conservation des enregistrements et transcriptions : `[durée, base]`.
+Supprimer dans l'application déplace une entrée vers un dossier
+corbeille à l'intérieur de la bibliothèque (`_papierkorb`) ; elle n'est
+définitivement effacée qu'en vidant ce dossier `[par qui, quand]`. Les
+instantanés d'historique se trouvent dans le dossier de la transcription
+concernée et sont supprimés avec elle. Les sauvegardes de l'appareil
+`[Time Machine, …]` relèvent de la règle de suppression du responsable.
+
+## 8. Mesures techniques et organisationnelles
+
+À la charge du responsable du traitement, le logiciel n'apportant
+lui-même aucun contrôle d'accès :
+
+- Chiffrement du disque, p. ex. FileVault : `[actif depuis …]`
+- Protection d'accès à l'appareil (connexion, verrouillage d'écran) :
+  `[…]`
+- Pseudonymisation avant toute transmission — dans l'éditeur de
+  l'application, les locuteurs peuvent être renommés et les noms dans le
+  texte remplacés par rechercher-remplacer ; la décision de ce qu'il faut
+  remplacer revient à la personne qui édite : `[procédure,
+  responsabilité]`
+- Règle de sauvegarde : `[…]`
+- Règle de transmission des fichiers d'export, en particulier ceux
+  contenant l'audio : `[…]`
+
+## 9. Base légale et information des personnes concernées
+
+`[consentement / intérêt légitime / privilège de recherche selon … ;
+lettre d'information du …]`. Le logiciel n'y contribue en rien.
+
+## 10. Vérifiabilité
+
+Les affirmations de la section 4 peuvent être vérifiées dans le code
+source : la liaison du service interne à `127.0.0.1` et le rejet des
+hôtes étrangers se trouvent dans
+`backend/src/localtranscript/main.py`. Le dépôt contient toute la chaîne
+de construction jusqu'au paquet d'installation signé ; qui ne fait pas
+confiance au binaire distribué peut le compiler.
+
+---
+
+Source de ce texte : <https://github.com/BenPohlBasel/LocalTranscript>
+(dossier `site/docs`). Il peut être utilisé et adapté librement.
+</script>
+<script type="text/plain" data-md="verfahren-it" data-name="localtranscript-trattamento-dei-dati-it.md">
+# LocalTranscript — Descrizione del trattamento dei dati
+
+Blocco di testo da inserire in un registro delle attività di
+trattamento, una valutazione d'impatto sulla protezione dei dati, una
+domanda al comitato etico o un piano di gestione dei dati. Stato al
+10 settembre 2026, LocalTranscript 2.2.0. Le voci tra `[parentesi
+quadre]` vengono completate dal titolare del trattamento.
+
+Nota preliminare: un programma non può essere « conforme al GDPR » —
+può esserlo un trattamento. Questo testo descrive che cosa il software
+fa e che cosa non fa. Se il trattamento svolto con esso soddisfi il GDPR
+o la nLPD svizzera lo giudica il titolare. Il testo non costituisce
+consulenza legale.
+
+---
+
+## 1. Software impiegato
+
+LocalTranscript, versione `[2.2.0]`. Software libero sotto
+AGPL-3.0-or-later, sviluppato al B/IAS – Basel Institut für angewandte
+Stadtforschung. Codice sorgente pubblico:
+<https://github.com/BenPohlBasel/LocalTranscript>. Il software gira
+come applicazione locale su macOS (Apple Silicon) ed è installato e
+gestito dal titolare stesso.
+
+## 2. Finalità del trattamento
+
+Conversione di registrazioni audio `[p. es. interviste semi-strutturate
+nel progetto …]` in testo con codici temporali e attribuzione dei
+parlanti, ai fini della successiva analisi qualitativa `[in ATLAS.ti /
+MAXQDA / NVivo / enrich / …]`.
+
+## 3. Interessati e categorie di dati
+
+Gli interessati sono le persone registrate `[intervistati, partecipanti
+a discussioni di gruppo, …]`. Vengono trattate registrazioni vocali
+(voce e contenuto della conversazione) e le trascrizioni da esse
+prodotte, con codici temporali e attribuzione dei parlanti. A seconda
+del contenuto possono essere coinvolte categorie particolari di dati
+personali `[sì / no: …]`.
+
+## 4. Flusso dei dati di una trascrizione
+
+1. **Ingresso.** Il file audio viene letto dal file system locale del
+   dispositivo (MP3, WAV, M4A, OGG, FLAC).
+2. **Elaborazione.** Il riconoscimento vocale (whisper.cpp, modello
+   large-v3-turbo) e la separazione dei parlanti (silero-vad, SpeechBrain
+   ECAPA) girano nel processo dell'applicazione, sul processore o sulla
+   scheda grafica del dispositivo. Tutti i modelli sono contenuti nel
+   pacchetto dell'applicazione; al primo avvio non viene scaricato
+   nulla.
+3. **Archiviazione.** Per ogni trascrizione viene creata una cartella
+   nella posizione scelta `[percorso, p. es.
+   ~/Documents/LocalTranscript]` con una copia dell'audio, il file
+   canonico della trascrizione (JSON), istantanee della cronologia a ogni
+   salvataggio e le esportazioni derivate. I file di lavoro temporanei
+   vengono rimossi dopo ogni esecuzione.
+4. **Rete.** Il software non apre alcuna connessione di rete in uscita:
+   niente telemetria, niente statistiche d'uso, niente controllo
+   aggiornamenti, nessun rapporto di arresto proprio. Il servizio interno
+   dell'applicazione si collega esclusivamente all'indirizzo di loopback
+   `127.0.0.1` e rifiuta le richieste di qualsiasi altro host
+   (HTTP 421). I dati diagnostici del sistema macOS sono regolati dalle
+   sue impostazioni di sistema, non dal software.
+5. **Uscita.** I file di esportazione (WebVTT, CSV, testo, REFI-QDA
+   `.qdpx`, dossier enrich `.enrich.zip`) vengono scritti dove chi opera
+   li salva. **Le esportazioni REFI-QDA ed enrich contengono la
+   registrazione audio.** Consegnarle significa consegnare la
+   registrazione.
+
+## 5. Luogo del trattamento
+
+Esclusivamente sul dispositivo `[dispositivo, luogo]`, nella sessione
+della persona che ha effettuato l'accesso. Non esistono server, servizi
+cloud né account utente.
+
+## 6. Destinatari, responsabili del trattamento, trasferimenti verso paesi terzi
+
+Nessuno. Poiché nessun dato viene trasmesso, non vi sono destinatari,
+responsabili del trattamento né trasferimenti verso paesi terzi. I dati
+lasciano il dispositivo solo se il titolare stesso consegna file di
+esportazione `[a …, tramite …]`.
+
+## 7. Conservazione e cancellazione
+
+Conservazione di registrazioni e trascrizioni: `[durata, base]`.
+Eliminare nell'applicazione sposta una voce in una cartella cestino
+all'interno della libreria (`_papierkorb`); viene rimossa
+definitivamente solo svuotando quella cartella `[da chi, quando]`. Le
+istantanee della cronologia si trovano nella cartella della rispettiva
+trascrizione e vengono cancellate con essa. Le copie di sicurezza del
+dispositivo `[Time Machine, …]` seguono la regola di cancellazione del
+titolare.
+
+## 8. Misure tecniche e organizzative
+
+A carico del titolare, poiché il software non porta con sé alcun
+controllo degli accessi:
+
+- Cifratura del disco, p. es. FileVault: `[attiva dal …]`
+- Protezione dell'accesso al dispositivo (login, blocco schermo): `[…]`
+- Pseudonimizzazione prima di ogni consegna — nell'editor
+  dell'applicazione i parlanti possono essere rinominati e i nomi nel
+  testo sostituiti con cerca-e-sostituisci; la decisione su che cosa
+  sostituire spetta a chi corregge: `[procedura, responsabilità]`
+- Regola per le copie di sicurezza: `[…]`
+- Regola per la consegna dei file di esportazione, in particolare di
+  quelli con audio: `[…]`
+
+## 9. Base giuridica e informazione degli interessati
+
+`[consenso / interesse legittimo / privilegio di ricerca ai sensi di …;
+lettera informativa del …]`. Il software non contribuisce in alcun modo.
+
+## 10. Verificabilità
+
+Le affermazioni della sezione 4 sono verificabili nel codice sorgente:
+il collegamento del servizio interno a `127.0.0.1` e il rifiuto degli
+host estranei si trovano in `backend/src/localtranscript/main.py`. Il
+repository contiene l'intera catena di build fino al pacchetto
+d'installazione firmato; chi non si fida del binario distribuito può
+compilarlo.
+
+---
+
+Fonte di questo testo: <https://github.com/BenPohlBasel/LocalTranscript>
+(cartella `site/docs`). Può essere usato e adattato liberamente.
+</script>
+<script type="text/plain" data-md="blatt-de" data-name="localtranscript-app-blatt-de.md">
+# LocalTranscript — App-Blatt für Forschende
+
+Was die App ist, welche KI darin was tut, wo der Code liegt, und warum
+das Transkript den Rechner nicht verlässt. Zum Weitergeben an
+Projektleitung, Ethikkommission oder Kolleg:innen. Stand 10. September
+2026, Version 2.2.0.
+
+## Was die App tut
+
+LocalTranscript wandelt Audioaufnahmen — Interviews, Gruppengespräche,
+Workshops — in Text mit Zeitmarken und Sprecherzuordnung um. Danach
+wird das Transkript in einem Editor korrigiert, Sprecher werden
+benannt, Namen ersetzt, und das Ergebnis wird für die Auswertung
+exportiert (ATLAS.ti, MAXQDA, NVivo über REFI-QDA; enrich; WebVTT,
+CSV, Text). Alles davon geschieht auf dem eigenen Mac.
+
+## Welche KI hier was macht
+
+| Baustein | Aufgabe | Herkunft, Lizenz | Läuft wo |
+|---|---|---|---|
+| whisper.cpp mit Modell `large-v3-turbo` | Spracherkennung: Audio → Text mit Zeitmarken | Modell von OpenAI (MIT), Laufzeit whisper.cpp (MIT) | lokal, auf der Grafikeinheit des Macs |
+| silero-vad | Sprachaktivität: erkennt, wo überhaupt gesprochen wird | MIT | lokal |
+| SpeechBrain ECAPA-TDNN | Sprechertrennung: berechnet Stimmprofile und gruppiert sie zu Sprechern | Apache-2.0 | lokal |
+
+Alle drei Modelle liegen im Programmpaket. Es gibt keinen Zugang zu
+einem KI-Dienst, kein Konto, keinen Schlüssel.
+
+**Keine generative KI.** Nichts wird zusammengefasst, umformuliert oder
+interpretiert. Die App liefert, was gesagt wurde — nicht, was gemeint
+war.
+
+**Grenze der Spracherkennung.** Whisper ist ein neuronales Modell. Wo
+es nichts versteht (Nebengeräusche, Dialekt, Überlappungen), kann es
+Wörter setzen, die nicht gesagt wurden. Ein Transkript aus
+LocalTranscript ist ein **Rohtranskript**, das gegen die Aufnahme geprüft
+werden muss; der Editor ist dafür gebaut. Standarddeutsch, Französisch,
+Italienisch und Englisch werden gut erkannt, Schweizerdeutsch lückenhaft
+— die Sprecher werden trotzdem sauber getrennt.
+
+## Wo der Code liegt
+
+- Quellcode: <https://github.com/BenPohlBasel/LocalTranscript>
+- Lizenz: AGPL-3.0-or-later — freie Software, darf genutzt, geprüft,
+  verändert und weitergegeben werden
+- Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung,
+  Beckenweg 6, 4056 Basel, <https://bias.city>
+- Installationspaket: signiert und notarisiert mit Apple Developer ID,
+  Prüfsumme bei jedem Release auf GitHub
+- Wer der Binärdatei nicht traut: Das Repository enthält die
+  vollständige Build-Kette, die App lässt sich selbst bauen
+
+## Das Transkript verlässt den Rechner nicht
+
+- Die App baut **keine ausgehenden Netzverbindungen** auf: keine
+  Telemetrie, keine Nutzungsstatistik, keine Update-Prüfung, keine
+  eigenen Absturzberichte.
+- Ihr interner Dienst hört nur auf der Loopback-Adresse `127.0.0.1`
+  des eigenen Rechners und weist jede Anfrage von anderswo ab. Der
+  Code dafür steht in `backend/src/localtranscript/main.py` — für jede
+  Person nachlesbar.
+- Audio und Transkript liegen ausschliesslich im gewählten
+  Bibliotheksordner. Gelöschtes wandert in einen Papierkorb-Ordner
+  innerhalb der Bibliothek, bis er geleert wird.
+- Kein Server, kein Cloud-Dienst, kein Benutzerkonto, kein
+  Auftragsverarbeiter, kein Drittlandtransfer — weil nichts übermittelt
+  wird.
+
+Was damit **nicht** abgedeckt ist: Backups des Macs (Time Machine,
+iCloud Drive für den Dokumente-Ordner) und die Diagnosedaten von macOS
+selbst folgen den Systemeinstellungen, nicht der App. Wer den
+Bibliotheksordner in einen synchronisierten Ordner legt, synchronisiert
+die Aufnahmen.
+
+## Namen anonymisieren
+
+- **Sprecher umbenennen:** Ein Name im Sprecher-Panel gilt für alle
+  Segmente dieser Person — aus «Sprecher 1» wird «B3» in einem Schritt.
+- **Namen im Text:** «Suchen und Ersetzen» findet einen Namen in allen
+  Segmenten, zeigt jeden Treffer im Zusammenhang und ersetzt einzeln
+  oder alle auf einmal — auch, wenn das Transkript den Namen über eine
+  Zeile getrennt hat.
+- **Was die App nicht entscheidet:** welche Angaben zu ersetzen sind —
+  Orte, Arbeitgeber, Ereignisse. Das bleibt eine Entscheidung der
+  Forschenden.
+- **Die Aufnahme bleibt, was sie ist.** Pseudonymisiert wird der Text.
+  Exporte als REFI-QDA (`.qdpx`) und enrich-Dossier (`.enrich.zip`)
+  enthalten die Audiodatei mit Stimme und Klarnamen; WebVTT, CSV und
+  Text enthalten nur den Text. Wer nur pseudonymisierte Daten weitergeben
+  will, gibt ein Textformat weiter.
+
+## Für den Methodenteil
+
+> Die Aufnahmen wurden mit LocalTranscript 2.2.0 (B/IAS Basel,
+> AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
+> Sprechertrennung mit SpeechBrain ECAPA-TDNN) vollständig lokal auf
+> einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an
+> externe Dienste. Die Rohtranskripte wurden anschliessend gegen die
+> Aufnahme korrigiert und pseudonymisiert.
+
+---
+
+Quelle: <https://github.com/BenPohlBasel/LocalTranscript> (Ordner
+`site/docs`). Das Blatt darf frei verwendet und angepasst werden.
+</script>
+<script type="text/plain" data-md="blatt-en" data-name="localtranscript-fact-sheet-en.md">
+# LocalTranscript — Fact sheet for researchers
+
+What the app is, which AI in it does what, where the code lives, and
+why the transcript never leaves your computer. For handing to a project
+lead, an ethics board or colleagues. As of 10 September 2026, version
+2.2.0.
+
+## What the app does
+
+LocalTranscript turns audio recordings — interviews, group discussions,
+workshops — into text with timecodes and speaker attribution. The
+transcript is then corrected in an editor, speakers are named, names are
+replaced, and the result is exported for analysis (ATLAS.ti, MAXQDA,
+NVivo via REFI-QDA; enrich; WebVTT, CSV, plain text). All of it happens
+on your own Mac.
+
+## Which AI does what
+
+| Component | Task | Origin, licence | Runs where |
+|---|---|---|---|
+| whisper.cpp with the model `large-v3-turbo` | Speech recognition: audio → text with timecodes | model by OpenAI (MIT), runtime whisper.cpp (MIT) | locally, on the Mac's graphics unit |
+| silero-vad | Voice activity: detects where speech occurs at all | MIT | locally |
+| SpeechBrain ECAPA-TDNN | Speaker separation: computes voice profiles and clusters them into speakers | Apache-2.0 | locally |
+
+All three models ship inside the application package. There is no
+access to an AI service, no account, no API key.
+
+**No generative AI.** Nothing is summarised, rephrased or interpreted.
+The app delivers what was said — not what was meant.
+
+**Limits of speech recognition.** Whisper is a neural model. Where it
+understands nothing (background noise, dialect, overlapping speech) it
+may insert words that were never said. A transcript from
+LocalTranscript is a **raw transcript** that must be checked against the
+recording; the editor is built for that. Standard German, French,
+Italian and English are recognised well, Swiss German patchily — the
+speakers are still separated cleanly.
+
+## Where the code lives
+
+- Source code: <https://github.com/BenPohlBasel/LocalTranscript>
+- Licence: AGPL-3.0-or-later — free software that may be used,
+  inspected, modified and passed on
+- Developed at B/IAS – Basel Institut für angewandte Stadtforschung,
+  Beckenweg 6, 4056 Basel, <https://bias.city>
+- Installer: signed and notarised with an Apple Developer ID, checksum
+  with every release on GitHub
+- If you do not trust the binary: the repository holds the complete
+  build chain, the app can be built from source
+
+## The transcript never leaves the computer
+
+- The app opens **no outbound network connections**: no telemetry, no
+  usage statistics, no update check, no crash reports of its own.
+- Its internal service listens only on the loopback address `127.0.0.1`
+  of the machine itself and rejects any request from elsewhere. The code
+  for this is in `backend/src/localtranscript/main.py` — readable by
+  anyone.
+- Audio and transcript live exclusively in the chosen library folder.
+  Deleted items move to a trash folder inside the library until it is
+  emptied.
+- No server, no cloud service, no user account, no processor, no
+  third-country transfer — because nothing is transmitted.
+
+What this does **not** cover: backups of the Mac (Time Machine, iCloud
+Drive for the Documents folder) and the diagnostic data of macOS itself
+follow the system settings, not the app. Whoever places the library
+folder inside a synchronised folder synchronises the recordings.
+
+## Anonymising names
+
+- **Rename speakers:** a name in the speaker panel applies to every
+  segment of that person — "Speaker 1" becomes "B3" in one step.
+- **Names in the text:** "Find and replace" finds a name in all
+  segments, shows each match in context and replaces one at a time or
+  all at once — even where the transcript broke the name across a line.
+- **What the app does not decide:** which details to replace — places,
+  employers, events. That remains the researcher's decision.
+- **The recording stays what it is.** Pseudonymisation applies to the
+  text. Exports as REFI-QDA (`.qdpx`) and enrich dossier (`.enrich.zip`)
+  contain the audio file with voice and real names; WebVTT, CSV and
+  plain text contain text only. Whoever wants to pass on pseudonymised
+  data only passes on a text format.
+
+## For the methods section
+
+> The recordings were transcribed with LocalTranscript 2.2.0 (B/IAS
+> Basel, AGPL-3.0; speech recognition whisper.cpp with the model
+> large-v3-turbo, speaker separation with SpeechBrain ECAPA-TDNN)
+> entirely locally on a computer of the research group, without
+> transmission to external services. The raw transcripts were then
+> corrected against the recording and pseudonymised.
+
+---
+
+Source: <https://github.com/BenPohlBasel/LocalTranscript> (folder
+`site/docs`). The sheet may be used and adapted freely.
+</script>
+<script type="text/plain" data-md="blatt-fr" data-name="localtranscript-fiche-fr.md">
+# LocalTranscript — Fiche pour les chercheur·euse·s
+
+Ce qu'est l'application, quelle IA y fait quoi, où se trouve le code,
+et pourquoi la transcription ne quitte jamais l'ordinateur. À remettre à
+une direction de projet, un comité d'éthique ou des collègues. État au
+10 septembre 2026, version 2.2.0.
+
+## Ce que fait l'application
+
+LocalTranscript transforme des enregistrements audio — entretiens,
+discussions de groupe, ateliers — en texte avec codes temporels et
+attribution des locuteurs. La transcription est ensuite corrigée dans un
+éditeur, les locuteurs sont nommés, les noms remplacés, et le résultat
+est exporté pour l'analyse (ATLAS.ti, MAXQDA, NVivo via REFI-QDA ;
+enrich ; WebVTT, CSV, texte). Tout cela se passe sur votre propre Mac.
+
+## Quelle IA fait quoi
+
+| Composant | Tâche | Origine, licence | S'exécute où |
+|---|---|---|---|
+| whisper.cpp avec le modèle `large-v3-turbo` | Reconnaissance vocale : audio → texte avec codes temporels | modèle d'OpenAI (MIT), exécution whisper.cpp (MIT) | localement, sur la carte graphique du Mac |
+| silero-vad | Activité vocale : détecte où l'on parle | MIT | localement |
+| SpeechBrain ECAPA-TDNN | Séparation des locuteurs : calcule des profils de voix et les regroupe par locuteur | Apache-2.0 | localement |
+
+Les trois modèles sont contenus dans le paquet de l'application. Il n'y
+a ni accès à un service d'IA, ni compte, ni clé.
+
+**Pas d'IA générative.** Rien n'est résumé, reformulé ni interprété.
+L'application livre ce qui a été dit — pas ce qui était voulu.
+
+**Limites de la reconnaissance vocale.** Whisper est un modèle
+neuronal. Là où il ne comprend rien (bruits de fond, dialecte,
+chevauchements), il peut placer des mots qui n'ont pas été prononcés.
+Une transcription issue de LocalTranscript est une **transcription
+brute** qui doit être vérifiée contre l'enregistrement ; l'éditeur est
+conçu pour cela. L'allemand standard, le français, l'italien et
+l'anglais sont bien reconnus, le suisse allemand de façon lacunaire —
+les locuteurs sont néanmoins séparés proprement.
+
+## Où se trouve le code
+
+- Code source : <https://github.com/BenPohlBasel/LocalTranscript>
+- Licence : AGPL-3.0-or-later — logiciel libre, qui peut être utilisé,
+  examiné, modifié et redistribué
+- Développé au B/IAS – Basel Institut für angewandte Stadtforschung,
+  Beckenweg 6, 4056 Bâle, <https://bias.city>
+- Paquet d'installation : signé et notarisé avec un Apple Developer ID,
+  somme de contrôle à chaque version sur GitHub
+- Qui ne fait pas confiance au binaire : le dépôt contient toute la
+  chaîne de construction, l'application peut être compilée soi-même
+
+## La transcription ne quitte pas l'ordinateur
+
+- L'application n'ouvre **aucune connexion réseau sortante** : pas de
+  télémétrie, pas de statistiques d'utilisation, pas de vérification de
+  mise à jour, pas de rapports de plantage propres.
+- Son service interne n'écoute que sur l'adresse de bouclage
+  `127.0.0.1` de la machine elle-même et rejette toute requête venue
+  d'ailleurs. Le code correspondant se trouve dans
+  `backend/src/localtranscript/main.py` — lisible par tout le monde.
+- Audio et transcription se trouvent exclusivement dans le dossier de
+  bibliothèque choisi. Ce qui est supprimé va dans un dossier corbeille
+  à l'intérieur de la bibliothèque, jusqu'à ce qu'il soit vidé.
+- Pas de serveur, pas de service cloud, pas de compte utilisateur, pas
+  de sous-traitant, pas de transfert vers un pays tiers — parce que rien
+  n'est transmis.
+
+Ce que cela ne couvre **pas** : les sauvegardes du Mac (Time Machine,
+iCloud Drive pour le dossier Documents) et les données de diagnostic de
+macOS suivent les réglages système, pas l'application. Qui place le
+dossier de bibliothèque dans un dossier synchronisé synchronise les
+enregistrements.
+
+## Anonymiser les noms
+
+- **Renommer les locuteurs :** un nom dans le panneau des locuteurs vaut
+  pour tous les segments de cette personne — « Locuteur 1 » devient
+  « B3 » en une étape.
+- **Noms dans le texte :** « Rechercher et remplacer » trouve un nom
+  dans tous les segments, montre chaque occurrence dans son contexte et
+  remplace une par une ou toutes d'un coup — même là où la transcription
+  a coupé le nom en fin de ligne.
+- **Ce que l'application ne décide pas :** quelles informations
+  remplacer — lieux, employeurs, événements. Cela reste la décision de
+  la personne qui fait la recherche.
+- **L'enregistrement reste ce qu'il est.** La pseudonymisation porte
+  sur le texte. Les exports REFI-QDA (`.qdpx`) et dossier enrich
+  (`.enrich.zip`) contiennent le fichier audio avec la voix et les noms
+  réels ; WebVTT, CSV et texte ne contiennent que le texte. Qui ne veut
+  transmettre que des données pseudonymisées transmet un format texte.
+
+## Pour la partie méthodologique
+
+> Les enregistrements ont été transcrits avec LocalTranscript 2.2.0
+> (B/IAS Bâle, AGPL-3.0 ; reconnaissance vocale whisper.cpp avec le
+> modèle large-v3-turbo, séparation des locuteurs avec SpeechBrain
+> ECAPA-TDNN) entièrement en local sur un ordinateur du groupe de
+> recherche, sans transmission à des services externes. Les
+> transcriptions brutes ont ensuite été corrigées contre
+> l'enregistrement et pseudonymisées.
+
+---
+
+Source : <https://github.com/BenPohlBasel/LocalTranscript> (dossier
+`site/docs`). La fiche peut être utilisée et adaptée librement.
+</script>
+<script type="text/plain" data-md="blatt-it" data-name="localtranscript-scheda-it.md">
+# LocalTranscript — Scheda per ricercatrici e ricercatori
+
+Che cos'è l'app, quale IA al suo interno fa che cosa, dove si trova il
+codice e perché la trascrizione non lascia mai il computer. Da
+consegnare alla direzione del progetto, al comitato etico o ai colleghi.
+Stato al 10 settembre 2026, versione 2.2.0.
+
+## Che cosa fa l'app
+
+LocalTranscript trasforma registrazioni audio — interviste, discussioni
+di gruppo, workshop — in testo con codici temporali e attribuzione dei
+parlanti. La trascrizione viene poi corretta in un editor, i parlanti
+vengono nominati, i nomi sostituiti, e il risultato esportato per
+l'analisi (ATLAS.ti, MAXQDA, NVivo tramite REFI-QDA; enrich; WebVTT,
+CSV, testo). Tutto avviene sul proprio Mac.
+
+## Quale IA fa che cosa
+
+| Componente | Compito | Origine, licenza | Gira dove |
+|---|---|---|---|
+| whisper.cpp con il modello `large-v3-turbo` | Riconoscimento vocale: audio → testo con codici temporali | modello di OpenAI (MIT), runtime whisper.cpp (MIT) | in locale, sulla scheda grafica del Mac |
+| silero-vad | Attività vocale: rileva dove si parla | MIT | in locale |
+| SpeechBrain ECAPA-TDNN | Separazione dei parlanti: calcola profili vocali e li raggruppa per parlante | Apache-2.0 | in locale |
+
+Tutti e tre i modelli sono contenuti nel pacchetto dell'applicazione.
+Non c'è accesso a un servizio di IA, nessun account, nessuna chiave.
+
+**Nessuna IA generativa.** Nulla viene riassunto, riformulato o
+interpretato. L'app restituisce ciò che è stato detto — non ciò che si
+intendeva.
+
+**Limiti del riconoscimento vocale.** Whisper è un modello neurale. Dove
+non capisce nulla (rumori di fondo, dialetto, sovrapposizioni) può
+inserire parole mai pronunciate. Una trascrizione di LocalTranscript è
+una **trascrizione grezza** che va verificata contro la registrazione;
+l'editor è fatto per questo. Tedesco standard, francese, italiano e
+inglese vengono riconosciuti bene, lo svizzero tedesco in modo lacunoso
+— i parlanti vengono comunque separati correttamente.
+
+## Dove si trova il codice
+
+- Codice sorgente: <https://github.com/BenPohlBasel/LocalTranscript>
+- Licenza: AGPL-3.0-or-later — software libero, che può essere usato,
+  esaminato, modificato e ridistribuito
+- Sviluppato al B/IAS – Basel Institut für angewandte Stadtforschung,
+  Beckenweg 6, 4056 Basilea, <https://bias.city>
+- Pacchetto d'installazione: firmato e notarizzato con Apple Developer
+  ID, checksum a ogni release su GitHub
+- Chi non si fida del binario: il repository contiene l'intera catena di
+  build, l'app può essere compilata da sé
+
+## La trascrizione non lascia il computer
+
+- L'app non apre **alcuna connessione di rete in uscita**: niente
+  telemetria, niente statistiche d'uso, niente controllo aggiornamenti,
+  nessun rapporto di arresto proprio.
+- Il suo servizio interno ascolta solo sull'indirizzo di loopback
+  `127.0.0.1` della macchina stessa e rifiuta ogni richiesta
+  proveniente da altrove. Il codice si trova in
+  `backend/src/localtranscript/main.py` — leggibile da chiunque.
+- Audio e trascrizione si trovano esclusivamente nella cartella della
+  libreria scelta. Ciò che viene eliminato finisce in una cartella
+  cestino all'interno della libreria, finché non viene svuotata.
+- Nessun server, nessun servizio cloud, nessun account utente, nessun
+  responsabile del trattamento, nessun trasferimento verso paesi terzi
+  — perché nulla viene trasmesso.
+
+Che cosa **non** è coperto: le copie di sicurezza del Mac (Time Machine,
+iCloud Drive per la cartella Documenti) e i dati diagnostici di macOS
+seguono le impostazioni di sistema, non l'app. Chi colloca la cartella
+della libreria in una cartella sincronizzata sincronizza le
+registrazioni.
+
+## Anonimizzare i nomi
+
+- **Rinominare i parlanti:** un nome nel pannello dei parlanti vale per
+  tutti i segmenti di quella persona — « Parlante 1 » diventa « B3 » in
+  un solo passaggio.
+- **Nomi nel testo:** « Cerca e sostituisci » trova un nome in tutti i
+  segmenti, mostra ogni occorrenza nel contesto e sostituisce una alla
+  volta o tutte insieme — anche dove la trascrizione ha spezzato il nome
+  a fine riga.
+- **Che cosa l'app non decide:** quali informazioni sostituire — luoghi,
+  datori di lavoro, eventi. Resta una decisione di chi fa ricerca.
+- **La registrazione resta quella che è.** La pseudonimizzazione
+  riguarda il testo. Le esportazioni REFI-QDA (`.qdpx`) e dossier enrich
+  (`.enrich.zip`) contengono il file audio con voce e nomi reali;
+  WebVTT, CSV e testo contengono solo il testo. Chi vuole consegnare
+  solo dati pseudonimizzati consegna un formato di testo.
+
+## Per la sezione metodologica
+
+> Le registrazioni sono state trascritte con LocalTranscript 2.2.0
+> (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
+> modello large-v3-turbo, separazione dei parlanti con SpeechBrain
+> ECAPA-TDNN) interamente in locale su un computer del gruppo di ricerca,
+> senza trasmissione a servizi esterni. Le trascrizioni grezze sono poi
+> state corrette contro la registrazione e pseudonimizzate.
+
+---
+
+Fonte: <https://github.com/BenPohlBasel/LocalTranscript> (cartella
+`site/docs`). La scheda può essere usata e adattata liberamente.
+</script>
+<!-- docs:end -->
+
 <script>
 const T = {
 de:{
@@ -893,6 +1817,7 @@ function setLang(l, inDieUrl){
   /* Die Textbausteine liegen je Sprache als eigene Datei in docs/ */
   document.querySelectorAll('a[data-doc]').forEach(a=>{
     const d = DOCS[a.dataset.doc]; if(d && d[l]) a.href = 'docs/' + d[l];
+    a.dataset.lang = l;
   });
   document.querySelectorAll('.langs button').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.lang===l)));
@@ -910,6 +1835,27 @@ function setLang(l, inDieUrl){
 
 document.querySelectorAll('.langs button').forEach(b=>
   b.addEventListener('click', ()=>setLang(b.dataset.lang, true)));
+
+/* Herunterladen statt anzeigen: Von file:// ignorieren Chromium und
+   WebKit das download-Attribut und öffnen die .md im Fenster. Der Text
+   liegt darum eingebettet in der Seite (docs/einbetten.py) und wird als
+   Blob gespeichert — das geht von jeder Adresse aus. Ohne JavaScript
+   bleibt der href auf docs/ als Rückfall. */
+document.querySelectorAll('a[data-doc]').forEach(a=>{
+  a.addEventListener('click', (e)=>{
+    const q = document.querySelector(
+      `script[data-md="${a.dataset.doc}-${a.dataset.lang}"]`);
+    if(!q || !window.Blob || !URL.createObjectURL) return;   /* Rückfall: href */
+    e.preventDefault();
+    const text = q.textContent.replace(/^\n/, '').replace(/<\\\/script/g, '</script');
+    const url = URL.createObjectURL(
+      new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+    const t = document.createElement('a');
+    t.href = url; t.download = q.dataset.name;
+    document.body.appendChild(t); t.click(); t.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+});
 
 const ausUrl = new URLSearchParams(location.search).get('lang');
 const ausHash = location.hash.replace('#','');      /* alte Links #en */
