@@ -76,6 +76,7 @@ main>section.dpo{background:var(--dunkel)}
 .row.kopf{margin-bottom:2.5rem}
 .row.kopf+.row.gross{border-top:0;padding-top:0;margin-top:0}
 .row .t h3{margin-bottom:.35rem}
+.row .t h3:has(.nr){display:flex;align-items:center}
 .row .t p{color:var(--ink-2)}
 .row .t p+p,.row .t ul,.row .t ol{margin-top:.6rem}
 .row .t li{color:var(--ink-2)}
@@ -83,7 +84,7 @@ main>section.dpo{background:var(--dunkel)}
 .row>:first-child h3{font-size:1.05rem}
 .row code{display:inline-block;margin-bottom:.4rem}
 /* Schrittzahl im Kreis (User: «die Zahlen mit Kreis waren besser») */
-.row h3 .nr{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;margin-right:.65rem;border-radius:50%;background:var(--lila);font-variation-settings:'MONO' 1;font-size:.95rem;font-weight:560;color:#fff;vertical-align:-.5rem}
+.row h3 .nr{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;margin-right:.65rem;border-radius:50%;background:var(--lila);font-variation-settings:'MONO' 1;font-size:.95rem;font-weight:560;color:#fff;flex:none}
 .lede{font-size:clamp(1.15rem,1rem + .5vw,1.4rem);line-height:1.4;color:var(--ink-2)}
 /* Grosses Zitat (Warum kostenlos): der Satz trägt den Abschnitt */
 /* So gross wie die Seiten-Überschrift, danach erst der Titel */
