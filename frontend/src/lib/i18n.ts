@@ -296,10 +296,10 @@ const W: Record<string, Eintrag> = {
     fr: "REFI-QDA (.qdpx) — LocalTranscript prend en charge l'export vers REFI-QDA ; la spécification est sous licence MIT, Copyright 2019 REFI-QDA. Aucune certification officielle, aucune licence de marque.",
     it: "REFI-QDA (.qdpx) — LocalTranscript supporta l'export in REFI-QDA; la specifica è sotto licenza MIT, Copyright 2019 REFI-QDA. Nessuna certificazione ufficiale, nessuna licenza di marchio." },
   "st.formate.enrich": {
-    de: "enrich-Dossier (.enrich.zip) — Format-Spezifikation unter MIT-Lizenz, BIAS.City. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
-    en: "enrich dossier (.enrich.zip) — format specification MIT-licensed, BIAS.City. WebVTT (W3C) · CSV · TXT are open and unrestricted.",
-    fr: "Dossier enrich (.enrich.zip) — spécification du format sous licence MIT, BIAS.City. WebVTT (W3C) · CSV · TXT sont ouverts et sans restriction.",
-    it: "Dossier enrich (.enrich.zip) — specifica del formato sotto licenza MIT, BIAS.City. WebVTT (W3C) · CSV · TXT sono aperti e senza restrizioni." },
+    de: "enrich-Dossier (.enrich) — Formatbeschreibung FORMAT.md im enrich-Repository, MIT-Lizenz, B/IAS. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
+    en: "enrich dossier (.enrich) — format description FORMAT.md in the enrich repository, MIT licence, B/IAS. WebVTT (W3C) · CSV · TXT are open and unrestricted.",
+    fr: "Dossier enrich (.enrich) — description du format FORMAT.md dans le dépôt enrich, licence MIT, B/IAS. WebVTT (W3C) · CSV · TXT sont ouverts et sans restriction.",
+    it: "Dossier enrich (.enrich) — descrizione del formato FORMAT.md nel repository enrich, licenza MIT, B/IAS. WebVTT (W3C) · CSV · TXT sono aperti e senza restrizioni." },
   "st.formate.xsd": {
     de: "Die REFI-Schemas (XSD) liegen NICHT im Bundle — LocalTranscript schreibt nach der Spezifikation und verweist nur auf die Schema-Adresse. Damit greift die MIT-Beilagepflicht nicht.",
     en: "The REFI schemas (XSD) are NOT bundled — LocalTranscript writes to the specification and only references the schema URL. The MIT attribution requirement therefore does not apply.",
