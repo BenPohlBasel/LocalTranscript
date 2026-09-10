@@ -35,6 +35,14 @@ Die Schrift wächst mit dem Fenster (17 → 19,5 px), damit eine Zeile in
 der breiten Spalte bei ~85 Zeichen bleibt: Text füllt die Breite, ohne
 unlesbar lang zu werden. Mehr Layoutklassen gibt es nicht.
 
+## Version
+
+Steht als `const VERSION` am Anfang des Skripts in `index.html` und
+erscheint unter den Knöpfen im Hero und in der Fusszeile. Bei jedem
+Release nachziehen — die Quelle ist `frontend/src-tauri/tauri.conf.json`.
+Die Textbausteine in `docs/` nennen die Version in ihrer Kopfzeile
+ebenfalls; nach dem Ändern `python3 site/docs/einbetten.py`.
+
 ## Sprachen
 
 Deutsch, Englisch, Französisch, Italienisch — dieselben vier wie in der
