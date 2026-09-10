@@ -20,6 +20,18 @@ img/                Bildschirmfotos, je Motiv in vier Sprachen
   anklickt: GitHub und LinkedIn.
 - **Keine Videos.** Nur Bildschirmfotos aus der laufenden App.
 
+## Raster
+
+Ein Raster für alles: jede Zeile hat links fünf Zwölftel (Titel, Label)
+und rechts sieben (Inhalt). Der Abschnittskopf ist auch nur so eine
+Zeile — Überschrift links, Einleitung rechts. Anleitungsschritt: Text
+links, Bildschirmfoto rechts. Lizenz, Prüfpunkte, Grenzen, Datenfluss,
+Verantwortung: Label links, Text rechts, Zeilen durch Haarlinien
+getrennt. Nur die Hero-Überschrift, die Vergleichstabelle und das
+Vorschaufenster laufen über die volle Breite. Unter 860 px fällt alles
+untereinander. Die Klasse heisst `.row`; eine Kopfzeile `.row.kopf`,
+eine volle Zeile `.row.voll`. Mehr Layoutklassen gibt es nicht.
+
 ## Sprachen
 
 Deutsch, Englisch, Französisch, Italienisch — dieselben vier wie in der
