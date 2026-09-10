@@ -25,13 +25,14 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
 
 2. **Journal im Transkript (`../enrich/FORMAT.md` §3.1).** Jede
    Schreibung im Editor ist ein Run mit `origin: human`, `who`
-   (angemeldete Person — heute gibt es keine; E-Mail aus den
-   Einstellungen), `started`/`finished`, `changed` (Segment-/Sprecher-
+   (App-Kennung `localtranscript/2.2.0` immer; Person nur, wenn in den
+   Einstellungen eine E-Mail steht — unbekannt ist kein Fehler), `started`/`finished`, `changed` (Segment-/Sprecher-
    IDs mit Art der Änderung), je Sitzung gebündelt (10 min Ruhe oder
    Verlassen des Editors). Der Whisper-Lauf ist ein Run mit `origin:
    machine` (Modell, Diarisierung, Version). Die `history/`-
    Schnappschüsse bleiben und werden vom Run referenziert. Beim
-   enrich-Export gehen die Runs ins Manifest.
+   enrich-Export gehen die Runs ins Manifest. Klein halten: IDs und
+   Hashes, nie Texte oder Diffs; Richtwert unter 2 KB je Run.
 
 3. **Import-Dialog für Ordner-Dossiers ohne enrich.app.** Ohne die UTI
    (kommt mit dem nächsten Build über `src-tauri/Info.plist`) ist ein
