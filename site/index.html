@@ -78,21 +78,7 @@ h1 .initial{width:.92em;height:.92em;display:inline-block;vertical-align:-.1em;m
 .window .chrome{height:1.7rem;background:#ececee;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.4rem;padding-left:.75rem}
 .window .chrome i{width:.7rem;height:.7rem;border-radius:50%;background:#d6d8db;display:block}
 .window img{width:100%;aspect-ratio:16/10}
-.hero-cap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:.8rem;font-size:.84rem;color:var(--ink-2)}
 
-/* features */
-.feat{display:grid;grid-template-columns:1fr 1.35fr;gap:2.5rem;align-items:center;padding:3rem 0;border-top:1px solid var(--line)}
-.feat:first-of-type{border-top:0;padding-top:0}
-.feat.flip{grid-template-columns:1.35fr 1fr}
-.feat.flip .txt{order:2}
-@media (max-width:860px){.feat,.feat.flip{grid-template-columns:1fr;gap:1.25rem}.feat.flip .txt{order:0}}
-.feat h3{margin-bottom:.5rem;font-size:1.3rem}
-.feat p{color:var(--ink-2);font-size:1rem}
-.feat p+p{margin-top:.6rem}
-.clip{border:1px solid var(--line);border-radius:.55rem;overflow:hidden;background:var(--wash);aspect-ratio:16/10;position:relative}
-.clip img{width:100%;height:100%;object-fit:cover;object-position:top left}
-.clip .tag{position:absolute;right:.6rem;bottom:.6rem;font-size:.72rem;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:.3rem;padding:.15rem .45rem;color:var(--ink-2)}
-kbd{font-variation-settings:'MONO' 1;font-size:.82em;border:1px solid var(--line);border-bottom-width:2px;border-radius:.25rem;padding:.05rem .35rem;background:var(--paper);color:var(--ink)}
 
 /* guide */
 .guide{border-top:1px solid var(--line)}
@@ -212,70 +198,9 @@ footer p{max-width:none}
       <img data-img="hero" src="img/hero-de.png" width="1600" height="1000"
            alt="LocalTranscript" data-alt="altHero">
     </div>
-    <div class="hero-cap">
-      <span data-t="heroCap"></span>
-      <span class="mono" data-t="heroFile"></span>
-    </div>
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-
-    <div class="feat">
-      <div class="txt">
-        <h3 data-t="f1h"></h3>
-        <p data-t="f1a"></p>
-        <p data-t="f1b"></p>
-      </div>
-      <div class="clip">
-        <img data-img="batch" src="img/batch-de.png" width="1200" height="750"
-             alt="" data-alt="altBatch" loading="lazy">
-        <span class="tag" data-t="clipTag"></span>
-      </div>
-    </div>
-
-    <div class="feat flip">
-      <div class="txt">
-        <h3 data-t="f2h"></h3>
-        <p data-t="f2a"></p>
-        <p data-t="f2b"></p>
-      </div>
-      <div class="clip">
-        <img data-img="speakers" src="img/speakers-de.png" width="585" height="365"
-             alt="" data-alt="altSpeakers" loading="lazy">
-        <span class="tag" data-t="clipTag"></span>
-      </div>
-    </div>
-
-    <div class="feat">
-      <div class="txt">
-        <h3 data-t="f3h"></h3>
-        <p data-t="f3a"></p>
-        <p><span data-t="f3b"></span> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> · <kbd>↑</kbd> <kbd>↓</kbd> · <kbd>⌥</kbd>+<kbd>J</kbd></p>
-      </div>
-      <div class="clip">
-        <img data-img="edit" src="img/edit-de.png" width="1100" height="687"
-             alt="" data-alt="altEdit" loading="lazy">
-        <span class="tag" data-t="clipTag"></span>
-      </div>
-    </div>
-
-    <div class="feat flip">
-      <div class="txt">
-        <h3 data-t="f4h"></h3>
-        <p data-t="f4a"></p>
-        <p data-t="f4b"></p>
-      </div>
-      <div class="clip">
-        <img data-img="export" src="img/export-de.png" width="1200" height="750"
-             alt="" data-alt="altExport" loading="lazy">
-        <span class="tag" data-t="clipTag"></span>
-      </div>
-    </div>
-
-  </div>
-</section>
 
 <section class="guide" id="guide">
   <div class="wrap">
@@ -300,7 +225,7 @@ footer p{max-width:none}
           <p data-t="g2b"></p>
         </div>
         <div class="shot"><img data-img="library" src="img/library-de.png"
-          width="1100" height="338" alt="" data-alt="altLibrary" loading="lazy"></div>
+          width="1200" height="262" alt="" data-alt="altLibrary" loading="lazy"></div>
       </div></li>
 
       <li><div class="body zweispaltig">
@@ -315,8 +240,8 @@ footer p{max-width:none}
             <li><b>Ctrl</b>+<b>L</b> <span data-t="k4"></span> · <b>Ctrl</b>+<b>X</b> <span data-t="k5"></span></li>
           </ul>
         </div>
-        <div class="shot"><img data-img="speakers" src="img/speakers-de.png"
-          width="585" height="365" alt="" data-alt="altSpeakers" loading="lazy"></div>
+        <div class="shot"><img data-img="edit" src="img/edit-de.png"
+          width="1200" height="750" alt="" data-alt="altEdit" loading="lazy"></div>
       </div></li>
 
       <li><div class="body zweispaltig">
@@ -353,7 +278,7 @@ footer p{max-width:none}
           <p style="margin-top:.8rem" data-t="g6c"></p>
         </div>
         <div class="shot"><img data-img="import" src="img/import-de.png"
-          width="1100" height="688" alt="" data-alt="altImport" loading="lazy"></div>
+          width="1200" height="750" alt="" data-alt="altImport" loading="lazy"></div>
       </div></li>
 
       <li><div class="body zweispaltig">
@@ -363,7 +288,7 @@ footer p{max-width:none}
           <p data-t="g7b"></p>
         </div>
         <div class="shot"><img data-img="settings" src="img/settings-de.png"
-          width="1400" height="875" alt="" data-alt="altSettings" loading="lazy"></div>
+          width="1200" height="750" alt="" data-alt="altSettings" loading="lazy"></div>
       </div></li>
     </ol>
     <p class="fn" data-t="shotNote"></p>
@@ -509,30 +434,14 @@ de:{
   h1:"LocalTranscript transkribiert Interviews, ohne dass die Aufnahme den Rechner verlässt.",
   lede:"Whisper und die Sprechertrennung laufen auf deinem Mac. Kein Konto, kein Server, kein Abo. Der Quellcode ist offen, die App ist kostenlos.",
   cta:"Herunterladen für macOS", ctaGuide:"Anleitung lesen", req:"Für Macs mit Apple Silicon · 2 GB · kostenlos und Open Source, AGPL-3.0",
-  heroCap:"Der Editor mit einem erfundenen Interview zu Wohngenossenschaften, synthetisiert mit macOS «say». Kein echtes Material auf dieser Seite.",
-  heroFile:"housing-cooperatives-interview.mp3 · 2 Sprecher · 02:02",
-  clipTag:"Bildschirmfoto aus der App",
   altHero:"Der Editor von LocalTranscript mit Transkript und Sprecherspalte",
   altBatch:"Batch-Liste mit einer laufenden und einer wartenden Datei",
-  altSpeakers:"Sprecher-Panel mit Namen und Segmentzahl",
   altEdit:"Segmentzeilen des Editors mit Transportleiste",
   altExport:"Geöffnetes Export-Menü mit allen Formaten",
   altLibrary:"Bibliotheksliste mit einem Transkript",
   altImport:"Human-Editor mit dem Knopf «Transkript importieren» oben links",
   altFind:"Panel Suchen und Ersetzen mit Trefferzähler",
   altSettings:"Einstellungen mit Speicherort, Lizenzen und Formaten",
-  f1h:"Ablegen und zuschauen",
-  f1a:"MP3, WAV, M4A, OGG oder FLAC in die Liste ziehen. Jede Datei wird ein Job mit Fortschritt, Restzeit und dem Text, der gerade erkannt wird.",
-  f1b:"Die Sprecherzahl gibst du exakt vor oder überlässt sie der App. Dateien laufen nacheinander; die Reihenfolge bleibt, wie du sie abgelegt hast.",
-  f2h:"Sprecher, die Namen haben",
-  f2a:"Jeder Sprecher hat ein Hörbeispiel, damit du weisst, wen du umbenennst. Zusammenführen, wenn die Trennung eine Stimme zweimal gefunden hat; neu zuweisen, wenn ein Segment falsch liegt.",
-  f2b:"Namen tauschen geht in einem Schritt für das ganze Transkript. So wird aus einem Klarnamen ein Pseudonym, bevor die Datei das Haus verlässt.",
-  f3h:"Bearbeiten wie in einem Audioprogramm",
-  f3a:"Der Player folgt dem Text, jedes Segment springt mit einem Tastendruck an den Anfang. Segmente teilen, verbinden, löschen. Jede Änderung wird gesichert und als Schnappschuss versioniert.",
-  f3b:"Shuttle wie in Audition, auch während du tippst:",
-  f4h:"Weiterarbeiten oder weitergeben",
-  f4a:"Direkt weiterarbeiten in QDA-Programmen, die REFI-QDA lesen — ATLAS.ti, NVivo, MAXQDA: Der Export .qdpx bringt das Transkript als Text- UND Audioquelle mit, einen Syncpunkt pro Äusserung und die Sprecher als Codes. Geprüft gegen ATLAS.ti 25.",
-  f4b:"Oder zum Weiterbearbeiten in LocalTranscript an eine Kolleg:in übergeben: Das enrich-Dossier .enrich.zip trägt Transkript und Audio in einer Datei, die Timecodes bleiben exakt, auf dem Weg hin und zurück geht nichts verloren. Dazu WebVTT, CSV und Text.",
 
   guideH:"Bedienungsanleitung",
   guideLede:"Von der Audiodatei bis zum Export in sieben Schritten. Dieselben Schritte stehen ausführlicher im README auf GitHub.",
@@ -627,30 +536,14 @@ en:{
   h1:"LocalTranscript transcribes interviews without the recording ever leaving your Mac.",
   lede:"Whisper and speaker separation run on your Mac. No account, no server, no subscription. The source is open and the app is free.",
   cta:"Download for macOS", ctaGuide:"Read the guide", req:"For Macs with Apple Silicon · 2 GB · free and open source, AGPL-3.0",
-  heroCap:"The editor with an invented interview on housing cooperatives, synthesised with macOS “say”. No real material anywhere on this page.",
-  heroFile:"housing-cooperatives-interview.mp3 · 2 speakers · 02:02",
-  clipTag:"Screenshot from the app",
   altHero:"The LocalTranscript editor with transcript and speaker panel",
   altBatch:"Batch list with one running and one queued file",
-  altSpeakers:"Speaker panel with names and segment counts",
   altEdit:"Editor segment rows with the transport bar",
   altExport:"Open export menu with all formats",
   altLibrary:"Library list with one transcript",
   altImport:"Human Editor with the “Import transcript” button at the top left",
   altFind:"Find and replace panel with match counter",
   altSettings:"Settings with storage location, licences and formats",
-  f1h:"Drop and watch",
-  f1a:"Drag MP3, WAV, M4A, OGG or FLAC into the list. Each file becomes a job with progress, time remaining and the text being recognised right now.",
-  f1b:"Set the number of speakers exactly or let the app decide. Files run one after another; the order stays as you dropped them.",
-  f2h:"Speakers with names",
-  f2a:"Every speaker has an audio sample, so you know whom you're renaming. Merge when separation found one voice twice; reassign when a segment landed wrong.",
-  f2b:"Swapping names is one step for the whole transcript. A real name becomes a pseudonym before the file leaves the building.",
-  f3h:"Edit like in an audio editor",
-  f3a:"The player follows the text; one key jumps to the start of any segment. Split, join and delete segments. Every change is saved and versioned as a snapshot.",
-  f3b:"Shuttle as in Audition, even while typing:",
-  f4h:"Carry on, or hand it over",
-  f4a:"Carry on directly in QDA software that reads REFI-QDA — ATLAS.ti, NVivo, MAXQDA: the .qdpx export carries the transcript as a text AND an audio source, one sync point per utterance and the speakers as codes. Verified against ATLAS.ti 25.",
-  f4b:"Or hand it to a colleague to keep editing in LocalTranscript: the enrich dossier .enrich.zip holds transcript and audio in one file, the timecodes stay exact, and nothing is lost on the way out or back. Plus WebVTT, CSV and plain text.",
 
   guideH:"User guide",
   guideLede:"From the audio file to the export in seven steps. The same steps are covered in more detail in the README on GitHub.",
@@ -745,30 +638,14 @@ fr:{
   h1:"LocalTranscript transcrit des entretiens sans que l'enregistrement ne quitte jamais votre Mac.",
   lede:"Whisper et la séparation des locuteurs tournent sur votre Mac. Pas de compte, pas de serveur, pas d'abonnement. Le code est ouvert, l'application est gratuite.",
   cta:"Télécharger pour macOS", ctaGuide:"Lire le guide", req:"Pour Mac avec Apple Silicon · 2 Go · gratuit et open source, AGPL-3.0",
-  heroCap:"L'éditeur avec un entretien fictif sur les coopératives d'habitation, synthétisé avec « say » de macOS. Aucun matériel réel sur cette page.",
-  heroFile:"housing-cooperatives-interview.mp3 · 2 locuteurs · 02:02",
-  clipTag:"Capture d'écran de l'application",
   altHero:"L'éditeur de LocalTranscript avec la transcription et la colonne des locuteurs",
   altBatch:"Liste de traitement avec un fichier en cours et un en attente",
-  altSpeakers:"Panneau des locuteurs avec noms et nombre de segments",
   altEdit:"Lignes de segments de l'éditeur avec la barre de lecture",
   altExport:"Menu d'export ouvert avec tous les formats",
   altLibrary:"Liste de la bibliothèque avec une transcription",
   altImport:"Éditeur humain avec le bouton « Importer une transcription » en haut à gauche",
   altFind:"Panneau Rechercher et remplacer avec compteur d'occurrences",
   altSettings:"Réglages avec emplacement, licences et formats",
-  f1h:"Déposer et regarder",
-  f1a:"Glissez MP3, WAV, M4A, OGG ou FLAC dans la liste. Chaque fichier devient une tâche avec progression, temps restant et le texte en cours de reconnaissance.",
-  f1b:"Fixez le nombre exact de locuteurs ou laissez l'application décider. Les fichiers se suivent ; l'ordre reste celui du dépôt.",
-  f2h:"Des locuteurs qui ont un nom",
-  f2a:"Chaque locuteur a un extrait audio, pour savoir qui vous renommez. Fusionnez quand la séparation a trouvé deux fois la même voix ; réattribuez quand un segment est mal placé.",
-  f2b:"Le remplacement des noms se fait en une étape pour toute la transcription. Un nom réel devient un pseudonyme avant que le fichier ne sorte.",
-  f3h:"Corriger comme dans un logiciel audio",
-  f3a:"Le lecteur suit le texte ; une touche saute au début de n'importe quel segment. Scinder, joindre, supprimer. Chaque modification est enregistrée et versionnée en instantané.",
-  f3b:"Navigation comme dans Audition, même en tapant :",
-  f4h:"Poursuivre ou transmettre",
-  f4a:"Poursuivre directement dans un logiciel QDA qui lit REFI-QDA — ATLAS.ti, NVivo, MAXQDA : l'export .qdpx porte la transcription comme source texte ET audio, un point de synchronisation par énoncé et les locuteurs comme codes. Vérifié avec ATLAS.ti 25.",
-  f4b:"Ou la confier à un·e collègue pour la corriger dans LocalTranscript : le dossier enrich .enrich.zip contient transcription et audio dans un seul fichier, les codes temporels restent exacts et rien ne se perd à l'aller ni au retour. Plus WebVTT, CSV et texte brut.",
 
   guideH:"Mode d'emploi",
   guideLede:"Du fichier audio à l'export en sept étapes. Les mêmes étapes sont détaillées dans le README sur GitHub.",
@@ -863,30 +740,14 @@ it:{
   h1:"LocalTranscript trascrive interviste senza che la registrazione lasci mai il tuo Mac.",
   lede:"Whisper e la separazione dei parlanti girano sul tuo Mac. Nessun account, nessun server, nessun abbonamento. Il codice è aperto, l'app è gratuita.",
   cta:"Scarica per macOS", ctaGuide:"Leggi la guida", req:"Per Mac con Apple Silicon · 2 GB · gratuita e open source, AGPL-3.0",
-  heroCap:"L'editor con un'intervista inventata sulle cooperative di abitazione, sintetizzata con « say » di macOS. Nessun materiale reale in questa pagina.",
-  heroFile:"housing-cooperatives-interview.mp3 · 2 parlanti · 02:02",
-  clipTag:"Schermata dell'app",
   altHero:"L'editor di LocalTranscript con trascrizione e colonna dei parlanti",
   altBatch:"Lista batch con un file in corso e uno in attesa",
-  altSpeakers:"Pannello dei parlanti con nomi e numero di segmenti",
   altEdit:"Righe dei segmenti dell'editor con la barra di riproduzione",
   altExport:"Menu di esportazione aperto con tutti i formati",
   altLibrary:"Elenco della libreria con una trascrizione",
   altImport:"Editor umano con il pulsante « Importa trascrizione » in alto a sinistra",
   altFind:"Pannello Cerca e sostituisci con contatore delle occorrenze",
   altSettings:"Impostazioni con posizione, licenze e formati",
-  f1h:"Trascina e guarda",
-  f1a:"Trascina MP3, WAV, M4A, OGG o FLAC nella lista. Ogni file diventa un lavoro con avanzamento, tempo residuo e il testo che viene riconosciuto in quel momento.",
-  f1b:"Imposta il numero esatto di parlanti o lascia decidere all'app. I file girano uno dopo l'altro; l'ordine resta quello del trascinamento.",
-  f2h:"Parlanti con un nome",
-  f2a:"Ogni parlante ha un campione audio, così sai chi stai rinominando. Unisci quando la separazione ha trovato due volte la stessa voce; riassegna quando un segmento è finito nel posto sbagliato.",
-  f2b:"Sostituire i nomi è un solo passaggio per tutta la trascrizione. Un nome reale diventa uno pseudonimo prima che il file esca.",
-  f3h:"Correggere come in un editor audio",
-  f3a:"Il lettore segue il testo; un tasto salta all'inizio di qualsiasi segmento. Dividi, unisci, elimina. Ogni modifica viene salvata e versionata come istantanea.",
-  f3b:"Navigazione come in Audition, anche mentre scrivi:",
-  f4h:"Proseguire o consegnare",
-  f4a:"Proseguire direttamente in un programma QDA che legge REFI-QDA — ATLAS.ti, NVivo, MAXQDA: l'esportazione .qdpx porta la trascrizione come sorgente testo E audio, un punto di sincronizzazione per enunciato e i parlanti come codici. Verificato con ATLAS.ti 25.",
-  f4b:"Oppure consegnarla a un o una collega perché continui a correggerla in LocalTranscript: il dossier enrich .enrich.zip contiene trascrizione e audio in un solo file, i codici temporali restano esatti e nulla si perde all'andata né al ritorno. Più WebVTT, CSV e testo.",
 
   guideH:"Guida all'uso",
   guideLede:"Dal file audio all'esportazione in sette passi. Gli stessi passi sono descritti in dettaglio nel README su GitHub.",
