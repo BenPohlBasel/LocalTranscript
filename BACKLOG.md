@@ -68,11 +68,11 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Audio nach `source/`, Journal übernommen); `_papierkorb/` bleibt
    ausserhalb. **Blockiert durch zwei Punkte in enrich-core (dort
    BACKLOG 000, Eintrag «Arbeitsdossier für LocalTranscript»):**
-   (1) Sitzungs-Schreibung — `write_layer` rettet heute bei JEDER
-   Schreibung nach `_history/` (`_history_retten`); der Editor sichert
-   debounced alle paar Sekunden → hunderte MB pro Stunde bei 1148
-   Segmenten. Innerhalb der offenen Sitzung (das Journal bündelt sie
-   schon) muss der Stand ERSETZT werden, nicht gestapelt. (2) Ein
+   (1) History beschränken auf die letzten 10 Stände je Schicht
+   (User-Entscheid 2026-09-11, wie `HISTORY_MAX` hier) — `write_layer`
+   rettet heute bei JEDER Schreibung nach `_history/` ohne Grenze; der
+   Editor sichert debounced alle paar Sekunden → hunderte MB pro Stunde
+   bei 1148 Segmenten. (2) Ein
    Dossier ohne Textschichten muss für enrich ein gültiger Zustand
    sein: Job «Text setzen aus der Transkript-Schicht» (Bausteine
    `segmente_als_turns`, `textsatz(transkript=…)` sind da). Dazu:
