@@ -47,9 +47,22 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    nebeneinander liegen (User 2026-09-10). Viersprachig, Seite und
    App-Blatt.
 
-5. **Bibliothek als Arbeitsdossiers (`<name>.enrich/`, Format 2,
-   unkomprimiert) — User-Impuls 2026-09-11, Einschätzung: ja, der
-   logische Endpunkt von Format 2.** Eine Form in beide Richtungen:
+5. **ZURÜCKGESTELLT (User-Entscheid 2026-09-11): Bibliothek als
+   Arbeitsdossiers (`<name>.enrich/`, Format 2, unkomprimiert).**
+   Nicht bauen, solange kein konkreter Bedarf besteht — etwa dass
+   enrich und LocalTranscript DASSELBE Dossier abwechselnd bearbeiten
+   sollen (dann zuerst die Sperr-Konvention). Begründung: das Ziel ist
+   erreicht — was die App verlässt, ist ein Format-2-Dossier, das
+   enrich liest (`Dossier.uebernehmen`, Inventar und Kette sauber). Der
+   Umbau kaufte Eleganz («eine Form innen wie aussen») zum Preis, dass
+   jeder Autosave durch enrich-cores `write_layer` liefe (Kopplung des
+   Speicherpfads an eine Bibliothek, die sich schnell bewegt), einer
+   Migration echter Studien-Daten, dreier Vorarbeiten in enrich und
+   einer Bibliothek, die Forscher:innen nicht mehr als EINE
+   `transkript.json` je Eintrag lesen können. Netto kein Code-Gewinn
+   (`format2.py` fiele weg, `bibliothek.py` auf `Dossier` + Migration
+   käme dazu). Ursprüngliche Skizze, falls es doch nötig wird — eine
+   Form in beide Richtungen:
    Export = `Dossier.pack(profile="handover")`, Import =
    `Dossier.uebernehmen`; kein Konverter mehr (`format2.py` fällt
    weitgehend weg), Journal/Locks/Zotero werden direkt geschrieben,
