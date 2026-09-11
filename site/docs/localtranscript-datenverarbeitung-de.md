@@ -2,7 +2,7 @@
 
 Textbaustein zum Einfügen in ein Verfahrensverzeichnis, eine
 Datenschutz-Folgenabschätzung, einen Ethikantrag oder einen
-Datenmanagementplan. Stand 11. September 2026, LocalTranscript 2.4.0.
+Datenmanagementplan. Stand 11. September 2026, LocalTranscript 2.4.1.
 Angaben in `[eckigen Klammern]` ergänzt die verantwortliche Stelle.
 
 Der Text beschreibt, was die Software tut und was sie nicht tut. Die
@@ -14,7 +14,7 @@ Text ersetzt keine Rechtsberatung.
 
 ## 1. Eingesetzte Software
 
-LocalTranscript, Version `[2.4.0]`. Freie Software unter
+LocalTranscript, Version `[2.4.1]`. Freie Software unter
 AGPL-3.0-or-later, entwickelt am B/IAS – Basel Institut für angewandte
 Stadtforschung. Quellcode öffentlich unter
 <https://github.com/BenPohlBasel/LocalTranscript>. Die Software läuft

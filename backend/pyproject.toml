@@ -1,6 +1,6 @@
 [project]
 name = "localtranscript"
-version = "2.4.0"
+version = "2.4.1"
 description = "LocalTranscript — offline Transkription (whisper.cpp) mit Sprecher-Diarisierung, Editor und enrich-Export"
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"

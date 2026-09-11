@@ -3,6 +3,18 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## 2.4.1 — 2026-09-11
+
+### Changed
+
+- **Side-panel tabs wrap instead of overflowing.** Speakers | Find |
+  Metadata keep their full labels; when the column is too narrow the
+  buttons wrap onto a second line (the third tab used to run past the
+  panel edge).
+- **Portrait video is bounded.** The picture under the speakers is
+  limited to 45 % of the window height and letterboxed, so a 9:16
+  recording no longer pushes the speaker list off the column.
+
 ## 2.4.0 — 2026-09-11
 
 ### Added
