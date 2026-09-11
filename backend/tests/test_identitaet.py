@@ -59,10 +59,10 @@ def test_export_traegt_app_install_und_email(client, eintrag):
     assert eigene and all(r["who"]["install"].startswith("ins-") for r in eigene)
     assert eigene[0]["who"].get("user") is None and eigene[-1]["who"]["user"] == "nora@uni.ch"
     assert eigene[-1]["origin"] == "human"
-    # Die Person steht im JOURNAL (who.user); den Kopf der Transkript-
-    # Schicht (`by`) setzt enrichs write_layer aus dem Run des Setzers —
-    # Befund an enrich (BACKLOG 000, 2026-09-11), hier nicht prüfbar
+    # Die Person steht im Journal (who.user) UND im Kopf der übernommenen
+    # Quelle (`by`, enrich@edc497e respektiert ein mitgebrachtes `by`)
     assert tj["kind"] == "transcript" and tj["origin"] in ("mixed", "human")
+    assert tj["by"]["user"] == "nora@uni.ch" and tj["by"]["tool"] == "localtranscript"
     manifest = _teil(z, "manifest.json").decode()
     host = socket.gethostname()               # nie eine Geräte-Kennung
     assert host not in manifest and host not in json.dumps(tj)

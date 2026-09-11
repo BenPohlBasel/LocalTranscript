@@ -1,5 +1,5 @@
 # VENDORED aus enrich (privates Repo BenPohlBasel/PDFenrichCLI),
-# Stand enrich@bc1eac8 — packages/enrich-serve/src/enrich_serve/textsatz.py.
+# Stand enrich@f871d33 — packages/enrich-serve/src/enrich_serve/textsatz.py.
 # Einzige Abweichung: der Import von _FONT_DIR/_sichtbar zeigt auf
 # .schrift (lokaler Extrakt aus refi_text.py). Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude).
@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from enrich_core.schemas.transcript import TranscriptLayer
 
 TOOL = "enrich-textimport"
+SOURCE_PDF_NAME = "source/document.pdf"
 TOOL_VERSION = "0.1.0"
 DETECTOR = "enrich-textsatz"
 
@@ -611,8 +612,42 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
     ist `rendered`). Die Zeitkarte wird DARAUS abgeleitet (`from` zeigt
     auf die Transkript-Schicht), nicht mehr aus der CSV.
     """
+
+    # Die Quelle steht beim Anlegen fest (FORMAT.md §3): das gesetzte PDF
+    # ist von der ersten Sekunde an `rendered`, nie «Quelle bis jemand
+    # es nachzieht» (BACKLOG 000).
+    from enrich_core.dossier import SOURCE_PDF, TRANSCRIPT_LAYER, quelle_kind_von_name
+    from enrich_core.schemas.manifest import SourceInfo
+    art = "transcript" if transkript is not None else (
+        quelle_kind_von_name(quelle) or "text")
+    quelle_info = SourceInfo(
+        kind=art,  # type: ignore[arg-type]
+        canonical=TRANSCRIPT_LAYER if art == "transcript" else "text/raw.json",
+        rendered=SOURCE_PDF)
+    d = Dossier.create(pfad, quelle=quelle_info)
+    bericht = fuelle_struktur_dossier(
+        d, struktur, quelle=quelle, user=user, zeiten=zeiten, audio=audio,
+        zeiten_quelle=zeiten_quelle, kopfzeile=kopfzeile,
+        transkript=transkript)
+    return d, bericht
+
+
+def fuelle_struktur_dossier(d: Dossier, struktur: dict, *, quelle: str,
+                            user: str,
+                            zeiten: list[dict] | None = None,
+                            audio: Path | None = None,
+                            zeiten_quelle: str = "",
+                            kopfzeile: str | None = None,
+                            transkript: TranscriptLayer | None = None,
+                            transkript_schreiben: bool = True,
+                            audio_name: str = "") -> dict:
+    """Ein BESTEHENDES Dossier aus einer Struktur füllen: PDF setzen,
+    Intake/Layout/T0/T1 (+ Zeitkarte) schreiben, Gates setzen. Getrennt
+    vom Anlegen, damit derselbe Weg ein importiertes Dossier bedient, das
+    nur seine Transkript-Schicht mitbringt («Text setzen», BACKLOG 000 (2)).
+    `transkript_schreiben=False`: die Schicht liegt schon im Dossier und
+    ist die QUELLE — sie wird gelesen, nie überschrieben."""
     import shutil
-    import tempfile
 
     from enrich_core.canonical import content_hash
     from enrich_core.diffmap import project_span
@@ -621,21 +656,6 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
 
     satz = setze_struktur(struktur, kopfzeile=kopfzeile)
     can = canary(satz["pdf"], satz["gezeichnet"])
-    # Die Quelle steht beim Anlegen fest (FORMAT.md §3): das gesetzte PDF
-    # ist von der ersten Sekunde an `rendered`, nie «Quelle bis jemand
-    # es nachzieht» (BACKLOG 000).
-    from enrich_core.dossier import SOURCE_PDF, quelle_kind_von_name
-    from enrich_core.schemas.manifest import SourceInfo
-    art = "transcript" if transkript is not None else (
-        quelle_kind_von_name(quelle) or "text")
-    quelle_info = SourceInfo(
-        kind=art,  # type: ignore[arg-type]
-        canonical=TRANSCRIPT_LAYER if art == "transcript" else "text/raw.json",
-        rendered=SOURCE_PDF)
-    with tempfile.NamedTemporaryFile(suffix=".pdf") as tf:
-        tf.write(satz["pdf"])
-        tf.flush()
-        d = Dossier.create(pfad, source_pdf=Path(tf.name), quelle=quelle_info)
     agent = Agent(type="derived", tool=f"{TOOL}/{TOOL_VERSION}")
     # Das Transkript wird nicht GERECHNET, sondern ÜBERNOMMEN — darum
     # `extracted`, und darum trägt jedes Segment sein eigenes `origin`
@@ -659,7 +679,7 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
                          started=utc_now(), warnings=warnungen,
                          summary=extra)
 
-    if transkript is not None:
+    if transkript is not None and transkript_schreiben:
         transkript.did = (
             f"Transkript aus {quelle} übernommen: "
             f"{len(transkript.segments)} Segmente, "
@@ -669,6 +689,13 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
                            {"segmente": len(transkript.segments),
                             "sprecher": len(transkript.speakers)},
                            ag=quell_agent))
+    # Das PDF ist die gesetzte LESEFASSUNG (`rendered`), wenn die Quelle
+    # ein Transkript/docx/Text ist — `pdf_setzen` weiss es aus `source`.
+    pdf_sha = d.pdf_setzen(satz["pdf"])
+    # Woraus? Aus dem Transkript (FORMAT.md §5) — alle gesetzten Schichten
+    # nennen es, damit «Text setzen» idempotent über den Kopf ist.
+    tsha = d.layer_hash(TRANSCRIPT_LAYER) if transkript is not None else None
+    von_quelle = ({TRANSCRIPT_LAYER: tsha} if tsha else {})
 
     intake = IntakeLayer(agent=agent, verdict="accept",
                          doc_class="born-digital",
@@ -680,19 +707,22 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
         # bleibt es beim abgeleiteten Wert.
         intake.origin = "source"
     d.write_layer("source/intake.json", intake,
-                  lauf("source/intake.json", {"quelle": quelle}))
+                  lauf("source/intake.json", {"quelle": quelle},
+                       inputs=von_quelle))
     d.write_layer("text/layout.json", LayoutLayer(
         agent=agent, detector=DETECTOR, page_count=satz["seiten"],
         heading_size_ranking=satz["ranking"],
         blocks=satz["bloecke"]),
-        lauf("text/layout.json", {"bloecke": len(satz["bloecke"])}))
+        lauf("text/layout.json", {"bloecke": len(satz["bloecke"])},
+             inputs={**von_quelle, SOURCE_PDF_NAME: pdf_sha}))
     d.write_layer("text/raw.json", TextRawLayer(
         agent=agent, streams=satz["streams"], spans=satz["rects"],
         block_spans=satz["block_spans"],
         note_markers=satz["note_markers"]),
         lauf("text/raw.json",
              {"zeichen": sum(len(t) for t in satz["streams"].values()),
-              "woerter": len(satz["rects"])}))
+              "woerter": len(satz["rects"])},
+             inputs={**von_quelle, SOURCE_PDF_NAME: pdf_sha}))
     # T1: main ohne Marker-Ziffern, andere Ströme identisch
     t1_streams: dict[str, str] = {}
     diffmaps: dict[str, StreamDiff] = {}
@@ -721,7 +751,9 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
     d.write_layer("text/clean.json", TextCleanLayer(
         revision="r1", agent=agent, streams=t1_streams,
         diffmaps=diffmaps, stream_hashes=hashes),
-        lauf("text/clean.json", {"canary_fehler": can}))
+        lauf("text/clean.json", {"canary_fehler": can},
+             inputs={**von_quelle,
+                     "text/raw.json": d.layer_hash("text/raw.json") or ""}))
 
     bericht = {"seiten": satz["seiten"], "canary": can,
                "bloecke": len(satz["bloecke"]),
@@ -739,7 +771,6 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
             einheiten.append(ZeitEinheit(
                 start=pr.start, end=pr.end, t0_s=z["t0_s"],
                 t1_s=z["t1_s"], speaker=z.get("speaker", "")))
-        audio_name = ""
         if audio is not None and audio.is_file():
             # Der NAME bleibt schlicht („audio.mp3"), der ORT ist
             # Konvention (Anhang A: `source/`) — `schicht_datei` löst
@@ -749,9 +780,10 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
             ziel.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(audio, ziel)
             bericht["audio"] = audio_name
+        elif audio_name and schicht_datei(d.path, audio_name).is_file():
+            bericht["audio"] = audio_name      # liegt schon im Dossier
         # Woraus? Aus dem Transkript (FORMAT.md §5) — solange es eines
         # gibt; ein Alt-Import ohne Transkript-Schicht bleibt ohne `from`.
-        tsha = d.layer_hash(TRANSCRIPT_LAYER)
         d.write_layer("text/timemap.json", ZeitkarteLayer(
             agent=agent, revision="r1", audio=audio_name,
             quelle=zeiten_quelle, einheiten=einheiten),
@@ -763,4 +795,87 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
     d.set_gate("layout", user, note=note)
     d.set_gate("ocr", user,
                note="Text-Import: kein OCR — der Text ist das Original")
-    return d, bericht
+    return bericht
+
+
+def text_setzen(d: Dossier, *, user: str = "textsatz",
+                force: bool = False) -> dict:
+    """«Text setzen» aus der Transkript-Schicht (BACKLOG 000 (2)): ein
+    Dossier, das nur `source/transcript.json` (+ Audio) mitbringt, bekommt
+    die gesetzte Lesefassung, Intake/Layout/T0/T1 und die Zeitkarte —
+    genau wie beim Text-Import, nur in ein bestehendes Dossier hinein.
+    Idempotent: liegt T0 schon mit `from` auf DIESEM Transkript-Stand,
+    passiert nichts (`uebersprungen`). Unter Folgeschichten verweigert
+    `write_layer` den Neubau (T1-Freeze) — dann bleibt es ein 409."""
+    from enrich_core.dossier import TRANSCRIPT_LAYER
+    from enrich_core.errors import PreconditionError
+    from enrich_core.schemas.transcript import TranscriptLayer
+    from enrich_core.skipkey import layer_inputs
+    from enrich_core.transkript import segmente_als_turns
+
+    from .textimport import turns_zu_struktur
+
+    m = d.manifest
+    if m.source is None or m.source.kind != "transcript" \
+            or TRANSCRIPT_LAYER not in m.current:
+        raise PreconditionError(
+            "Text setzen braucht ein Transkript als Quelle "
+            "(`source.kind: transcript` + `source/transcript.json`)")
+    tsha = d.layer_hash(TRANSCRIPT_LAYER) or ""
+    if not force and "text/raw.json" in m.current:
+        vorher = layer_inputs(m, "text/raw.json")
+        if vorher.get("transcript") == tsha:
+            return {"uebersprungen": True, "grund": "Text liegt schon zu "
+                    "diesem Transkript-Stand gesetzt vor"}
+    transkript = d.read_layer(TRANSCRIPT_LAYER)
+    if not isinstance(transkript, TranscriptLayer):  # pragma: no cover
+        raise PreconditionError("source/transcript.json ist keine Transkript-Schicht")
+    struktur, zeiten = turns_zu_struktur(segmente_als_turns(transkript))
+    if not struktur["absaetze"]:
+        raise PreconditionError("Transkript ohne Text — nichts zu setzen")
+    audio_name = ""
+    if m.source.media:
+        audio_name = Path(m.source.media).name
+    else:
+        for f in sorted(m.files):
+            if f.lower().endswith((".mp3", ".m4a", ".wav", ".ogg", ".flac",
+                                   ".aac", ".mp4", ".mov")):
+                audio_name = Path(f).name
+                break
+    meta = None
+    fz = d.datei("source/zotero.json")
+    if fz.is_file():
+        try:
+            import json as _json
+            meta = _json.loads(fz.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            meta = None
+    bericht = fuelle_struktur_dossier(
+        d, struktur, quelle=TRANSCRIPT_LAYER, user=user, zeiten=zeiten,
+        audio=None, zeiten_quelle="transcript",
+        kopfzeile=kopfzeile_aus_meta(meta), transkript=transkript,
+        transkript_schreiben=False, audio_name=audio_name)
+    bericht.update({"uebersprungen": False, "audio": audio_name,
+                    "segmente": len(transkript.segments),
+                    "sprecher": len(transkript.speakers)})
+    return bericht
+
+
+def text_setzen_wenn_noetig(dp: Path, *, user: str = "import") -> dict | None:
+    """Beim Import: ein Transkript-Dossier ohne Textschichten wird ein
+    GÜLTIGER Eingangszustand — enrich setzt die Lesefassung selbst
+    (BACKLOG 000 (2)). Alles andere: None, nichts angefasst."""
+    from enrich_core.dossier import TRANSCRIPT_LAYER
+
+    d = Dossier.open(dp)
+    m = d.manifest
+    if m.source is None or m.source.kind != "transcript" \
+            or TRANSCRIPT_LAYER not in m.current \
+            or "text/raw.json" in m.current:
+        return None
+    lock = d.arbeitslock("serve:textsatz")
+    lock.acquire()
+    try:
+        return text_setzen(d, user=user)
+    finally:
+        lock.release()

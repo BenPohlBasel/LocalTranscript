@@ -25,7 +25,6 @@ und prüft Inventar und Kette (tests/test_format2.py).
 """
 from __future__ import annotations
 
-import io
 import json
 import tempfile
 import zipfile
@@ -129,30 +128,7 @@ def baue_container(daten: dict, d: Dossier, stamm: str) -> bytes:
     # über die mitreisenden Runs geschlossen.
     with tempfile.TemporaryDirectory() as td:
         ziel = d.pack(Path(td) / f"{stamm}.enrich", profile="handover")
-        return _producer_setzen(ziel.read_bytes(), f"{stamm}.enrich")
-
-
-def _producer_setzen(sendung: bytes, wurzel: str) -> bytes:
-    """`producer` in der Sendung auf LocalTranscript stellen.
-
-    enrichs `_kopf_manifest` überschreibt jeden fremden `producer` mit
-    «enrich» — auch in der Kopie, die `handover_plan` baut (Befund
-    2026-09-11, enrich BACKLOG 000). FORMAT.md §3 meint aber die
-    Anwendung, die den Container ERZEUGT hat; enrich-core ist hier die
-    Bibliothek. Das Manifest steht nicht im Inventar, die Kette hängt an
-    den Run-Einträgen — die Korrektur berührt keinen Hash."""
-    from enrich_core.canonical import canonical_dumps
-    alt = zipfile.ZipFile(io.BytesIO(sendung))
-    aus = io.BytesIO()
-    with zipfile.ZipFile(aus, "w", zipfile.ZIP_STORED) as neu:
-        for i in alt.infolist():
-            roh = alt.read(i.filename)
-            if i.filename == f"{wurzel}/manifest.json":
-                m = json.loads(roh.decode("utf-8"))
-                m["producer"] = {"app": TOOL, "version": APP_VERSION}
-                roh = canonical_dumps(m).encode("utf-8")
-            neu.writestr(i, roh)
-    return aus.getvalue()
+        return ziel.read_bytes()
 
 
 # ---------- Lesen ----------
