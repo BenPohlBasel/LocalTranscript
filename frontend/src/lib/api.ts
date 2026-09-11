@@ -32,6 +32,8 @@ export type Segment = {
 export type Transkript = {
   schema: number; id: string; name: string; created: string;
   updated: string; audio: string | null;
+  /** Video unverändert im Eintrag (BACKLOG 8); der Ton liegt als mp3 daneben */
+  video?: string | null;
   quelle: Record<string, unknown>;
   sprecher: Sprecher[]; segmente: Segment[];
   /** Zotero-Schnappschuss, wenn verknüpft */
@@ -40,6 +42,7 @@ export type Transkript = {
 export type EintragMeta = {
   id: string; name: string; created: string; updated: string;
   dauer: number; segmente: number; sprecher: number; audio: boolean;
+  video?: boolean;
   quelle: Record<string, unknown>;
 };
 export type Job = {

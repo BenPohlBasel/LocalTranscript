@@ -152,7 +152,7 @@ def _konvertiere(job: dict, quelle: Path, arbeits_dir: Path) -> Path:
     _setze(job, started_at=datetime.now(UTC).isoformat(
         timespec="seconds"), progress=5, message="konvertiere")
     proc = subprocess.Popen(
-        [get_ffmpeg_cli(), "-y", "-i", str(quelle), "-ar", "16000",
+        [get_ffmpeg_cli(), "-y", "-i", str(quelle), "-vn", "-ar", "16000",
          "-ac", "1", "-c:a", "pcm_s16le", str(ziel)],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     _PROC[job["id"]] = proc
@@ -193,7 +193,17 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
     p = job["params"]
     tmp = Path(tempfile.mkdtemp(prefix="lt-job-"))
     try:
+        # Video? Dann ist die Bibliotheks-Tonspur ein mp3, das Video
+        # liegt unverändert daneben (BACKLOG 8). Geprüft wurde schon im
+        # Endpunkt — hier nur noch der Ton.
+        from . import video as _video
+        ist_video = _video.pruefe(quelle) is not None
         wav = _konvertiere(job, quelle, tmp)
+        audio_fuer_bibliothek = quelle
+        if ist_video:
+            _setze(job, message="Tonspur")
+            audio_fuer_bibliothek = _video.ton_extrahieren(
+                quelle, tmp / "audio.mp3")
         segmente: list[dict] = []
         sprecher: list[dict] = []
 
@@ -274,7 +284,8 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             quelle={"datei": job["filename"], "model": p["model"],
                     "language": p["language"], "diarize": p["diarize"],
                     "erzeugt": "transcription"},
-            audio=quelle, origin="machine",
+            audio=audio_fuer_bibliothek, video=quelle if ist_video else None,
+            origin="machine",
             by={"tool": "whisper.cpp", "model": p["model"],
                 **({"diarization": "speechbrain-ecapa"} if p["diarize"] else {})})
         _setze(job, status="completed", progress=100, message="fertig",

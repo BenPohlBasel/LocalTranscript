@@ -5,6 +5,21 @@ a version are the corresponding section of this file.
 
 ## Unreleased
 
+### Added
+
+- **Video as a source.** Drop an MP4/MOV/M4V (H.264 or HEVC) into the
+  batch list or pick it as the audio of an import: the sound track is
+  extracted to mp3 as the working copy for Whisper and the editor, the
+  video file itself is stored unchanged in the entry — nothing is
+  transcoded, ever. Only limit: 10 GB per file. Other containers and
+  codecs (webm/VP9, mkv, AVI, MPEG-2, AV1) are refused with a hint to
+  export as H.264/MP4 externally. In the editor the picture sits under
+  the speakers in the side panel — muted, without controls; the audio
+  player leads and the picture follows (position, play/pause, speed);
+  at 2× and during jumps it freezes and blurs until the picture is back.
+  Export: REFI-QDA gets a second entry “with video” (`VideoSource`,
+  video in the Media folder); the enrich dossier stays audio only.
+
 ### Changed
 
 - **Zotero roles are shown as Zotero names them** — `interviewer`,

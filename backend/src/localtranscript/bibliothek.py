@@ -48,6 +48,9 @@ SITZUNG_RUHE_S = 600
 HISTORY_MAX = 30
 AUDIO_ENDUNGEN = (".mp3", ".m4a", ".aac", ".wav", ".ogg", ".flac",
                   ".webm")
+#: Video-Container, die als Quelle angenommen werden (video.py prüft
+#: den Codec); der Ton wird nach mp3 gezogen, das Video liegt daneben
+VIDEO_ENDUNGEN = (".mp4", ".m4v", ".mov")
 
 
 class BibliothekFehler(Exception):
@@ -287,7 +290,8 @@ def schreibe(eid: str, daten: dict, *, did: str = "Im Editor bearbeitet",
 def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
             quelle: dict, audio: Path | None = None, *,
             origin: str = "machine", journal: list[dict] | None = None,
-            by: dict | None = None, zotero: dict | None = None) -> dict:
+            by: dict | None = None, zotero: dict | None = None,
+            video: Path | None = None) -> dict:
     """Neuer Eintrag (aus Transkriptions-Job oder Import). segmente:
     [{start, end, sprecher: id|None, text}] — IDs werden hier vergeben,
     wenn sie fehlen. `origin` gilt für alle Records ohne eigenes Flag:
@@ -300,6 +304,12 @@ def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
     if audio is not None and audio.is_file():
         audio_name = f"audio{audio.suffix.lower()}"
         shutil.copyfile(audio, ordner / audio_name)
+    # Video (BACKLOG 8): unverändert kopiert, NIE umgewandelt; der Ton
+    # liegt als mp3 daneben — Bild und Ton getrennt
+    video_name = None
+    if video is not None and video.is_file():
+        video_name = f"video{video.suffix.lower()}"
+        shutil.copyfile(video, ordner / video_name)
     for s in segmente:
         s.setdefault("id", uuid.uuid4().hex[:8])
         s["text"] = s.get("text", "")
@@ -310,6 +320,7 @@ def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
     jetzt = _jetzt()
     daten = {"schema": SCHEMA, "id": ordner.name, "name": name,
              "created": jetzt, "updated": jetzt, "audio": audio_name,
+             "video": video_name,
              "quelle": quelle, "sprecher": sprecher,
              "segmente": segmente, "journal": _kette_schliessen(journal or [])}
     if zotero:                       # aus einem Dossier mitgebracht (source)
@@ -343,6 +354,7 @@ def liste() -> list[dict]:
             "segmente": len(seg),
             "sprecher": len(d.get("sprecher", [])),
             "audio": bool(d.get("audio")),
+            "video": bool(d.get("video")),
             "quelle": d.get("quelle", {})})
     aus.sort(key=lambda e: e["updated"], reverse=True)
     return aus
@@ -361,6 +373,14 @@ def loeschen(eid: str) -> None:
     korb.mkdir(exist_ok=True)
     ziel = korb / f"{ordner.name}-{_stamp()}"
     shutil.move(str(ordner), str(ziel))
+
+
+def video_pfad(eid: str) -> Path | None:
+    d = lese(eid)
+    if not d.get("video"):
+        return None
+    p = eintrag_pfad(eid) / d["video"]
+    return p if p.is_file() else None
 
 
 def audio_pfad(eid: str) -> Path | None:

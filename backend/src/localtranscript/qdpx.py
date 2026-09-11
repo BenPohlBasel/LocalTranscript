@@ -103,7 +103,7 @@ def text_und_marken(segmente: list[dict]) -> tuple[str, list[dict]]:
 
 def baue_projekt(name: str, segmente: list[dict], sprecher: list[dict],
                  audio_name: str | None,
-                 codes: bool = True) -> tuple[bytes, str, list[dict]]:
+                 codes: bool = True, video: bool = False) -> tuple[bytes, str, list[dict]]:
     """project.qde bauen. Gibt (XML, Plain Text, Marken) zurück.
 
     `segmente` in Export-Form (Namen aufgelöst), `sprecher` die
@@ -178,8 +178,11 @@ def baue_projekt(name: str, segmente: list[dict], sprecher: list[dict],
             ET.SubElement(cod, "CodeRef", {"targetGUID": g})
 
     # ---------- AudioSource + Transcript: dieselbe Textdatei ----------
+    # Mit Video (BACKLOG 8, «Video mitgeben»): dieselbe Struktur als
+    # VideoSource — REFI-QDA führt Transcript und SyncPoint für beide
+    # gleich; die Mediendatei ist dann das Video, der Ton steckt darin.
     if audio_name:
-        audio = ET.SubElement(quellen, "AudioSource", {
+        audio = ET.SubElement(quellen, "VideoSource" if video else "AudioSource", {
             "guid": audio_guid, "name": name,
             "path": f"relative:///{audio_guid}{Path(audio_name).suffix}",
             "creatingUser": user_guid, "creationDateTime": jetzt,
@@ -200,11 +203,16 @@ def baue_projekt(name: str, segmente: list[dict], sprecher: list[dict],
 
 
 def baue_zip(name: str, segmente: list[dict], sprecher: list[dict],
-             audio: Path | None, codes: bool = True) -> bytes:
-    """Das ganze Paket: <Name>.qdpx + <Name> Media/ in EINEM Zip."""
+             audio: Path | None, codes: bool = True,
+             video: Path | None = None) -> bytes:
+    """Das ganze Paket: <Name>.qdpx + <Name> Media/ in EINEM Zip.
+    `video` statt `audio`: die Mediendatei ist das Video (VideoSource)."""
+    if video is not None and video.is_file():
+        audio = video
     audio_name = audio.name if audio and audio.is_file() else None
     xml, text, _marken = baue_projekt(name, segmente, sprecher,
-                                      audio_name, codes)
+                                      audio_name, codes,
+                                      video=video is not None)
     txt_guid = _guid(_NS_QUELLE, f"{name}:text")
     audio_guid = _guid(_NS_QUELLE, f"{name}:audio")
 

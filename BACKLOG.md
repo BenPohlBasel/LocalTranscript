@@ -117,7 +117,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Rollen (interviewee, castMember, guest … nicht vorausgewählt).
    Optional die Hilfezeile «Rollen wie in Zotero» viersprachig.
 
-8. **Video (User-Konzept 2026-09-11).** Eingang: **keine Grenze bei
+8. ~~**Video (User-Konzept 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG Unreleased; geprüft in Chromium und WebKit: Bild folgt dem Ton auf < 0,25 s, Sprung, Einfrieren ab 2×). Konzept: Eingang: **keine Grenze bei
    Dauer oder Auflösung, nur Dateigrösse ≤ 10 GB.** Es wird **nichts
    umgewandelt**: angenommen wird, was der WKWebKit nativ spielt — H.264
    und HEVC in MP4/MOV/M4V (AV1 nur, wo die Hardware es dekodiert);

@@ -67,7 +67,11 @@ conversation, special categories of personal data may be involved
    in Settings and, if the transcript is linked to Zotero, the adopted
    metadata (title, date, people by the chosen roles, citation key).
    With Zotero consent the application reads the local `zotero.sqlite`
-   read-only and only on request.
+   read-only and only on request. For a video recording the video file
+   is stored unchanged in the transcript's folder (faces are personal
+   and, where identifiable, biometric data); the enrich export carries
+   the sound only, the REFI-QDA export the video only when chosen
+   explicitly.
 
 ## 5. Location of the processing
 

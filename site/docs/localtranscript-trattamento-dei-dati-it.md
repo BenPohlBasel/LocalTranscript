@@ -72,7 +72,11 @@ personali `[sì / no: …]`.
    impostazioni e, se la trascrizione è collegata a Zotero, i metadati
    ripresi (titolo, data, persone secondo i ruoli scelti, chiave di
    citazione). Con il consenso Zotero l'applicazione legge il database
-   locale `zotero.sqlite` in sola lettura, solo su richiesta.
+   locale `zotero.sqlite` in sola lettura, solo su richiesta. Per una
+   registrazione video il file video è conservato invariato nella
+   cartella della trascrizione (i volti sono dati personali, biometrici
+   se identificabili); l’export enrich contiene solo l’audio, l’export
+   REFI-QDA il video solo su scelta esplicita.
 
 ## 5. Luogo del trattamento
 

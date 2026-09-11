@@ -69,7 +69,11 @@ betroffen sein `[ja / nein: …]`.
    und, wenn das Transkript mit Zotero verknüpft ist, die übernommenen
    Metadaten (Titel, Datum, Personen nach gewählten Rollen, Citekey).
    Mit Zotero-Einwilligung liest die Anwendung die lokale
-   `zotero.sqlite` nur lesend und nur auf Anfrage.
+   `zotero.sqlite` nur lesend und nur auf Anfrage. Bei einer
+   Videoaufnahme liegt die Videodatei unverändert im Ordner des
+   Transkripts (Gesichter sind personenbezogene, bei Identifizierbarkeit
+   biometrische Daten); der enrich-Export enthält nur den Ton, der
+   REFI-QDA-Export das Video nur auf ausdrückliche Wahl.
 
 ## 5. Ort der Verarbeitung
 

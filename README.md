@@ -51,6 +51,22 @@ destroyed.
 
 ![Library list](docs/screenshots/02-library.png)
 
+## Video
+
+An MP4/MOV/M4V with H.264 or HEVC is accepted wherever audio is — in
+the batch list and as the audio of an import. The sound track is
+extracted to mp3 (the working copy for Whisper and the editor); the
+video file is stored unchanged in the entry and never transcoded. The
+only limit is 10 GB per file; other containers and codecs (webm/VP9,
+mkv, AVI, MPEG-2, AV1) are refused with a hint to export as H.264/MP4
+externally, for instance with HandBrake or QuickTime. In the editor
+the picture sits under the speakers in the side panel, muted and
+without controls: the audio player leads, the picture follows — at 2×
+and during jumps it freezes and blurs until it has caught up. Faces
+are personal data; the privacy sheets say what that means for storage
+and export. The REFI-QDA export offers “with video” (`VideoSource`,
+video in the Media folder); the enrich dossier carries the sound only.
+
 ## Edit
 
 Click an entry to open the editor. Autosave, speaker rename / merge /

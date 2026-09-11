@@ -42,6 +42,11 @@ export default function EditorModule({ id, onExit }: {
   const [sprecher, setSprecher] = useState<Sprecher[]>([]);
   const [segmente, setSegmente] = useState<Segment[]>([]);
   const [hatAudio, setHatAudio] = useState(false);
+  // Video (BACKLOG 8): stumm, fest unter den Sprechern, ohne Knöpfe —
+  // Ton führt, Bild folgt; ab 2× oder bei Sprüngen eingefroren
+  const [hatVideo, setHatVideo] = useState(false);
+  const [eingefroren, setEingefroren] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [fehler, setFehler] = useState("");
   const [speichert, setSpeichert] = useState(false);
   const [gespeichert, setGespeichert] = useState("");
@@ -89,6 +94,7 @@ export default function EditorModule({ id, onExit }: {
       setSegmente(t.segmente.map((s) => ({ ...s,
         id: s.id || neueId() })));
       setHatAudio(!!t.audio);
+      setHatVideo(!!t.video);
     }).catch((e) => setFehler(errMsg(e)));
   }, [id]);
 
@@ -320,6 +326,50 @@ export default function EditorModule({ id, onExit }: {
     lset(KEYS.editorSpeed, String(speed));
   }, [speed, hatAudio]);
 
+  // Ton führt, Bild folgt (BACKLOG 8): das Video hängt am Audio-Element
+  // — Position alle ~250 ms nachgezogen, Play/Pause gespiegelt, Rate
+  // mit. Ab 2× steht das Bild eingefroren (WebKit dekodiert nicht
+  // schneller als nötig und nie rückwärts); ein Sprung friert kurz ein,
+  // bis das Bild an der neuen Stelle wieder da ist.
+  useEffect(() => {
+    const a = audioRef.current, v = videoRef.current;
+    if (!a || !v || !hatVideo) return;
+    const zieh = () => {
+      if (Math.abs(v.currentTime - a.currentTime) > 0.25)
+        v.currentTime = a.currentTime;
+    };
+    const lauf = () => {
+      const frieren = a.playbackRate >= 2;
+      setEingefroren(frieren);
+      v.playbackRate = Math.min(a.playbackRate, 2);
+      zieh();
+      if (a.paused || frieren) v.pause(); else void v.play().catch(() => undefined);
+    };
+    const sprung = () => { setEingefroren(true); v.currentTime = a.currentTime; };
+    // nach dem Sprung noch einmal nachziehen: bei langen Keyframe-
+    // Abständen dauert das Dekodieren, der Ton ist derweil weitergelaufen
+    const angekommen = () => {
+      if (a.playbackRate < 2) setEingefroren(false);
+      if (!a.paused && Math.abs(v.currentTime - a.currentTime) > 0.25)
+        v.currentTime = a.currentTime;
+    };
+    a.addEventListener("timeupdate", zieh);
+    a.addEventListener("play", lauf);
+    a.addEventListener("pause", lauf);
+    a.addEventListener("ratechange", lauf);
+    a.addEventListener("seeking", sprung);
+    v.addEventListener("seeked", angekommen);
+    lauf();
+    return () => {
+      a.removeEventListener("timeupdate", zieh);
+      a.removeEventListener("play", lauf);
+      a.removeEventListener("pause", lauf);
+      a.removeEventListener("ratechange", lauf);
+      a.removeEventListener("seeking", sprung);
+      v.removeEventListener("seeked", angekommen);
+    };
+  }, [hatAudio, hatVideo]);
+
   useEffect(() => {
     // Tastatur-Schema v2 (User 2026-08-30 — Ctrl+Pfeile frisst
     // macOS/Mission Control!): J/K/L-Shuttle wie Audition; mit ⌥
@@ -413,7 +463,7 @@ export default function EditorModule({ id, onExit }: {
     // .enrich ist EINE Datei (ein Zip, wie .docx) und heisst nach dem,
     // was drin ist. .qdpx.zip bleibt: darin liegt das .qdpx UND daneben
     // der Media-Ordner mit dem Audio, wie ATLAS.ti es exportiert.
-    const endung = format === "qdpx" ? "qdpx.zip" : format;
+    const endung = format.startsWith("qdpx") ? "qdpx.zip" : format;
     try {
       if (isTauri()) {
         const p = await savePath(`${name || "transkript"}.${endung}`,
@@ -446,7 +496,7 @@ export default function EditorModule({ id, onExit }: {
               : gespeichert
                 ? tr("ed.gespeichert", { t: gespeichert }) : ""}
           </Text>
-          <ExportMenu onExport={exportiere} />
+          <ExportMenu onExport={exportiere} hatVideo={hatVideo} />
         </Flex>
         {fehler && <ErrorNote>{fehler}</ErrorNote>}
         {exportNote && (
@@ -576,7 +626,9 @@ export default function EditorModule({ id, onExit }: {
                            segmente={segmente} hatAudio={hatAudio}
                            onRename={umbenennen} onNeu={sprecherNeu}
                            onMerge={zusammenfuehren}
-                           onLeere={leereZuweisen} />
+                           onLeere={leereZuweisen}
+                           video={hatVideo ? { ref: videoRef,
+                             eingefroren } : null} />
           : seitenTab === "suchen"
             ? <SuchPanel segmente={segmente} onZeige={zeigeTreffer}
                          onErsetze={textErsetzen}
@@ -778,8 +830,8 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
   );
 }
 
-function ExportMenu({ onExport }: {
-  onExport: (format: string) => void;
+function ExportMenu({ onExport, hatVideo }: {
+  onExport: (format: string) => void; hatVideo?: boolean;
 }) {
   const tr = useT();
   return (
@@ -793,6 +845,10 @@ function ExportMenu({ onExport }: {
         </Select.Item>
         <Select.Item value="qdpx">{tr("ed.export.qdpx")}
         </Select.Item>
+        {hatVideo && (
+          <Select.Item value="qdpx-video">{tr("ed.export.qdpxvideo")}
+          </Select.Item>
+        )}
       </Select.Content>
     </Select.Root>
   );
@@ -960,9 +1016,12 @@ function NameFeld({ id, name, onRename }: {
 }
 
 function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
-                         onNeu, onMerge, onLeere }: {
+                         onNeu, onMerge, onLeere, video }: {
   id: string; sprecher: Sprecher[]; segmente: Segment[];
   hatAudio: boolean;
+  /** Video fest unter den Sprechern, ohne Knöpfe (BACKLOG 8) */
+  video?: { ref: React.RefObject<HTMLVideoElement>;
+            eingefroren: boolean } | null;
   onRename: (id: string, name: string) => void;
   onNeu: () => void;
   onMerge: (von: string, nach: string) => void;
@@ -1063,6 +1122,16 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
       })}
       <Button size="1" variant="soft" onClick={onNeu}>
         <Icon name="plus" size={14} /> {tr("ed.sprecher.neu")}</Button>
+      {video && (
+        // Stumm, ohne Controls, so breit wie das Panel; die einzige
+        // Bedienung ist der Audioplayer. Eingefroren = weichgezeichnet.
+        <video ref={video.ref} muted playsInline preload="auto"
+               src={`${API_BASE}/api/transcripts/${id}/video`}
+               style={{ width: "100%", borderRadius: 6, marginTop: 8,
+                        background: "#000", display: "block",
+                        filter: video.eingefroren ? "blur(6px)" : "none",
+                        transition: "filter .25s" }} />
+      )}
     </Flex>
   );
 }

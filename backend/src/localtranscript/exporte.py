@@ -53,6 +53,18 @@ def export_bytes(eid: str, format: str) -> tuple[bytes, str, str]:
         return (qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
                               bibliothek.audio_pfad(eid)),
                 f"{stamm}.qdpx.zip", "application/zip")
+    if format == "qdpx-video":
+        # «Video mitgeben» (BACKLOG 8): VideoSource, die Videodatei im
+        # Media-Ordner — nur angeboten, wenn der Eintrag ein Video hat
+        from . import qdpx
+        if not seg:
+            raise ValueError("Leeres Transkript — nichts zu exportieren")
+        video = bibliothek.video_pfad(eid)
+        if video is None:
+            raise ValueError("Dieser Eintrag hat kein Video")
+        return (qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
+                              bibliothek.audio_pfad(eid), video=video),
+                f"{stamm}.qdpx.zip", "application/zip")
     raise ValueError(f"Unbekanntes Format: {format}")
 
 

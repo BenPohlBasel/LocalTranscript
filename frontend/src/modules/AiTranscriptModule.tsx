@@ -14,8 +14,10 @@ import {
 import { jobText, useT } from "../lib/i18n";
 import { isTauri, onFileDrop, pickAudio } from "../lib/tauri";
 
+// Video (BACKLOG 8): H.264/HEVC in MP4/MOV/M4V — geprüft im Backend,
+// nie umgewandelt; der Ton wird gezogen, das Bild folgt ihm im Editor
 const AUDIO_EXT = [".mp3", ".m4a", ".aac", ".wav", ".ogg", ".flac",
-  ".webm"];
+  ".webm", ".mp4", ".m4v", ".mov"];
 
 // Werte sind min-max-Paare fürs Backend; gleiche Grenzen = genau n.
 // „1-1" ist der AUS-Fall (User 2026-09-09: „1 steht für keine

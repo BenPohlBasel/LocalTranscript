@@ -50,6 +50,8 @@ async def host_wache(request, call_next):
                             content={"detail": f"Host nicht erlaubt: {host}"})
     return await call_next(request)
 
+VIDEO_MEDIA = {".mp4": "video/mp4", ".m4v": "video/mp4",
+               ".mov": "video/quicktime"}
 AUDIO_MEDIA = {".mp3": "audio/mpeg", ".m4a": "audio/mp4",
                ".aac": "audio/aac", ".wav": "audio/wav",
                ".ogg": "audio/ogg", ".flac": "audio/flac",
@@ -166,18 +168,30 @@ async def transcribe_upload(file: UploadFile = File(...),
                             diarize: bool = Form(True)) -> dict:
     name = file.filename or "audio"
     endung = Path(name).suffix.lower()
-    if endung not in bibliothek.AUDIO_ENDUNGEN:
+    if endung not in bibliothek.AUDIO_ENDUNGEN + bibliothek.VIDEO_ENDUNGEN:
         raise HTTPException(status_code=400,
                             detail=f"Nicht unterstützt: {endung}")
     tmp = _tmpdatei(endung, "lt-up-")
     with tmp.open("wb") as f:
         while chunk := await file.read(1 << 20):
             f.write(chunk)
+    _video_pruefen(tmp, aufraeumen=True)
     job = jobs.starte(tmp, name,
                       _params(model, language, speaker_range,
                               cluster_threshold, diarize),
                       quelle_ist_temp=True)
     return {"job_id": job["id"]}
+
+
+def _video_pruefen(p: Path, *, aufraeumen: bool = False) -> None:
+    """Abweisen VOR dem Job (422 mit Hinweis), nie still im Thread."""
+    from . import video
+    try:
+        video.pruefe(p)
+    except video.VideoFehler as e:
+        if aufraeumen:
+            p.unlink(missing_ok=True)
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 class TranscribePathReq(ApiModel):
@@ -196,9 +210,10 @@ def transcribe_path(req: TranscribePathReq) -> dict:
     p = Path(req.path).expanduser()
     if not p.is_file():
         raise HTTPException(status_code=404, detail=f"{p} fehlt")
-    if p.suffix.lower() not in bibliothek.AUDIO_ENDUNGEN:
+    if p.suffix.lower() not in bibliothek.AUDIO_ENDUNGEN + bibliothek.VIDEO_ENDUNGEN:
         raise HTTPException(status_code=400,
                             detail=f"Nicht unterstützt: {p.suffix}")
+    _video_pruefen(p)
     job = jobs.starte(p, p.name,
                       _params(req.model, req.language,
                               req.speaker_range, req.cluster_threshold,
@@ -231,6 +246,29 @@ def job_cancel(job_id: str) -> dict:
 
 def _import_turns(turns: list[dict], name: str, quelle_art: str,
                   audio: Path | None) -> dict:
+    """`audio` darf auch ein Video sein: dann wird der Ton gezogen und
+    das Video unverändert mitgenommen (BACKLOG 8)."""
+    import tempfile
+
+    from . import video as _video
+    tmp: Path | None = None
+    video_pfad: Path | None = None
+    if audio is not None and audio.is_file() \
+            and audio.suffix.lower() in bibliothek.VIDEO_ENDUNGEN:
+        _video_pruefen(audio)
+        tmp = Path(tempfile.mkdtemp(prefix="lt-imp-video-"))
+        video_pfad = audio
+        audio = _video.ton_extrahieren(audio, tmp / "audio.mp3")
+    try:
+        return _import_turns_roh(turns, name, quelle_art, audio, video_pfad)
+    finally:
+        if tmp is not None:
+            import shutil
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _import_turns_roh(turns: list[dict], name: str, quelle_art: str,
+                      audio: Path | None, video: Path | None) -> dict:
     if not turns:
         raise HTTPException(status_code=400,
                             detail="Keine Segmente gefunden")
@@ -249,7 +287,7 @@ def _import_turns(turns: list[dict], name: str, quelle_art: str,
     eintrag = bibliothek.anlegen(
         name=name, segmente=segmente, sprecher=sprecher,
         quelle={"datei": name, "erzeugt": quelle_art}, audio=audio,
-        origin="source")
+        video=video, origin="source")
     return {"eintrag": eintrag["id"], "segmente": len(segmente),
             "sprecher": len(sprecher)}
 
@@ -309,7 +347,7 @@ async def import_upload(datei: UploadFile = File(...),
     try:
         if audio is not None and audio.filename:
             endung = Path(audio.filename).suffix.lower()
-            if endung in bibliothek.AUDIO_ENDUNGEN:
+            if endung in bibliothek.AUDIO_ENDUNGEN + bibliothek.VIDEO_ENDUNGEN:
                 audio_tmp = _tmpdatei(endung, "lt-imp-")
                 audio_tmp.write_bytes(await audio.read())
         return _import_turns(turns, name.stem,
@@ -351,7 +389,7 @@ def import_path(req: ImportPathReq) -> dict:
         if a.is_file():
             audio = a
     if audio is None:
-        for endung in bibliothek.AUDIO_ENDUNGEN:
+        for endung in bibliothek.AUDIO_ENDUNGEN + bibliothek.VIDEO_ENDUNGEN:
             k = p.with_suffix(endung)
             if k.is_file():
                 audio = k
@@ -499,6 +537,20 @@ def transcript_delete(eid: str, req: DeleteReq) -> dict:
     return {"status": "deleted"}
 
 
+@app.get("/api/transcripts/{eid}/video")
+def transcript_video(eid: str):
+    """Das Video unverändert; FileResponse beantwortet Range-Anfragen —
+    der WebView springt damit direkt an die Stelle."""
+    try:
+        p = bibliothek.video_pfad(eid)
+    except BibliothekFehler as e:
+        raise _err(e) from e
+    if p is None:
+        raise HTTPException(status_code=404, detail="Kein Video")
+    return FileResponse(p, media_type=VIDEO_MEDIA.get(
+        p.suffix.lower(), "application/octet-stream"))
+
+
 @app.get("/api/transcripts/{eid}/audio")
 def transcript_audio(eid: str):
     try:
@@ -577,7 +629,8 @@ def export_datei(eid: str, req: ExportReq) -> dict:
     # überschreiben (~/.zshrc, LaunchAgents) — die Endung muss zum
     # Format passen, mehr Constraint erlaubt der freie Save-Dialog nicht
     erlaubt = {"vtt": ".vtt", "csv": ".csv", "txt": ".txt",
-               "enrich": ".enrich", "qdpx": ".zip"}[req.format]
+               "enrich": ".enrich", "qdpx": ".zip",
+               "qdpx-video": ".zip"}[req.format]
     if ziel.suffix.lower() != erlaubt:
         raise HTTPException(status_code=409,
                             detail=f"Zieldatei muss auf {erlaubt} enden")

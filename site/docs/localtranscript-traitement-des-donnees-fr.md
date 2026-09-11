@@ -75,7 +75,11 @@ particulières de données personnelles peuvent être concernées
    métadonnées reprises (titre, date, personnes selon les rôles
    choisis, clé de citation). Avec l'autorisation Zotero, l'application
    lit la base locale `zotero.sqlite` en lecture seule, uniquement sur
-   demande.
+   demande. Pour un enregistrement vidéo, le fichier vidéo est conservé
+   tel quel dans le dossier de la transcription (les visages sont des
+   données personnelles, biométriques si identifiables) ; l’export
+   enrich ne contient que le son, l’export REFI-QDA la vidéo seulement
+   sur choix explicite.
 
 ## 5. Lieu du traitement
 
