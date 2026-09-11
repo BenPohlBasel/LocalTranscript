@@ -561,6 +561,11 @@ const W: Record<string, Eintrag> = {
     en: "incomplete (too small for a model)",
     fr: "incomplet (trop petit pour un modèle)",
     it: "incompleto (troppo piccolo per un modello)" },
+  "st.modell.grund.icloud": {
+    de: "liegt nur in iCloud — im Finder herunterladen (Wolkensymbol), dann erscheint es",
+    en: "stored in iCloud only — download it in Finder (cloud icon), then it appears",
+    fr: "seulement dans iCloud — la télécharger dans le Finder (icône nuage), puis elle apparaît",
+    it: "solo su iCloud — scaricarlo nel Finder (icona nuvola), poi compare" },
   "st.modell.grund.unlesbar": { de: "nicht lesbar", en: "unreadable",
     fr: "illisible", it: "illeggibile" },
   "st.modell.grund.name": { de: "wird ignoriert (Name muss ggml-….bin sein)",

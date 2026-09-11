@@ -93,6 +93,19 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    O_EXCL) und respektiert sie. Aufwand hier danach ~1 Tag
    (`bibliothek.py` auf `Dossier`, Migration, Tests).
 
+6. **Bibliothek in iCloud Drive erkennen (Befund 2026-09-11).** Auf dem
+   Entwickler-Mac liegt `~/Documents` in iCloud Drive («Schreibtisch &
+   Dokumente»); bei 99 % voller Platte lagert macOS Dateien aus
+   (`SF_DATALESS`) — ein 1,6-GB-Modell im Bibliotheksordner brauchte 16 s
+   zum Öffnen, `/api/models` hing. Modelle sind seit 2.3.0 abgefangen;
+   für Audio/Transkripte gilt dasselbe Risiko, und die Aufnahmen werden
+   dann nach iCloud synchronisiert (die Blätter sagen das). In den
+   Einstellungen warnen, wenn der Bibliotheksordner unter iCloud liegt
+   (Prüfung: Pfad unter `~/Library/Mobile Documents/` oder `~/Documents`/
+   `~/Desktop` bei aktivem Desktop-&-Dokumente-Sync — `brctl`/
+   `com.apple.icloud.desktop`-Marker prüfen), und einen Ort ausserhalb
+   anbieten.
+
 ## Gemessen, nicht gebaut
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit

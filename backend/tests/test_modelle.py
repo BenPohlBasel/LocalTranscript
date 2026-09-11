@@ -50,6 +50,30 @@ def test_eigene_modelle_erscheinen_und_werden_geprueft(client, tmp_path, monkeyp
     assert {x["name"]: x["quelle"] for x in client.get("/api/models").json()["models"]}["medium"] == "bundled"
 
 
+def test_ausgelagerte_icloud_datei_wird_nicht_geoeffnet(client, tmp_path, monkeypatch):
+    """SF_DATALESS (Inhalt nur in iCloud): nicht anbieten, nicht öffnen —
+    open() würde den Scan blockieren, bis iCloud die Datei geholt hat."""
+    import os
+    monkeypatch.setenv("LT_MODELS_DIR", str(tmp_path / "leer"))
+    eigene = Path(client.get("/api/models").json()["eigene_dir"])
+    p = _modell(eigene / "ggml-wolke.bin")
+    echt = os.stat
+    class _St:
+        def __init__(self, st): self._st = st; self.st_flags = config.SF_DATALESS
+        def __getattr__(self, n): return getattr(self._st, n)
+    monkeypatch.setattr(Path, "stat", lambda self, **k: _St(echt(self)) if self == p else echt(self, **k))
+    geoeffnet = []
+    echt_open = Path.open
+    def _open(self, *a, **k):
+        if self == p:
+            geoeffnet.append(self); raise AssertionError("geöffnet")
+        return echt_open(self, *a, **k)
+    monkeypatch.setattr(Path, "open", _open)
+    m = client.get("/api/models").json()
+    assert [u for u in m["ungueltig"] if u["datei"] == "ggml-wolke.bin"][0]["grund"] == "icloud"
+    assert not [x for x in m["models"] if x["name"] == "wolke"] and not geoeffnet
+
+
 def test_fehlendes_modell_ist_ein_klarer_fehler(client, tmp_path, monkeypatch):
     monkeypatch.setenv("LT_MODELS_DIR", str(tmp_path / "leer"))
     try:

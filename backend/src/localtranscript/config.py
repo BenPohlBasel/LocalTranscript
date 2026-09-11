@@ -111,11 +111,25 @@ def get_eigene_modelle_dir() -> Path | None:
     return root / EIGENE_MODELLE if root else None
 
 
+#: macOS-Dateiflag SF_DATALESS: der Inhalt liegt nur in iCloud («Mac-
+#: Speicher optimieren» hat die Datei ausgelagert). Ein open() blockiert
+#: dann, bis iCloud die Datei geholt hat — beim 1,6-GB-Modell 16 s, bei
+#: schlechtem Netz Minuten; /api/models hing damit (Live-Befund
+#: 2026-09-11, Bibliothek in ~/Documents mit iCloud Drive).
+SF_DATALESS = 0x40000000
+
+
+def _dataless(st: os.stat_result) -> bool:
+    return bool(getattr(st, "st_flags", 0) & SF_DATALESS)
+
+
 def _modell_pruefen(p: Path) -> str | None:
     """None, wenn die Datei ein fertiges whisper.cpp-Modell ist — sonst
     der Grund (für die Einstellungen, nicht für die Auswahl)."""
     try:
         st = p.stat()
+        if _dataless(st):
+            return "icloud"          # nicht öffnen: das würde blockieren
         if time.time() - st.st_mtime < MODELL_RUHE_S:
             return "kopiert"
         with p.open("rb") as f:

@@ -26,6 +26,9 @@ a version are the corresponding section of this file.
   copying) before they are offered; Settings show the folder, open it,
   rescan, and name what was ignored and why. The app never downloads
   models; the journal records which model transcribed a recording.
+  A file that iCloud has evicted from the Mac ("Optimise Mac Storage")
+  is reported as such and not opened — opening it would block until
+  iCloud has fetched it.
 
 - **Metadata from Zotero.** A third tab in the editor's side panel —
   Speakers | Find | Metadata — links a transcript to an item in your
