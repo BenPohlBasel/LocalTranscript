@@ -2,7 +2,7 @@
 
 Was die App ist, welche KI darin was tut, wo der Code liegt, und warum
 das Transkript den Rechner nicht verlässt. Zum Weitergeben an
-Projektleitung, Ethikkommission oder Kolleg:innen. Stand 10. September
+Projektleitung, Ethikkommission oder Kolleg:innen. Stand 11. September
 2026, Version 2.3.0.
 
 ## Was die App tut

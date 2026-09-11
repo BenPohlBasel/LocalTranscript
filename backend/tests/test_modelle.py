@@ -44,6 +44,10 @@ def test_eigene_modelle_erscheinen_und_werden_geprueft(client, tmp_path, monkeyp
     # der Lauf nimmt dieselbe Datei wie die Auswahl
     assert config.model_pfad("medium") == eigene / "ggml-medium.bin"
     assert config.model_pfad("large-v3-turbo").parent == eigene
+    # … auch wenn die eigene Datei durchfällt: dann gilt das Bundle
+    _modell(eigene / "ggml-medium.bin", magic=b"%PDF")
+    assert config.model_pfad("medium") == bundle / "ggml-medium.bin"
+    assert {x["name"]: x["quelle"] for x in client.get("/api/models").json()["models"]}["medium"] == "bundled"
 
 
 def test_fehlendes_modell_ist_ein_klarer_fehler(client, tmp_path, monkeypatch):

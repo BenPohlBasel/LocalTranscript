@@ -599,6 +599,18 @@ const ROLLEN = ["interviewer", "interviewee", "author", "contributor",
 const ROLLEN_VORAB = new Set(["interviewer", "author", "contributor",
                               "editor", "translator"]);
 
+/** Rollen, die in den Creators vorkommen: die bekannten in fester
+    Reihenfolge, unbekannte (performer, podcaster, guest …) dahinter —
+    Zotero kennt mehr Rollen als das Interview (Review 2026-09-11). */
+function rollenVon(cs: { role: string }[]): string[] {
+  const da = new Set(cs.map((c) => c.role || "author"));
+  return [...ROLLEN.filter((r) => da.has(r)),
+          ...Array.from(da).filter((r) => !(ROLLEN as readonly string[]).includes(r)).sort()];
+}
+function rolleName(r: string, tr: (k: string) => string): string {
+  return (ROLLEN as readonly string[]).includes(r) ? tr(`ed.meta.rolle.${r}`) : r;
+}
+
 function personen(cs: { first: string; last: string }[]): string {
   return cs.map((c) => `${c.first} ${c.last}`.trim()).join(", ");
 }
@@ -622,7 +634,10 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
     void apiGet<ZoteroStatus>("/api/zotero/status").then(setStatus)
       .catch((e) => setFehler(errMsg(e)));
   }, []);
-  useEffect(() => { if (!q) setQ(name); }, [name, q]);
+  // Neues Transkript → Suche und Auswahl zurücksetzen (das Feld darf
+  // danach auch leer bleiben — Review 2026-09-11)
+  useEffect(() => { setQ(name); setTreffer(null); setWahl(null);
+    setFehler(""); }, [id, name]);
 
   const suche = async () => {
     setLaeuft(true); setFehler(""); setWahl(null);
@@ -668,17 +683,16 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
         <Text size="1" color="gray">
           {[zotero.date ?? zotero.year, zotero.citekey, zotero.publication]
             .filter(Boolean).join(" · ")}</Text>
-        {ROLLEN.map((r) => {
-          const cs = zotero.creators.filter((c) => c.role === r);
-          return cs.length ? (
-            <Text size="1" key={r}>
-              <Text color="gray">{tr(`ed.meta.rolle.${r}`)}: </Text>
-              {personen(cs)}</Text>
-          ) : null;
-        })}
+        {rollenVon(zotero.creators).map((r) => (
+          <Text size="1" key={r}>
+            <Text color="gray">{rolleName(r, tr)}: </Text>
+            {personen(zotero.creators.filter((c) => c.role === r))}</Text>
+        ))}
         {zotero.doi && <Text size="1" color="gray">DOI {zotero.doi}</Text>}
         <Flex gap="2" wrap="wrap">
-          {zotero.select_link && (
+          {/* Nur ein Zotero-Select-Link geht an `open` — der Wert kann
+              aus einem fremden Dossier stammen (Review 2026-09-11) */}
+          {zotero.select_link?.startsWith("zotero://select/") && (
             <Button size="1" variant="soft"
                     onClick={() => void ordnerOeffnen(zotero.select_link!)}>
               {tr("ed.meta.zotero.oeffnen")}</Button>
@@ -734,8 +748,7 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
         <Flex direction="column" gap="2" p="2"
               style={{ border: "1px solid var(--gray-a5)", borderRadius: 6 }}>
           <Text size="1" weight="medium">{tr("ed.meta.rollen")}</Text>
-          {ROLLEN.filter((r) => wahl.creators.some((c) => c.role === r))
-            .map((r) => (
+          {rollenVon(wahl.creators).map((r) => (
               <Flex key={r} align="center" gap="2" asChild>
                 <label>
                   <Checkbox checked={rollen.has(r)}
@@ -745,7 +758,7 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
                       setRollen(n);
                     }} />
                   <Text size="1">
-                    {tr(`ed.meta.rolle.${r}`)}: {personen(
+                    {rolleName(r, tr)}: {personen(
                       wahl.creators.filter((c) => c.role === r))}</Text>
                 </label>
               </Flex>

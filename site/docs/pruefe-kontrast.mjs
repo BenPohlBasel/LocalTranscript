@@ -3,11 +3,11 @@
 // weiss sein, nichts darf über den Rand ragen, nichts waagrecht scrollen.
 // Aufruf aus dem Repo:  node site/docs/pruefe-kontrast.mjs
 
-import { chromium } from "/Users/benpohl/Claude/enrich-transcript/frontend/node_modules/playwright/index.mjs";
+import { chromium } from "../../frontend/node_modules/playwright/index.mjs";
 const b = await chromium.launch();
 for (const w of [1440, 820, 390]) {
   const p = await b.newPage({ viewport: { width: w, height: 900 } });
-  await p.goto("file:///Users/benpohl/Claude/enrich-transcript/site/index.html?lang=de", { waitUntil: "networkidle" });
+  await p.goto(new URL("../index.html?lang=de", import.meta.url).href, { waitUntil: "networkidle" });
   const r = await p.evaluate(() => {
     const lum = (c) => { const [r,g,b] = c.map(v => { v/=255; return v <= .03928 ? v/12.92 : ((v+.055)/1.055)**2.4; }); return .2126*r+.7152*g+.0722*b; };
     const parse = (s) => { const m = s.match(/rgba?\(([^)]+)\)/); if (!m) return null; const v = m[1].split(",").map(parseFloat); return { rgb: v.slice(0,3), a: v.length > 3 ? v[3] : 1 }; };

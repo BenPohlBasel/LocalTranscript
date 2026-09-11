@@ -67,7 +67,7 @@ a version are the corresponding section of this file.
   flatten them. Older library entries are upgraded on read.
 - **Journal.** Every write is a run: the Whisper job (model,
   diarisation), an import, and each editor session (bundled — ten
-  minutes of quiet or leaving the editor close a run) with the ids of
+  minutes of quiet close a run) with the ids of
   the records it changed and the kind of change. Runs name the app, the
   installation id and, if set, the e-mail; they are chained by the hash
   of the preceding entry and travel with the dossier.

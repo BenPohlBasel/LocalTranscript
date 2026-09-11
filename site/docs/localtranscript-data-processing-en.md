@@ -62,7 +62,12 @@ conversation, special categories of personal data may be involved
 5. **Output.** Export files (WebVTT, CSV, plain text, REFI-QDA `.qdpx.zip`,
    enrich dossier `.enrich`) are written wherever the operator saves
    them. **REFI-QDA and enrich exports contain the audio recording.**
-   Passing them on is passing on the recording.
+   Passing them on is passing on the recording. An enrich dossier also
+   contains the change journal with the optional e-mail address entered
+   in Settings and, if the transcript is linked to Zotero, the adopted
+   metadata (title, date, people by the chosen roles, citation key).
+   With Zotero consent the application reads the local `zotero.sqlite`
+   read-only and only on request.
 
 ## 5. Location of the processing
 

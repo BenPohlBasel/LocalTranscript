@@ -32,10 +32,14 @@ class ZoteroFehler(Exception):
 
 
 def status() -> dict:
+    """Ohne Einwilligung wird auch nicht GESUCHT (die Suche liest Zoteros
+    prefs.js) — `found` bleibt dann unbekannt (None)."""
     cfg = read_config()
+    if not cfg.get("zotero_consent"):
+        return {"consent": False, "found": None, "dir": None}
     d = ez.find_zotero_dir(cfg)
-    return {"consent": bool(cfg.get("zotero_consent")),
-            "found": d is not None, "dir": str(d) if d else None}
+    return {"consent": True, "found": d is not None,
+            "dir": str(d) if d else None}
 
 
 def _zugang():

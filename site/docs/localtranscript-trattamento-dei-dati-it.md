@@ -64,10 +64,15 @@ personali `[sì / no: …]`.
    (HTTP 421). I dati diagnostici del sistema macOS sono regolati dalle
    sue impostazioni di sistema, non dal software.
 5. **Uscita.** I file di esportazione (WebVTT, CSV, testo, REFI-QDA
-   `.qdpx`, dossier enrich `.enrich`) vengono scritti dove chi opera
+   `.qdpx.zip`, dossier enrich `.enrich`) vengono scritti dove chi opera
    li salva. **Le esportazioni REFI-QDA ed enrich contengono la
    registrazione audio.** Consegnarle significa consegnare la
-   registrazione.
+   registrazione. Un dossier enrich contiene inoltre il giornale delle
+   modifiche con l'indirizzo e-mail facoltativo inserito nelle
+   impostazioni e, se la trascrizione è collegata a Zotero, i metadati
+   ripresi (titolo, data, persone secondo i ruoli scelti, chiave di
+   citazione). Con il consenso Zotero l'applicazione legge il database
+   locale `zotero.sqlite` in sola lettura, solo su richiesta.
 
 ## 5. Luogo del trattamento
 

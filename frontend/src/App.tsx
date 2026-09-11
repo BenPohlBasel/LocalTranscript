@@ -2,13 +2,13 @@
 // (Speicherort), dann Bibliothek ⇄ Editor (Drilldown, enrich-
 // Werkstatt-Muster) + Einstellungen.
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, Flex, Heading, ModalDialog, SegTabs, Text }
-  from "./components/ui";
+import { Badge, Button, ErrorNote, Flex, Heading, ModalDialog, SegTabs,
+  Text } from "./components/ui";
 import { Icon } from "./components/icons";
 import { apiGet, apiSend, errMsg, type Settings } from "./lib/api";
 import { setSprache, useT, type Sprache } from "./lib/i18n";
-import { backendStarten, isTauri, onUeber, ordnerOeffnen, pickOrdner }
-  from "./lib/tauri";
+import { backendStarten, geoeffneteDateien, isTauri, onDateien, onUeber,
+  ordnerOeffnen, pickOrdner } from "./lib/tauri";
 import AiTranscriptModule from "./modules/AiTranscriptModule";
 import EditorModule from "./modules/EditorModule";
 import EinstellungenModule from "./modules/EinstellungenModule";
@@ -28,6 +28,23 @@ export default function App() {
     "ai");
   const [editorId, setEditorId] = useState<string | null>(null);
   const [ueber, setUeber] = useState(false);
+  const [importFehler, setImportFehler] = useState("");
+
+  // Dateien aus dem Finder (Doppelklick, «Öffnen mit»): importieren und
+  // das zuletzt importierte Transkript im Editor öffnen
+  const oeffneDateien = useCallback(async () => {
+    const pfade = await geoeffneteDateien();
+    let letzte: string | null = null;
+    for (const p of pfade) {
+      if (!/\.(enrich|enrich\.zip|vtt|webvtt|csv)$/i.test(p)) continue;
+      try {
+        const r = await apiSend<{ eintrag: string }>("/api/import-path",
+                                                     { path: p });
+        letzte = r.eintrag;
+      } catch (e) { setImportFehler(errMsg(e)); }
+    }
+    if (letzte) { setTab("editor"); setEditorId(letzte); }
+  }, []);
 
   const starte = useCallback(async () => {
     setBoot("lade");
@@ -43,6 +60,15 @@ export default function App() {
     }
   }, []);
   useEffect(() => { void starte(); }, [starte]);
+  useEffect(() => {
+    if (boot !== "bereit") return;
+    let ab: (() => void) | undefined;
+    let weg = false;
+    void oeffneDateien();
+    void onDateien(() => void oeffneDateien())
+      .then((f) => { if (weg) f(); else ab = f; });
+    return () => { weg = true; ab?.(); };
+  }, [boot, oeffneDateien]);
   // „About LocalTranscript" aus dem Menü
   useEffect(() => {
     let ab: (() => void) | undefined;
@@ -100,7 +126,7 @@ export default function App() {
             Klick auf „Human-Editor" ein onChange und verlässt den
             Editor zur Liste (Review-Befund) */}
         <SegTabs value={editorId ? "" : tab}
-                 onChange={(v) => { setEditorId(null);
+                 onChange={(v) => { setEditorId(null); setImportFehler("");
                    setTab(v as "ai" | "editor" | "einstellungen"); }}
                  options={[
                    { value: "ai", label: tr("tab.ai"),
@@ -111,6 +137,7 @@ export default function App() {
                      label: tr("tab.einstellungen"),
                      icon: "settings" }]} />
       </Flex>
+      {importFehler && <ErrorNote>{importFehler}</ErrorNote>}
       <div style={{ flex: 1, minHeight: 0 }}>
         {editorId
           ? <EditorModule id={editorId}

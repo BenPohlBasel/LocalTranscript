@@ -169,14 +169,20 @@ def get_ungueltige_modelle() -> list[dict]:
 
 
 def model_pfad(model: str) -> Path:
-    """Die Datei zum Modellnamen — eigener Ordner zuerst, dann Bundle."""
+    """Die Datei zum Modellnamen — eigener Ordner zuerst, dann Bundle.
+    Dieselbe Regel wie die Auswahl (Review 2026-09-11): eine eigene Datei
+    zählt nur, wenn sie die Prüfung besteht — sonst schattete eine halb
+    kopierte oder falsche `ggml-medium.bin` das mitgelieferte Modell,
+    während die Einstellungen es als gültig zeigen."""
     e = get_eigene_modelle_dir()
-    kandidaten = ([e / f"ggml-{model}.bin"] if e is not None else []) + \
-        [get_models_dir() / f"ggml-{model}.bin"]
-    for p in kandidaten:
-        if p.is_file():
+    if e is not None:
+        p = e / f"ggml-{model}.bin"
+        if p.is_file() and _modell_pruefen(p) is None:
             return p
-    raise FileNotFoundError(f"Modell nicht gefunden: {kandidaten[-1]}")
+    p = get_models_dir() / f"ggml-{model}.bin"
+    if p.is_file():
+        return p
+    raise FileNotFoundError(f"Modell nicht gefunden: {p}")
 
 
 # ---------- Einstellungen ----------

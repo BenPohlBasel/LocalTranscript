@@ -128,7 +128,7 @@ first edit no analysis layer would line up with the text any more.
 timecodes but no sound:
 
 1. **Pick the transcript.** A file dialog opens for `.vtt` / `.csv`
-   (and `.zip`).
+   (and `.enrich`, including the `.enrich.zip` of earlier versions).
 2. **Pick the matching audio.** A second dialog asks for the `mp3` that
    belongs to it — *Cancel* if there is none. Without audio the entry
    still works; you simply edit text against timecodes and hear
@@ -278,8 +278,9 @@ references the schema URL, so the MIT attribution requirement does not
 apply.
 
 **enrich dossier (`.enrich`).** The format is described in
-`FORMAT.md` in the enrich repository — Format 1 as it is, Format 2 as a
-proposal — under the **MIT licence** (B/IAS).
+`FORMAT.md` in the enrich repository — Format 2, which enrich and
+LocalTranscript write today, and Format 1 for reading — under the
+**MIT licence** (B/IAS).
 
 **WebVTT** (W3C) · **CSV** · **TXT** are open and unrestricted.
 

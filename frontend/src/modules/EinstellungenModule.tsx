@@ -190,7 +190,7 @@ export default function EinstellungenModule({ settings, onChange }: {
               onKeyDown={(e) => { if (e.key === "Enter")
                 (e.target as HTMLInputElement).blur(); }} />
             <Text size="1" color="gray">{tr("st.zotero.dir.hinweis")}</Text>
-            {zstatus && (
+            {zstatus && zstatus.found !== null && (
               <Text size="1" color={zstatus.found ? "gray" : "red"}>
                 {zstatus.found
                   ? tr("st.zotero.gefunden", { d: zstatus.dir ?? "" })

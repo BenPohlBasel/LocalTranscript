@@ -103,7 +103,7 @@ Das erzeugt die `.docx` mit pandoc neu und spielt beides in
   werden, plus ein fertiger Satz für den Methodenteil.
 
 Beide sagen ausdrücklich, was NICHT abgedeckt ist: Backups und
-Diagnosedaten von macOS, und dass Exporte mit Audio (.qdpx, .enrich.zip)
+Diagnosedaten von macOS, und dass Exporte mit Audio (.qdpx.zip, .enrich)
 die Aufnahme samt Stimme und Klarnamen tragen.
 
 ## Schrift und Kontrast

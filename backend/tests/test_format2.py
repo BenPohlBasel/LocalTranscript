@@ -119,6 +119,19 @@ def test_schema1_wird_beim_lesen_ergaenzt(client, eintrag, tmp_path):
     assert by["Sprecher 3"] == "machine" and by["Anna"] == "human"
 
 
+def test_whisper_lauf_steht_im_by(client, tmp_path):
+    """Whisper-Modell und Sprechertrennung kommen aus dem Journal des
+    Transkriptions-Laufs (dort in `who`) in den Kopf der Schicht."""
+    from localtranscript import bibliothek
+    from localtranscript.format2 import transkript_schicht
+    d = bibliothek.anlegen("w", [{"start": 0.0, "end": 1.0, "sprecher": None, "text": "x"}],
+                           [], {"erzeugt": "transcription", "model": "large-v3-turbo"},
+                           by={"tool": "whisper.cpp", "model": "large-v3-turbo",
+                               "diarization": "speechbrain-ecapa"})
+    by = transkript_schicht(d, {"user": None, "install": "ins-x"}).by
+    assert by.model == "whisper.cpp large-v3-turbo" and by.diarization == "speechbrain-ecapa"
+
+
 def test_enrich_liest_den_container(client, eintrag, tmp_path):
     """Der Kompatibilitätstest: enrich-core öffnet das Dossier aus dem
     Container, Inventar und Kette sind sauber, die Transkript-Schicht

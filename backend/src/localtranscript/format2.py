@@ -56,7 +56,10 @@ def transkript_schicht(daten: dict, wer: dict) -> TranscriptLayer:
     # Womit? Der erste Run des Journals weiss es (Whisper, Modell,
     # Sprechertrennung) — sonst nur das, was die Quelle sagt
     erster = next(iter(daten.get("journal") or []), {})
-    by = dict(erster.get("by") or {})
+    # journal_eintrag legt tool/model/diarization ins `who` des Runs
+    by = dict(erster.get("by") or {}) or {
+        k: v for k, v in (erster.get("who") or {}).items()
+        if k in ("tool", "model", "diarization")}
     return TranscriptLayer(
         name=daten.get("name", ""), language=quelle.get("language"),
         by=LayerBy(tool=TOOL, version=APP_VERSION,
@@ -88,7 +91,8 @@ def _run_aus_journal(r: dict, wer: dict, layer_id: str) -> RunRecord:
     """Bibliotheks-Run → schlanker enrich-Run: wann, was, wer, wo
     (FORMAT.md §3.1). Woraus/womit/was herauskam steht im Schicht-Kopf."""
     who = dict(r.get("who") or {})
-    by = dict(r.get("by") or {})
+    by = dict(r.get("by") or {}) or {
+        k: v for k, v in who.items() if k in ("tool", "model", "diarization")}
     # Bibliothek führt `app` als «localtranscript/2.2.0»; enrichs Who
     # trennt app und version
     version = (who.get("app") or f"{TOOL}/{APP_VERSION}").split("/", 1)[-1]
@@ -212,6 +216,11 @@ def lies(z: zipfile.ZipFile, wurzel: str, m: dict) -> dict | None:
         zotero = {k: zl.get(k) for k in (
             "item_key", "citekey", "item_type", "title", "date", "year",
             "publication", "doi", "abstract", "select_link", "creators")}
+        # Der Link landet in `open` (Review 2026-09-11): aus einem fremden
+        # Container darf nur ein Zotero-Select-Link kommen, nie eine URL
+        sl = zotero.get("select_link")
+        if not (isinstance(sl, str) and sl.startswith("zotero://select/")):
+            zotero["select_link"] = None
     return {"name": m.get("title") or t.get("name") or "",
             "segmente": segmente, "sprecher": sprecher,
             "audio_name": audio_name, "audio_bytes": audio_bytes,

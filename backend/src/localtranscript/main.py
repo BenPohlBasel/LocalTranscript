@@ -389,7 +389,7 @@ def zotero_link(eid: str, req: ZoteroLinkReq) -> dict:
     from . import zotero
     try:
         bibliothek.lese(eid)
-    except (OSError, ValueError) as e:
+    except (OSError, ValueError, BibliothekFehler) as e:
         raise HTTPException(status_code=404, detail=eid) from e
     try:
         it = zotero.eintrag(req.item_key)
@@ -403,7 +403,7 @@ def zotero_link(eid: str, req: ZoteroLinkReq) -> dict:
 def zotero_unlink(eid: str) -> dict:
     try:
         bibliothek.lese(eid)
-    except (OSError, ValueError) as e:
+    except (OSError, ValueError, BibliothekFehler) as e:
         raise HTTPException(status_code=404, detail=eid) from e
     bibliothek.zotero_loesen(eid)
     return {"status": "unlinked"}

@@ -37,7 +37,7 @@ export async function pickTranskript(): Promise<string | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
   const r = await open({ multiple: false, filters: [{
     name: "Transkript",
-    extensions: ["vtt", "webvtt", "csv", "enrich"] }] });
+    extensions: ["vtt", "webvtt", "csv", "enrich", "zip"] }] });
   return typeof r === "string" ? r : null;
 }
 
@@ -62,6 +62,25 @@ export async function onFileDrop(
   return getCurrentWebview().onDragDropEvent((e) => {
     if (e.payload.type === "drop") cb(e.payload.paths);
   });
+}
+
+/** Dateien, die macOS der App zum Öffnen gab (Doppelklick auf ein
+    .enrich im Finder, «Öffnen mit»). Die Shell sammelt sie; dieser
+    Aufruf holt und leert die Liste — auch das, was vor dem ersten
+    Listener ankam (Start per Doppelklick). */
+export async function geoeffneteDateien(): Promise<string[]> {
+  if (!isTauri()) return [];
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke<string[]>("geoeffnete_dateien");
+}
+
+/** Signal der Shell, dass neue Dateien zum Öffnen da sind — die Pfade
+    holt der Aufrufer über geoeffneteDateien(), damit nichts doppelt
+    importiert wird. */
+export async function onDateien(cb: () => void): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const { listen } = await import("@tauri-apps/api/event");
+  return listen("dateien", () => cb());
 }
 
 /** „About LocalTranscript" aus dem Menü — die Shell schickt nur das

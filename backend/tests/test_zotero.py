@@ -46,7 +46,8 @@ def test_zotero_datum_wird_lesbar():
 def test_ohne_einwilligung_424(client, zot):
     r = client.get("/api/zotero/candidates?q=Basel")
     assert r.status_code == 424
-    assert client.get("/api/zotero/status").json()["consent"] is False
+    st = client.get("/api/zotero/status").json()
+    assert st["consent"] is False and st["found"] is None      # nicht gesucht
 
 
 def test_kandidaten_interview_zuerst(client, zot):
@@ -72,9 +73,9 @@ def test_verknuepfen_waehlt_rollen_und_journalt(client, zot, eintrag):
     assert d["journal"][-1]["origin"] == "human"
     assert d["journal"][-1]["changed"] == {"zotero": "linked"}
     # der Editor speichert weiter, ohne den Block zu kennen
-    client.put(f"/api/transcripts/{eintrag}",
-               json={"name": d["name"], "sprecher": d["sprecher"],
-                     "segmente": d["segmente"]})
+    r = client.put(f"/api/transcripts/{eintrag}",
+                   json={"sprecher": d["sprecher"], "segmente": d["segmente"]})
+    assert r.status_code == 200, r.text
     assert bibliothek.lese(eintrag)["zotero"]["citekey"] == "whitfield2026"
     r = client.delete(f"/api/transcripts/{eintrag}/zotero")
     assert r.status_code == 200
@@ -107,3 +108,30 @@ def test_export_traegt_zotero_schicht(client, zot, eintrag):
     neu = bibliothek.lese(r.json()["eintrag"])
     assert neu["zotero"]["citekey"] == "whitfield2026"
     assert neu["zotero"]["origin"] == "source"
+    assert neu["zotero"]["select_link"].startswith("zotero://select/")
+
+
+def test_fremder_select_link_wird_verworfen(client, zot, eintrag):
+    """Ein Dossier von anderswo darf der App keinen Link unterschieben,
+    den «In Zotero zeigen» dann an `open` gibt (Review 2026-09-11)."""
+    from enrich_core.canonical import content_hash
+    client.post("/api/settings", json={"zotero_consent": True})
+    client.post(f"/api/transcripts/{eintrag}/zotero",
+                json={"item_key": "ABCD1234", "roles": ["interviewer"]})
+    inhalt, _n, _m = exporte.export_bytes(eintrag, "enrich")
+    alt = zipfile.ZipFile(io.BytesIO(inhalt)); w = alt.namelist()[0].split("/", 1)[0]
+    m = json.loads(alt.read(f"{w}/manifest.json"))
+    zl = json.loads(alt.read(f"{w}/source/zotero.json"))
+    zl["select_link"] = "https://evil.example/t?id=1"
+    roh = json.dumps(zl).encode()
+    m["files"]["source/zotero.json"]["hash"] = content_hash(roh)
+    m["files"]["source/zotero.json"]["bytes"] = len(roh)
+    aus = io.BytesIO()
+    with zipfile.ZipFile(aus, "w", zipfile.ZIP_STORED) as neu:
+        for i in alt.infolist():
+            if i.filename.endswith("/source/zotero.json"): neu.writestr(i, roh)
+            elif i.filename.endswith("/manifest.json"): neu.writestr(i, json.dumps(m).encode())
+            else: neu.writestr(i, alt.read(i.filename))
+    r = client.post("/api/import", files={"datei": ("x.enrich", aus.getvalue(), "application/zip")})
+    assert r.status_code == 200, r.text
+    assert bibliothek.lese(r.json()["eintrag"])["zotero"]["select_link"] is None

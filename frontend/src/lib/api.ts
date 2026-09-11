@@ -65,7 +65,8 @@ export type Settings = {
   /** leer = Standardorte suchen (~/Zotero, Zotero-Profil, Volumes) */
   zotero_dir: string;
 };
-export type ZoteroStatus = { consent: boolean; found: boolean;
+/** found = null: ohne Einwilligung wird nicht gesucht */
+export type ZoteroStatus = { consent: boolean; found: boolean | null;
                              dir: string | null };
 export type ZoteroCreator = { first: string; last: string; role: string };
 /** ein Treffer der Kandidatensuche (schlank: ohne Abstract) */

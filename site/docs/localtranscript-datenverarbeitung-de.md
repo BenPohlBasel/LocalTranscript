@@ -64,7 +64,12 @@ betroffen sein `[ja / nein: …]`.
    enrich-Dossier `.enrich`) werden dorthin geschrieben, wo die
    bedienende Person sie speichert. **REFI-QDA- und enrich-Exporte
    enthalten die Audioaufnahme.** Ihre Weitergabe ist eine Weitergabe
-   der Aufnahme.
+   der Aufnahme. Ein enrich-Dossier enthält zudem das Änderungsjournal
+   mit der freiwillig in den Einstellungen hinterlegten E-Mail-Adresse
+   und, wenn das Transkript mit Zotero verknüpft ist, die übernommenen
+   Metadaten (Titel, Datum, Personen nach gewählten Rollen, Citekey).
+   Mit Zotero-Einwilligung liest die Anwendung die lokale
+   `zotero.sqlite` nur lesend und nur auf Anfrage.
 
 ## 5. Ort der Verarbeitung
 

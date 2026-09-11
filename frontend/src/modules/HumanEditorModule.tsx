@@ -39,7 +39,7 @@ export default function HumanEditorModule({ onOpen }: {
       setFehler("");
       void (async () => {
         for (const p of pfade) {
-          if (!/\.(enrich|vtt|webvtt|csv)$/i.test(p)) continue;
+          if (!/\.(enrich|enrich\.zip|vtt|webvtt|csv)$/i.test(p)) continue;
           try { await apiSend("/api/import-path", { path: p }); }
           catch (e) { setFehler(errMsg(e)); }
         }
@@ -57,7 +57,7 @@ export default function HumanEditorModule({ onOpen }: {
         if (!p) return;
         // Ein .enrich (Datei oder Package) trägt sein Audio schon mit
         // sich — nur bei vtt/csv lohnt die Nachfrage (User 2026-09-09).
-        const audio = /\.enrich$/i.test(p)
+        const audio = /\.enrich(\.zip)?$/i.test(p)
           ? null : await pickAudio(tr("he.audiowahl"), false);
         await apiSend("/api/import-path", { path: p,
           audio_path: audio?.[0] ?? null });
@@ -74,7 +74,7 @@ export default function HumanEditorModule({ onOpen }: {
       <Flex gap="3" align="center" wrap="wrap">
         <Button variant="soft" onClick={() => void importiere()}>
           <Icon name="text" /> {tr("bib.import")}</Button>
-        <input ref={importRef} type="file" hidden accept=".vtt,.csv,.enrich"
+        <input ref={importRef} type="file" hidden accept=".vtt,.csv,.enrich,.zip"
                onChange={(e) => {
                  const f = e.target.files?.[0];
                  e.target.value = "";

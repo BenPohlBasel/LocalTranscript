@@ -318,6 +318,16 @@ async fn backend_starten(
     }
 }
 
+/// Pfade, die macOS zum Öffnen gab (Info.plist: .enrich) — gesammelt,
+/// bis das Frontend sie abholt; beim Start per Doppelklick kommt das
+/// Ereignis, bevor ein Listener steht.
+struct Geoeffnet(Mutex<Vec<String>>);
+
+#[tauri::command]
+fn geoeffnete_dateien(state: tauri::State<'_, Geoeffnet>) -> Vec<String> {
+    state.0.lock().map(|mut g| std::mem::take(&mut *g)).unwrap_or_default()
+}
+
 #[tauri::command]
 fn ordner_oeffnen(pfad: String) -> Result<(), String> {
     std::process::Command::new("/usr/bin/open")
@@ -396,11 +406,28 @@ pub fn run() {
         })
         .plugin(tauri_plugin_dialog::init())
         .manage(EigenesBackend(Mutex::new(None)))
-        .invoke_handler(tauri::generate_handler![backend_starten, ordner_oeffnen])
+        .manage(Geoeffnet(Mutex::new(Vec::new())))
+        .invoke_handler(tauri::generate_handler![backend_starten, ordner_oeffnen,
+                                                 geoeffnete_dateien])
         .build(tauri::generate_context!())
         .expect("LocalTranscript konnte nicht starten");
 
     app.run(|handle, event| {
+        // Doppelklick auf ein .enrich (Info.plist): Pfade merken und dem
+        // Frontend ein Signal geben (Review 2026-09-11 — vorher wurde
+        // das Ereignis verworfen, die App ging nur nach vorn).
+        if let RunEvent::Opened { urls } = &event {
+            use tauri::Emitter;
+            let pfade: Vec<String> = urls
+                .iter()
+                .filter_map(|u| u.to_file_path().ok())
+                .map(|p| p.to_string_lossy().into_owned())
+                .collect();
+            if let Ok(mut g) = handle.state::<Geoeffnet>().0.lock() {
+                g.extend(pfade);
+            }
+            let _ = handle.emit("dateien", ());
+        }
         if let RunEvent::Exit = event {
             // NUR das selbst gestartete Backend beenden (eiserne Regel);
             // zusätzlich ps-identifizierte eigene Waisen auf dem Port.
