@@ -1,6 +1,5 @@
 # VENDORED aus enrich (privates Repo BenPohlBasel/PDFenrichCLI),
-# Stand enrich@5e169b8 + Arbeitsstand 2026-09-11 (Quelle-und-Person:
-# SourceInfo beim Anlegen) — packages/enrich-serve/src/enrich_serve/textsatz.py.
+# Stand enrich@bc1eac8 — packages/enrich-serve/src/enrich_serve/textsatz.py.
 # Einzige Abweichung: der Import von _FONT_DIR/_sichtbar zeigt auf
 # .schrift (lokaler Extrakt aus refi_text.py). Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude).

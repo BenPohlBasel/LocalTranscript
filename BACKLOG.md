@@ -46,3 +46,36 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Import in ATLAS.ti entpacken; `.qdpx` und `Media`-Ordner müssen
    nebeneinander liegen (User 2026-09-10). Viersprachig, Seite und
    App-Blatt.
+
+5. **Bibliothek als Arbeitsdossiers (`<name>.enrich/`, Format 2,
+   unkomprimiert) — User-Impuls 2026-09-11, Einschätzung: ja, der
+   logische Endpunkt von Format 2.** Eine Form in beide Richtungen:
+   Export = `Dossier.pack(profile="handover")`, Import =
+   `Dossier.uebernehmen`; kein Konverter mehr (`format2.py` fällt
+   weitgehend weg), Journal/Locks/Zotero werden direkt geschrieben,
+   die Bibliothek ist im Finder ein Ordner mit Packages (UTI steht).
+   Entscheide: Arbeitsdossier hält NUR `source/` (Transkript, Audio,
+   Zotero) + Manifest — die Textschichten (PDF, Layout, T0/T1,
+   Zeitkarte) entstehen beim Packen, nicht bei jedem Speichern (8 s
+   beim 3,4-h-Workshop); Bibliotheksordner GETRENNT vom enrich-
+   Projektordner (gleiche Form, anderer Ort — enrichs Index und
+   Warteschlange sollen nicht auf halbfertige Transkripte losgehen;
+   Übergabe bleibt ein bewusster Akt); Audio schon beim Anlegen als
+   mp3 (`pack` transkodiert nicht); neue Segmente/Sprecher als
+   `sg-`/`sp-`-ULID, Altbestand bleibt; `liste()` aus dem Manifest;
+   Migration bestehender Bibliotheken idempotent mit Sicherung
+   (`<stamp>/transkript.json` → `<stamp>.enrich/source/transcript.json`,
+   Audio nach `source/`, Journal übernommen); `_papierkorb/` bleibt
+   ausserhalb. **Blockiert durch zwei Punkte in enrich-core (dort
+   BACKLOG 000, Eintrag «Arbeitsdossier für LocalTranscript»):**
+   (1) Sitzungs-Schreibung — `write_layer` rettet heute bei JEDER
+   Schreibung nach `_history/` (`_history_retten`); der Editor sichert
+   debounced alle paar Sekunden → hunderte MB pro Stunde bei 1148
+   Segmenten. Innerhalb der offenen Sitzung (das Journal bündelt sie
+   schon) muss der Stand ERSETZT werden, nicht gestapelt. (2) Ein
+   Dossier ohne Textschichten muss für enrich ein gültiger Zustand
+   sein: Job «Text setzen aus der Transkript-Schicht» (Bausteine
+   `segmente_als_turns`, `textsatz(transkript=…)` sind da). Dazu:
+   LocalTranscript nimmt enrichs Sidecar-Sperre (`<name>.enrich.lock`,
+   O_EXCL) und respektiert sie. Aufwand hier danach ~1 Tag
+   (`bibliothek.py` auf `Dossier`, Migration, Tests).
