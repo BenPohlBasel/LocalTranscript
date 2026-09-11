@@ -114,3 +114,12 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
   eigenes Modell — aber nur mit `scripts/hf-nach-ggml.py` (Tokentabelle
   nach ID, s. Kopf des Skripts); der unveränderte whisper.cpp-Konverter
   liefert Kauderwelsch.
+- **Schweizerdeutsch: Flurin17/whisper-large-v3-turbo-swiss-german**
+  (turbo-Basis, ~301 h, CC-BY-NC-4.0, bfloat16 — darum die bf16-Hebung im
+  Konverter) läuft als eigenes Modell (`ggml-large-v3-turbo-swiss-
+  german.bin`, 1,6 GB). Auf dem Podcast-Ausschnitt (Standarddeutsch):
+  17,3 s gegen 15,9 s turbo, 634/633 Wörter, gleicher Inhalt; Unterschiede
+  nur Schweizer Schreibung («ss» statt «ß») und Guillemets «…» um jede
+  Äusserung (Untertitel-Stil der Trainingsdaten — für den Editor evtl.
+  beim Import strippen, wenn das Modell in Gebrauch kommt). Der echte
+  Nutzen zeigt sich erst auf Mundart-Aufnahmen — noch nicht gemessen.
