@@ -39,8 +39,10 @@ conversation, special categories of personal data may be involved
 
 ## 4. Data flow of one transcription
 
-1. **Input.** The audio file is read from the local file system of the
-   device (MP3, WAV, M4A, OGG, FLAC).
+1. **Input.** The audio or video file is read from the local file
+   system of the device (audio: MP3, WAV, M4A, OGG, FLAC; video: MP4,
+   MOV, M4V with H.264/HEVC — from video only the sound track is read,
+   the video is never transcoded).
 2. **Processing.** Speech recognition (whisper.cpp, model
    large-v3-turbo) and speaker separation (silero-vad, SpeechBrain
    ECAPA) run inside the application's process on the device's
@@ -50,7 +52,8 @@ conversation, special categories of personal data may be involved
    “Modelle” folder — the application never downloads.
 3. **Storage.** For each transcript a folder is created at the chosen
    location `[path, e.g. ~/Documents/LocalTranscript]` holding a copy of
-   the audio, the canonical transcript file (JSON), history snapshots
+   the audio (for video: the sound track as MP3 and the unchanged video
+   file), the canonical transcript file (JSON), history snapshots
    written on every save, and the derived exports. Temporary working
    files are removed after each run.
 4. **Network.** The software opens no outbound network connections: no

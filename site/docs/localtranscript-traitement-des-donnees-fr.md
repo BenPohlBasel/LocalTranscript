@@ -41,8 +41,10 @@ particulières de données personnelles peuvent être concernées
 
 ## 4. Flux de données d'une transcription
 
-1. **Entrée.** Le fichier audio est lu depuis le système de fichiers
-   local de l'appareil (MP3, WAV, M4A, OGG, FLAC).
+1. **Entrée.** Le fichier audio ou vidéo est lu depuis le système de
+   fichiers local de l'appareil (audio : MP3, WAV, M4A, OGG, FLAC ;
+   vidéo : MP4, MOV, M4V en H.264/HEVC — d'une vidéo seule la piste
+   audio est lue, la vidéo n'est jamais convertie).
 2. **Traitement.** La reconnaissance vocale (whisper.cpp, modèle
    large-v3-turbo) et la séparation des locuteurs (silero-vad,
    SpeechBrain ECAPA) s'exécutent dans le processus de l'application, sur
@@ -54,7 +56,8 @@ particulières de données personnelles peuvent être concernées
    au premier lancement.
 3. **Stockage.** Pour chaque transcription, un dossier est créé à
    l'emplacement choisi `[chemin, p. ex. ~/Documents/LocalTranscript]`
-   contenant une copie de l'audio, le fichier canonique de transcription
+   contenant une copie de l'audio (pour une vidéo : la piste audio en
+   MP3 et le fichier vidéo inchangé), le fichier canonique de transcription
    (JSON), des instantanés d'historique à chaque enregistrement et les
    exports dérivés. Les fichiers de travail temporaires sont supprimés
    après chaque exécution.

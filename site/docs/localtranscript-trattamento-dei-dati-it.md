@@ -40,8 +40,10 @@ personali `[sì / no: …]`.
 
 ## 4. Flusso dei dati di una trascrizione
 
-1. **Ingresso.** Il file audio viene letto dal file system locale del
-   dispositivo (MP3, WAV, M4A, OGG, FLAC).
+1. **Ingresso.** Il file audio o video viene letto dal file system
+   locale del dispositivo (audio: MP3, WAV, M4A, OGG, FLAC; video: MP4,
+   MOV, M4V in H.264/HEVC — da un video viene letta solo la traccia
+   audio, il video non viene mai convertito).
 2. **Elaborazione.** Il riconoscimento vocale (whisper.cpp, modello
    large-v3-turbo) e la separazione dei parlanti (silero-vad, SpeechBrain
    ECAPA) girano nel processo dell'applicazione, sul processore o sulla
@@ -52,7 +54,8 @@ personali `[sì / no: …]`.
    nulla.
 3. **Archiviazione.** Per ogni trascrizione viene creata una cartella
    nella posizione scelta `[percorso, p. es.
-   ~/Documents/LocalTranscript]` con una copia dell'audio, il file
+   ~/Documents/LocalTranscript]` con una copia dell'audio (per un
+   video: la traccia audio in MP3 e il file video invariato), il file
    canonico della trascrizione (JSON), istantanee della cronologia a ogni
    salvataggio e le esportazioni derivate. I file di lavoro temporanei
    vengono rimossi dopo ogni esecuzione.

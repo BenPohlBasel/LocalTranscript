@@ -39,8 +39,10 @@ betroffen sein `[ja / nein: …]`.
 
 ## 4. Datenfluss einer Transkription
 
-1. **Eingabe.** Die Audiodatei wird vom lokalen Dateisystem des
-   Endgeräts eingelesen (MP3, WAV, M4A, OGG, FLAC).
+1. **Eingabe.** Die Audio- oder Videodatei wird vom lokalen Dateisystem
+   des Endgeräts eingelesen (Audio: MP3, WAV, M4A, OGG, FLAC; Video:
+   MP4, MOV, M4V mit H.264/HEVC — aus Video wird nur die Tonspur
+   gelesen, das Video wird nie umgewandelt).
 2. **Verarbeitung.** Spracherkennung (whisper.cpp, Modell
    large-v3-turbo) und Sprechertrennung (silero-vad, SpeechBrain ECAPA)
    laufen im Prozess der Anwendung auf dem Prozessor bzw. der Grafikkarte
@@ -50,7 +52,8 @@ betroffen sein `[ja / nein: …]`.
    Bibliothek legen — die Anwendung lädt nie selbst.
 3. **Ablage.** Je Transkript entsteht ein Ordner am gewählten
    Speicherort `[Pfad, z. B. ~/Documents/LocalTranscript]` mit einer
-   Kopie des Audios, der kanonischen Transkriptdatei (JSON),
+   Kopie des Audios (bei Video: der Tonspur als MP3 und der
+   unveränderten Videodatei), der kanonischen Transkriptdatei (JSON),
    Verlaufsschnappschüssen bei jedem Speichern und den abgeleiteten
    Exporten. Temporäre Arbeitsdateien werden nach jedem Lauf entfernt.
 4. **Netz.** Die Software baut keine ausgehenden Netzverbindungen auf:
