@@ -154,6 +154,20 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Probe: Keyframe-Abstände echter Aufnahmen und Sync-Jitter Ton→Bild
    im WKWebKit messen.
 
+9. **Notarisierung aus Tauri herausnehmen (Befund Release 2.4.1,
+   2026-09-11 abends).** Apples Warteschlange brauchte 22 min statt
+   12–15; Tauris interne Wartezeit lief ab und `tauri build` brach mit
+   leerer Meldung ab — die Einreichung lief bei Apple weiter, das DMG
+   entstand nicht. Nachlauf von Hand: `notarytool wait <id>`, `stapler
+   staple` auf die unveränderte .app, DMG per `hdiutil` (UDZO,
+   Applications-Link), `codesign` des DMG, `notarize-dmg.mjs`. Umbau:
+   `tauri build` OHNE APPLE_*-Variablen (nur signieren), danach eigenes
+   Skript `scripts/notarize-app.mjs` mit `--timeout 2h`, Stapeln, dann
+   DMG wie gehabt; `npm run release` entsprechend verketten. Vorteil:
+   ein Ticket-Timeout kostet nie mehr den Build. Das hdiutil-DMG ist
+   2,1 GB statt Tauris 1,9 GB (Kompressionsstufe) — akzeptabel, oder
+   Tauris `bundle_dmg.sh` aus dem target-Ordner nachnutzen.
+
 ## Gemessen, nicht gebaut
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
