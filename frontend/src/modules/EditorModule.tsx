@@ -1062,7 +1062,12 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
     // dieselbe Kante wie „LocalTranscript" links und der
     // Einstellungen-Knopf rechts. Ghost-Knöpfe tragen negative
     // Ränder, ihr GLYPH sitzt damit ebenfalls auf 16 px.
-    <Flex direction="column" gap="2" px="4" py="3">
+    // Mit Video (User 2026-09-11): die Sprecherliste scrollt für sich,
+    // das Bild bleibt unten in der Spalte sichtbar — egal wie viele
+    // Sprecher. Ohne Video ist der Rahmen derselbe, nur ohne Fuss.
+    <Flex direction="column" style={{ height: "100%" }}>
+    <Flex direction="column" gap="2" px="4" py="3"
+          style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
       {sprecher.map((s) => {
         const n = segmente.filter((x) => x.sprecher === s.id).length;
         return (
@@ -1122,16 +1127,21 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
       })}
       <Button size="1" variant="soft" onClick={onNeu}>
         <Icon name="plus" size={14} /> {tr("ed.sprecher.neu")}</Button>
-      {video && (
-        // Stumm, ohne Controls, so breit wie das Panel; die einzige
-        // Bedienung ist der Audioplayer. Eingefroren = weichgezeichnet.
+    </Flex>
+    {video && (
+      // Fuss der Spalte: stumm, ohne Controls, so breit wie das Panel;
+      // die einzige Bedienung ist der Audioplayer. Eingefroren =
+      // weichgezeichnet.
+      <div style={{ padding: "8px 16px 12px",
+                    borderTop: "1px solid var(--gray-a4)" }}>
         <video ref={video.ref} muted playsInline preload="auto"
                src={`${API_BASE}/api/transcripts/${id}/video`}
-               style={{ width: "100%", borderRadius: 6, marginTop: 8,
+               style={{ width: "100%", borderRadius: 6,
                         background: "#000", display: "block",
                         filter: video.eingefroren ? "blur(6px)" : "none",
                         transition: "filter .25s" }} />
-      )}
+      </div>
+    )}
     </Flex>
   );
 }
