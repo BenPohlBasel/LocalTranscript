@@ -91,6 +91,9 @@ def get_models_dir() -> Path:
 #: (little-endian auf der Platte: «lmgg»). Daran erkennt der Scan eine
 #: echte Modelldatei — eine umbenannte PDF landet nicht in der Auswahl.
 GGML_MAGIC = b"lmgg"
+#: Kleiner ist kein Whisper-Modell (tiny = 75 MB): eine abgebrochene
+#: Umwandlung hinterlässt Kopf + Tokentabelle (~600 KB) mit gültigem Magic.
+MODELL_MIN_BYTES = 30_000_000
 #: Eine Datei, die vor weniger als so vielen Sekunden geändert wurde,
 #: wird gerade noch kopiert (3 GB aus dem Finder) — noch nicht anbieten.
 MODELL_RUHE_S = 5
@@ -121,6 +124,8 @@ def _modell_pruefen(p: Path) -> str | None:
         return "unlesbar"
     if magic != GGML_MAGIC:
         return "kein-ggml"
+    if st.st_size < MODELL_MIN_BYTES:
+        return "unvollstaendig"
     return None
 
 

@@ -7,7 +7,9 @@
 # OpenAI-Vokabulare ohne Lücken, falsch für Modelle mit neu trainiertem
 # Tokenizer (CrisperWhisper: 45 066 Tokens, IDs 0…50257 mit 5 192 Lücken;
 # whisper.cpp nimmt die Position als ID → 44 810 Tokens verschoben →
-# Kauderwelsch, geprüft 2026-09-11).
+# Kauderwelsch, geprüft 2026-09-11). Zweite Änderung: Gewichte werden vor
+# `.numpy()` nach float32 gehoben — bfloat16-Checkpoints (Flurin17) brachen
+# sonst mit «unsupported ScalarType BFloat16» ab.
 #
 # Gebrauch (braucht torch + transformers, z. B. in einer eigenen venv):
 #   huggingface-cli download nyralabs/CrisperWhisper --local-dir cw
@@ -198,7 +200,7 @@ for name in list_vars.keys():
         name = conv_map[name] if name in conv_map else name
 
     print(src, ' -> ', name)
-    data = list_vars[src].squeeze().numpy()
+    data = list_vars[src].squeeze().to(torch.float32).numpy()   # PATCH: bf16-fähig
     data = data.astype(np.float16)
 
     # reshape conv bias from [n] to [n, 1]
