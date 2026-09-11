@@ -3,7 +3,7 @@
 Che cos'è l'app, quale IA al suo interno fa che cosa, dove si trova il
 codice e perché la trascrizione non lascia mai il computer. Da
 consegnare alla direzione del progetto, al comitato etico o ai colleghi.
-Stato al 11 settembre 2026, versione 2.3.0.
+Stato al 11 settembre 2026, versione 2.4.0.
 
 ## Che cosa fa l'app
 
@@ -12,7 +12,10 @@ di gruppo, workshop — in testo con codici temporali e attribuzione dei
 parlanti. La trascrizione viene poi corretta in un editor, i parlanti
 vengono nominati, i nomi sostituiti, e il risultato esportato per
 l'analisi (ATLAS.ti, MAXQDA, NVivo tramite REFI-QDA; enrich; WebVTT,
-CSV, testo). Tutto avviene sul proprio Mac.
+CSV, testo). Anche le registrazioni video (MP4/MOV) sono accettate: il
+suono viene estratto, il video resta invariato con la trascrizione e
+lascia il computer solo se lo si include esplicitamente nell'export
+REFI-QDA. Tutto avviene sul proprio Mac.
 
 ## Quale IA fa che cosa
 
@@ -93,7 +96,7 @@ registrazioni.
 
 ## Per la sezione metodologica
 
-> Le registrazioni sono state trascritte con LocalTranscript 2.3.0
+> Le registrazioni sono state trascritte con LocalTranscript 2.4.0
 > (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
 > modello large-v3-turbo, separazione dei parlanti con SpeechBrain
 > ECAPA-TDNN) interamente in locale su un computer del gruppo di ricerca,

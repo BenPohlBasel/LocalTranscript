@@ -3,7 +3,7 @@
 What the app is, which AI in it does what, where the code lives, and
 why the transcript never leaves your computer. For handing to a project
 lead, an ethics board or colleagues. As of 11 September 2026, version
-2.3.0.
+2.4.0.
 
 ## What the app does
 
@@ -11,8 +11,11 @@ LocalTranscript turns audio recordings — interviews, group discussions,
 workshops — into text with timecodes and speaker attribution. The
 transcript is then corrected in an editor, speakers are named, names are
 replaced, and the result is exported for analysis (ATLAS.ti, MAXQDA,
-NVivo via REFI-QDA; enrich; WebVTT, CSV, plain text). All of it happens
-on your own Mac.
+NVivo via REFI-QDA; enrich; WebVTT, CSV, plain text). Video recordings
+(MP4/MOV) are accepted too: the sound is extracted, the video stays
+unchanged with the transcript and leaves the computer only if you
+explicitly include it in the REFI-QDA export. All of it happens on your
+own Mac.
 
 ## Which AI does what
 
@@ -87,7 +90,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ## For the methods section
 
-> The recordings were transcribed with LocalTranscript 2.3.0 (B/IAS
+> The recordings were transcribed with LocalTranscript 2.4.0 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
 > large-v3-turbo, speaker separation with SpeechBrain ECAPA-TDNN)
 > entirely locally on a computer of the research group, without

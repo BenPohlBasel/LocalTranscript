@@ -3,7 +3,7 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
-## Unreleased
+## 2.4.0 — 2026-09-11
 
 ### Added
 

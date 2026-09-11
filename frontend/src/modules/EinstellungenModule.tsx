@@ -11,8 +11,7 @@ import {
 import { setSprache, useT, type Sprache } from "../lib/i18n";
 import { isTauri, ordnerOeffnen, pickOrdner } from "../lib/tauri";
 
-const BIAS_URL = "https://bias.city/"
-  + "b-ias-basel-institut-fuer-angewandte-stadtforschung/";
+const BIAS_URL = "https://bias.city/localtranscript/";
 
 export default function EinstellungenModule({ settings, onChange }: {
   settings: Settings | null;

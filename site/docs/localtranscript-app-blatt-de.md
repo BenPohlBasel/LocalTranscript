@@ -3,7 +3,7 @@
 Was die App ist, welche KI darin was tut, wo der Code liegt, und warum
 das Transkript den Rechner nicht verlässt. Zum Weitergeben an
 Projektleitung, Ethikkommission oder Kolleg:innen. Stand 11. September
-2026, Version 2.3.0.
+2026, Version 2.4.0.
 
 ## Was die App tut
 
@@ -12,7 +12,10 @@ Workshops — in Text mit Zeitmarken und Sprecherzuordnung um. Danach
 wird das Transkript in einem Editor korrigiert, Sprecher werden
 benannt, Namen ersetzt, und das Ergebnis wird für die Auswertung
 exportiert (ATLAS.ti, MAXQDA, NVivo über REFI-QDA; enrich; WebVTT,
-CSV, Text). Alles davon geschieht auf dem eigenen Mac.
+CSV, Text). Videoaufnahmen (MP4/MOV) nimmt sie ebenfalls an: der Ton
+wird ausgelesen, das Video bleibt unverändert beim Transkript und
+verlässt den Rechner nur, wenn man es beim REFI-QDA-Export ausdrücklich
+mitgibt. Alles davon geschieht auf dem eigenen Mac.
 
 ## Welche KI hier was macht
 
@@ -93,7 +96,7 @@ die Aufnahmen.
 
 ## Für den Methodenteil
 
-> Die Aufnahmen wurden mit LocalTranscript 2.3.0 (B/IAS Basel,
+> Die Aufnahmen wurden mit LocalTranscript 2.4.0 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
 > Sprechertrennung mit SpeechBrain ECAPA-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an

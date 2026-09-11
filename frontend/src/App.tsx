@@ -158,8 +158,7 @@ export default function App() {
 }
 
 const REPO = "https://github.com/BenPohlBasel/LocalTranscript";
-const BIAS = "https://bias.city/"
-  + "b-ias-basel-institut-fuer-angewandte-stadtforschung/";
+const BIAS = "https://bias.city/localtranscript/";
 
 /** Eigener Über-Dialog: das macOS-Standardpanel zeigt nur Name und
     Version, und Links darin wären nicht klickbar. Die Texte kommen aus

@@ -3,7 +3,7 @@
 Ce qu'est l'application, quelle IA y fait quoi, où se trouve le code,
 et pourquoi la transcription ne quitte jamais l'ordinateur. À remettre à
 une direction de projet, un comité d'éthique ou des collègues. État au
-11 septembre 2026, version 2.3.0.
+11 septembre 2026, version 2.4.0.
 
 ## Ce que fait l'application
 
@@ -12,7 +12,11 @@ discussions de groupe, ateliers — en texte avec codes temporels et
 attribution des locuteurs. La transcription est ensuite corrigée dans un
 éditeur, les locuteurs sont nommés, les noms remplacés, et le résultat
 est exporté pour l'analyse (ATLAS.ti, MAXQDA, NVivo via REFI-QDA ;
-enrich ; WebVTT, CSV, texte). Tout cela se passe sur votre propre Mac.
+enrich ; WebVTT, CSV, texte). Les enregistrements vidéo (MP4/MOV) sont
+aussi acceptés : le son est extrait, la vidéo reste inchangée avec la
+transcription et ne quitte l'ordinateur que si on l'inclut
+explicitement dans l'export REFI-QDA. Tout cela se passe sur votre
+propre Mac.
 
 ## Quelle IA fait quoi
 
@@ -94,7 +98,7 @@ enregistrements.
 
 ## Pour la partie méthodologique
 
-> Les enregistrements ont été transcrits avec LocalTranscript 2.3.0
+> Les enregistrements ont été transcrits avec LocalTranscript 2.4.0
 > (B/IAS Bâle, AGPL-3.0 ; reconnaissance vocale whisper.cpp avec le
 > modèle large-v3-turbo, séparation des locuteurs avec SpeechBrain
 > ECAPA-TDNN) entièrement en local sur un ordinateur du groupe de
