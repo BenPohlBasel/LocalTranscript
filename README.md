@@ -157,6 +157,9 @@ whisper.cpp model there (`ggml-*.bin` — large-v3-turbo, a quantised
 variant, a fine-tune converted with whisper.cpp's converter) and it
 appears in the model list, marked as your own; a file with the same
 name as a bundled model replaces it. The app never downloads models.
+A Hugging Face fine-tune is converted with `scripts/hf-nach-ggml.py`
+(whisper.cpp's converter, with the token table written by id — needed
+for models with a retrained tokenizer such as CrisperWhisper).
 Files are checked (ggml magic, finished copying) before they are
 offered, and Settings names what was ignored and why. Settings also
 show the full list of bundled components with their

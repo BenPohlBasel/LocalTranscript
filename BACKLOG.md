@@ -92,3 +92,25 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    LocalTranscript nimmt enrichs Sidecar-Sperre (`<name>.enrich.lock`,
    O_EXCL) und respektiert sie. Aufwand hier danach ~1 Tag
    (`bibliothek.py` auf `Dossier`, Migration, Tests).
+
+## Gemessen, nicht gebaut
+
+- **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
+  MLX wäre gut»).** Messung auf diesem Mac, 5-min-Ausschnitt einer echten
+  Aufnahme, large-v3-turbo: `whisper-cli` (whisper.cpp, Metal, Flags der
+  App) **15,9 s**, `mlx_whisper` 0.4.3 (mlx 0.32, GPU) **13,1 s** — gleicher
+  Wortlaut (633 Wörter). MLX ist ~18 % schneller: pro Stunde Audio ~3,2 min
+  statt ~2,6 min. Dafür ein zweiter Runtime-Pfad (mlx, numba, tiktoken im
+  Bundle, ~200 MB), ein zweites Modellformat im Modelle-Ordner, und für
+  Modelle mit eigenem Tokenizer (CrisperWhisper) eine gepatchte
+  Tokenizer-Ladung, weil mlx_whisper das OpenAI-Vokabular fest verdrahtet.
+  Entscheid: nicht bauen, solange whisper.cpp nicht zurückfällt. Falls
+  Beschleunigung nötig wird, zuerst whisper.cpps CoreML-Encoder prüfen
+  (die gebündelte `whisper-cli` ist ohne CoreML gebaut — `strings` findet
+  keinen CoreML-Bezug); das ist derselbe Runtime, nur ein Build-Flag.
+  Nebenbefund: `-nt` (ohne Zeitstempel) lässt whisper.cpp ganze Fenster
+  fallen (518 statt 633 Wörter) — die App setzt es nicht, richtig so.
+- **CrisperWhisper** (nyralabs, Basis large-v3, CC-BY-NC-4.0) läuft als
+  eigenes Modell — aber nur mit `scripts/hf-nach-ggml.py` (Tokentabelle
+  nach ID, s. Kopf des Skripts); der unveränderte whisper.cpp-Konverter
+  liefert Kauderwelsch.
