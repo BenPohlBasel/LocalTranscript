@@ -57,8 +57,11 @@ def test_export_traegt_app_install_und_email(client, eintrag):
     assert m["producer"]["app"] == "localtranscript"
     eigene = [r for r in m["runs"] if r["who"]["app"] == "localtranscript"]
     assert eigene and all(r["who"]["install"].startswith("ins-") for r in eigene)
-    assert eigene[0]["who"].get("user") is None and eigene[-1]["who"]["user"] == "nora@uni.ch"
-    assert eigene[-1]["origin"] == "human"
+    assert eigene[0]["who"].get("user") is None
+    # der letzte MENSCHLICHE Run trägt die Person; danach folgt nur noch
+    # die Schreibung der Transkript-Schicht beim Export (machine)
+    menschlich = [r for r in eigene if r["origin"] == "human"]
+    assert menschlich and menschlich[-1]["who"]["user"] == "nora@uni.ch"
     # Die Person steht im Journal (who.user) UND im Kopf der übernommenen
     # Quelle (`by`, enrich@edc497e respektiert ein mitgebrachtes `by`)
     assert tj["kind"] == "transcript" and tj["origin"] in ("mixed", "human")
