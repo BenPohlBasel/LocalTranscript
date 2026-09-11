@@ -606,3 +606,17 @@ body { margin: 0; background: var(--gray-1); }
   background: var(--color-panel-solid);
   box-shadow: 0 0 0 2px var(--accent-a4);
 }
+
+/* SegTabs in einer schmalen Kopfzeile (Editor-Seitenspalte): die
+   Knöpfe teilen sich die Breite, Beschriftungen werden mit «…»
+   gekürzt statt über den Panelrand zu laufen (User 2026-09-11). Radix
+   legt im Label (flex) zwei Spans übereinander — aktiv im Fluss,
+   inaktiv absolut; das Label bleibt flex, nur Überlauf und Ellipse
+   kommen dazu. */
+.ui-segtabs-fit { display: flex; width: 100%; min-width: 0; }
+.ui-segtabs-fit .rt-SegmentedControlItem { flex: 1 1 0; min-width: 0; }
+.ui-segtabs-fit .rt-SegmentedControlItemLabel { min-width: 0; overflow: hidden; }
+.ui-segtabs-fit .rt-SegmentedControlItemLabelActive,
+.ui-segtabs-fit .rt-SegmentedControlItemLabelInactive {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }

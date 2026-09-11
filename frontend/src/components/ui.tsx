@@ -814,15 +814,20 @@ export function SearchField({ value, onChange, placeholder }: {
 }
 
 /** Segment-Umschalter (Quelle wählen, Geltungsbereich …). */
-export function SegTabs({ value, onChange, options }: {
+export function SegTabs({ value, onChange, options, fit }: {
   value: string; onChange: (v: string) => void;
+  /** In eine schmale Kopfzeile einpassen (LocalTranscript 2026-09-11):
+      volle Breite, die Knöpfe teilen sich den Platz, zu lange
+      Beschriftungen enden in «…» statt aus dem Panel zu laufen. */
+  fit?: boolean;
   // icon optional (2026-08-07, Textmengen-Switch im Fragen-Tab): Icon
   // und/oder Label; title trägt die Erklärung (Tooltip + a11y).
   options: { value: string; label: string; icon?: IconName;
              title?: string }[];
 }) {
   return (
-    <SegmentedControl.Root value={value} onValueChange={onChange} size="1">
+    <SegmentedControl.Root value={value} onValueChange={onChange} size="1"
+                           className={fit ? "ui-segtabs-fit" : undefined}>
       {options.map((o) => (
         <SegmentedControl.Item key={o.value} value={o.value}
                                title={o.title} aria-label={o.title || o.label}>

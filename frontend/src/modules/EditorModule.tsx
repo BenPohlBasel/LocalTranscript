@@ -614,7 +614,7 @@ export default function EditorModule({ id, onExit }: {
       <SidePanel side="right" storageKey={KEYS.sidebarSprecher}
                  defaultWidth={260} resizable
                  title={
-                   <SegTabs value={seitenTab}
+                   <SegTabs value={seitenTab} fit
                      onChange={(v) => {
                        sset(KEYS.editorSeitenTab, v);
                        setSeitenTab(v as SeitenTab);
