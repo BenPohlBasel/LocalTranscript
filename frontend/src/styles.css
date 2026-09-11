@@ -608,15 +608,16 @@ body { margin: 0; background: var(--gray-1); }
 }
 
 /* SegTabs in einer schmalen Kopfzeile (Editor-Seitenspalte): die
-   Knöpfe teilen sich die Breite, Beschriftungen werden mit «…»
-   gekürzt statt über den Panelrand zu laufen (User 2026-09-11). Radix
-   legt im Label (flex) zwei Spans übereinander — aktiv im Fluss,
-   inaktiv absolut; das Label bleibt flex, nur Überlauf und Ellipse
-   kommen dazu. */
-.ui-segtabs-fit { display: flex; width: 100%; min-width: 0; }
-.ui-segtabs-fit .rt-SegmentedControlItem { flex: 1 1 0; min-width: 0; }
-.ui-segtabs-fit .rt-SegmentedControlItemLabel { min-width: 0; overflow: hidden; }
-.ui-segtabs-fit .rt-SegmentedControlItemLabelActive,
-.ui-segtabs-fit .rt-SegmentedControlItemLabelInactive {
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
-  white-space: nowrap; }
+   Knöpfe behalten ihre natürliche Breite und BRECHEN in die nächste
+   Zeile um, wenn der Platz (16-px-Rand) nicht reicht — keine Ellipse,
+   nichts gedrängt (User 2026-09-11). Radix' gleitende Pille setzt eine
+   Zeile voraus; sie ist hier aus, der aktive Knopf trägt die Pille als
+   eigenen Hintergrund. */
+.ui-segtabs-fit { display: flex; flex-wrap: wrap; width: 100%; min-width: 0;
+  height: auto; row-gap: 4px; }
+.ui-segtabs-fit .rt-SegmentedControlIndicator,
+.ui-segtabs-fit .rt-SegmentedControlSeparator { display: none; }
+.ui-segtabs-fit .rt-SegmentedControlItem { flex: 0 0 auto; }
+.ui-segtabs-fit .rt-SegmentedControlItem[data-state='on'] .rt-SegmentedControlItemLabel {
+  background: var(--color-panel-solid); border-radius: var(--radius-2);
+  box-shadow: 0 0 0 1px var(--gray-a4), 0 1px 2px var(--black-a3); }
