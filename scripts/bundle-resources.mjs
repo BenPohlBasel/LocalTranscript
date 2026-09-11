@@ -78,7 +78,9 @@ if (forceVenv || leer(venv) || !fs.existsSync(path.join(venv, "bin/python3"))) {
     fs.rmSync(p); fs.symlinkSync(rel, p);
   }
   const pip = path.join(venv, "bin/pip");
-  if (!da(ENRICH_CORE)) {
+  // enrich-core kommt seit 2.4.0 als Git-Abhängigkeit (öffentliches
+  // MIT-Paket) — pip holt es; ein Pfad-Check gilt nur für lokale Pfade.
+  if (!ENRICH_CORE.includes("git+") && !da(ENRICH_CORE)) {
     console.error(`enrich-core fehlt (${ENRICH_CORE}) — der .enrich-Export braucht es.`);
     process.exit(1);
   }
