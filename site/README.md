@@ -60,11 +60,17 @@ Zeile.
 
 ## Bildschirmfotos
 
-`img/<motiv>-<sprache>.png`, acht Motive mal vier Sprachen — das
-Hero-Bild und zu jedem Schritt der Anleitung eines. Die Anleitungsbilder
-stammen aus einem auf 800 × 500 verkleinerten Fenster: neben dem Text
-bleibt so alles lesbar, was in einem 1280er-Fenster zu Fliegendreck
-würde (Vorschlag des Users). Beim
+`img/<motiv>-<sprache>.png`, zehn Motive mal vier Sprachen — das
+Hero-Bild und zu jedem Schritt der Anleitung eines (Zotero: zwei,
+Suche und verknüpft). Dazu drei sprachneutrale Bilder: der Import-
+Dialog (`import-dialog.png`) und zwei **schematische** Ansichten
+(`zotero-item.png`, `models-folder.png`) — nachgebaute Fenster von
+Zotero und Finder als Illustration, keine echten Bildschirmfotos,
+beschriftet als «Schematische Ansicht». Die Zotero-Bilder zeigen
+erfundene Einträge zum erfundenen Interview, nie eine echte Bibliothek.
+Die Anleitungsbilder stammen aus einem 1200 × 750-Fenster (bis 2.2.0
+800 × 500): neben dem Text bleibt so alles lesbar, was in einem
+1280er-Fenster zu Fliegendreck würde (Vorschlag des Users). Beim
 Sprachwechsel tauscht das Skript die Quelle jedes `img[data-img]` aus,
 die Seite zeigt die App also immer in der gerade gewählten Sprache.
 
