@@ -145,9 +145,14 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    (`VideoSource`, Datei im `Media/`-Ordner); **enrich bleibt Ton
    (mp3) — Entscheid User 2026-09-11: «enrich hat nur Ton».**
    Datenschutzblätter ×4 um Video (Gesichter, biometrisch) ergänzen;
-   iCloud-Warnung (6) wird damit dringend. Aufwand ~2 Tage; erster Schritt eine halbe Stunde Probe:
-   Keyframe-Abstände echter Aufnahmen und Sync-Jitter Ton→Bild im
-   WKWebKit messen.
+   iCloud-Warnung (6) wird damit dringend. **Bestätigt 2026-09-11: ohne Umwandlung, auch nicht optional** —
+   Original bleibt Original; Sprünge kosten bei langen Keyframe-
+   Abständen bis ~0,5 s, das Einfrieren beim Shuttle fängt es ab.
+   Einzige denkbare Ausnahme, falls die Probe sie nötig macht: ein
+   verlustfreies Umpacken des Containers (mov → mp4, Sekunden, keine
+   Bildänderung). Aufwand ~2 Tage; erster Schritt eine halbe Stunde
+   Probe: Keyframe-Abstände echter Aufnahmen und Sync-Jitter Ton→Bild
+   im WKWebKit messen.
 
 ## Gemessen, nicht gebaut
 
