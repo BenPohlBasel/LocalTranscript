@@ -1141,8 +1141,11 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
                     borderTop: "1px solid var(--gray-a4)" }}>
         <video ref={video.setEl} muted playsInline preload="auto"
                src={`${API_BASE}/api/transcripts/${id}/video`}
-               style={{ width: "100%", borderRadius: 6,
-                        background: "#000", display: "block",
+               // Hochformat (9:16) würde bei Panelbreite fast die ganze
+               // Spalte füllen — deshalb eine Höhengrenze; das Bild wird
+               // dann auf schwarzem Grund eingepasst (User-Frage 2026-09-11)
+               style={{ width: "100%", maxHeight: "45vh", objectFit: "contain",
+                        borderRadius: 6, background: "#000", display: "block",
                         filter: video.eingefroren ? "blur(6px)" : "none",
                         transition: "filter .25s" }} />
       </div>
