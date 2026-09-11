@@ -117,26 +117,32 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Rollen (interviewee, castMember, guest … nicht vorausgewählt).
    Optional die Hilfezeile «Rollen wie in Zotero» viersprachig.
 
-8. **Video (User-Konzept 2026-09-11).** Eingang: ffprobe prüft Dauer
-   ≤ 3 h und Höhe ≤ 1080 (Vortrags-/Vorlesungsformat); Ton wie heute
-   nach mp3, Bild als eigene Datei `video.mp4` in den Eintrag — beim
-   Eingang umgewandelt (H.264 in MP4, `h264_videotoolbox`, Keyframe-
-   Abstand 1 s `-g 30`, `+faststart`; VP9/webm/mkv/AV1 werden nicht
-   kopiert, sondern gewandelt), grössere Quellen mit Hinweis auf 720p.
+8. **Video (User-Konzept 2026-09-11).** Eingang: **keine Grenze bei
+   Dauer oder Auflösung, nur Dateigrösse ≤ 10 GB.** Es wird **nichts
+   umgewandelt**: angenommen wird, was der WKWebKit nativ spielt — H.264
+   und HEVC in MP4/MOV/M4V (AV1 nur, wo die Hardware es dekodiert);
+   alles Ältere oder Fremde (VP8/VP9/webm, mkv, AVI/DivX/WMV, MPEG-2,
+   …) wird **abgewiesen mit Hinweis** («Video wird nicht umgewandelt —
+   extern als H.264/MP4 exportieren, z. B. HandBrake»). ffprobe liefert
+   Codec, Container und Grösse für die Prüfung. Ton wie heute nach mp3,
+   Bild als eigene Datei unverändert in den Eintrag kopiert.
    **Bild und Ton getrennt: Ton führt, Bild folgt** — der Audioplayer
    bleibt Zeitquelle, das Video läuft stumm und wird alle ~250 ms auf
    `audio.currentTime` nachgezogen, `playbackRate` 0,5–2× mit; bei
    Shuttle (J/K/L ≥ 2×, rückwärts, Sprünge) Bild einfrieren und
-   weichzeichnen, danach scharf und weiter (WebKit kann nicht rückwärts,
-   Suchen landet auf Keyframes). Fusszeile rechts ein Video-Icon: erst
-   PROBE Bild-in-Bild des Systems (`requestPictureInPicture` im
+   weichzeichnen, danach scharf und weiter (WebKit kann nicht rückwärts;
+   Suchen landet auf dem vorigen Keyframe — bei langen Keyframe-
+   Abständen einer Aufnahme dauert der Sprung entsprechend, das ist der
+   Preis dafür, nichts umzuwandeln). Fusszeile rechts ein Video-Icon:
+   erst PROBE Bild-in-Bild des Systems (`requestPictureInPicture` im
    WKWebKit; eigene PiP-Knöpfe abfangen), sonst zweites Tauri-Fenster
    mit Position/Rate über Events. Export: qdpx-Häkchen «Video mitgeben»
    (`VideoSource`, Datei im `Media/`-Ordner); **enrich bleibt Ton
    (mp3) — Entscheid User 2026-09-11: «enrich hat nur Ton».**
    Datenschutzblätter ×4 um Video (Gesichter, biometrisch) ergänzen;
-   iCloud-Warnung (6) wird damit dringend. Aufwand 3–4 Tage; erster
-   Schritt eine Stunde Probe (PiP, Keyframe-Abstände echter Aufnahmen).
+   iCloud-Warnung (6) wird damit dringend. Aufwand 2–3 Tage (ohne
+   Umwandlung weniger); erster Schritt eine Stunde Probe (PiP,
+   Keyframe-Abstände echter Aufnahmen).
 
 ## Gemessen, nicht gebaut
 
