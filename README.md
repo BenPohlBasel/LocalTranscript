@@ -274,7 +274,11 @@ the ticket is already stapled the script does nothing and saves the
 
 `bundle-resources.mjs` takes the python runtime, whisper-cli/dylibs and
 models from a v1 checkout sitting next to this one
-(`../whisper-web/electron/resources`) and builds the venv fresh.
+(`../whisper-web/electron/resources`) and builds the venv fresh. The
+dossier reader/writer comes from the public package
+[enrich-core](https://github.com/BenPohlBasel/enrich-core) (MIT), pinned
+to a tag in `backend/pyproject.toml` — the same code the tests run
+against.
 **ffmpeg**: a redistributable GPL static build from
 <https://ffmpeg.martin-riedl.de> (macos/arm64/release) →
 `frontend/src-tauri/resources/bin/ffmpeg`; the script refuses nonfree
@@ -294,9 +298,10 @@ references the schema URL, so the MIT attribution requirement does not
 apply.
 
 **enrich dossier (`.enrich`).** The format is described in
-`FORMAT.md` in the enrich repository — Format 2, which enrich and
-LocalTranscript write today, and Format 1 for reading — under the
-**MIT licence** (B/IAS).
+`FORMAT.md` — Format 2, which enrich and LocalTranscript write today,
+and Format 1 for reading — and implemented by the reference package
+[enrich-core](https://github.com/BenPohlBasel/enrich-core), both under
+the **MIT licence** (B/IAS).
 
 **WebVTT** (W3C) · **CSV** · **TXT** are open and unrestricted.
 
@@ -317,7 +322,7 @@ of §13. The source is public anyway; the "Source code (GitHub)" button
 in the About dialog is the offer inside the app itself.
 
 Bundled, among others: whisper.cpp (MIT), large-v3-turbo model (OpenAI,
-MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0),
-FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
+MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0), PyTorch
+(BSD-3), enrich-core (B/IAS, MIT), FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
 (GPL-3.0 build, `--enable-gpl --enable-version3`) — the complete list is
 in the settings.

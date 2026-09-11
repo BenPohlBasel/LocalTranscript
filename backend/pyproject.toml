@@ -22,10 +22,14 @@ dependencies = [
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.5"]
 
 [tool.uv.sources]
-# Side-Projekt von enrich: enrich-core liegt als Geschwister-Checkout.
+# enrich-core ist seit 2026-09-11 ein eigenes, öffentliches Paket (MIT):
+# https://github.com/BenPohlBasel/enrich-core — der Format-Kern des
+# .enrich-Dossiers. Gebaut und getestet wird gegen den getaggten Stand;
+# der Geschwister-Checkout ../enrich dient nur noch dem Drift-Guard für
+# turns.py (enrich-serve/textimport).
 # Der gebaute App-Bundle-venv trägt es mit; ein frischer Clone braucht
 # ../enrich (README).
-enrich-core = { path = "../../enrich/packages/enrich-core", editable = true }
+enrich-core = { git = "https://github.com/BenPohlBasel/enrich-core", tag = "v0.1.0" }
 
 [build-system]
 requires = ["hatchling"]

@@ -7,6 +7,14 @@ a version are the corresponding section of this file.
 
 ### Added
 
+- **enrich-core is a public MIT package.** The dossier reader/writer
+  that LocalTranscript bundles — manifest, schemas, journal, naming
+  convention, transcript source, Zotero layer — now lives at
+  <https://github.com/BenPohlBasel/enrich-core> under the MIT licence,
+  like `FORMAT.md`. The app is built against the tagged release
+  (v0.1.0), so the source offer of the AGPL app covers everything in
+  the bundle. Settings name it in the licence list.
+
 - **Video as a source.** Drop an MP4/MOV/M4V (H.264 or HEVC) into the
   batch list or pick it as the audio of an import: the sound track is
   extracted to mp3 as the working copy for Whisper and the editor, the

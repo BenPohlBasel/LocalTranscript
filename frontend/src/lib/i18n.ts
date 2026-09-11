@@ -341,7 +341,7 @@ const W: Record<string, Eintrag> = {
     fr: "REFI-QDA (.qdpx) — LocalTranscript prend en charge l'export vers REFI-QDA ; la spécification est sous licence MIT, Copyright 2019 REFI-QDA. Aucune certification officielle, aucune licence de marque.",
     it: "REFI-QDA (.qdpx) — LocalTranscript supporta l'export in REFI-QDA; la specifica è sotto licenza MIT, Copyright 2019 REFI-QDA. Nessuna certificazione ufficiale, nessuna licenza di marchio." },
   "st.formate.enrich": {
-    de: "enrich-Dossier (.enrich) — Formatbeschreibung FORMAT.md im enrich-Repository, MIT-Lizenz, B/IAS. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
+    de: "enrich-Dossier (.enrich) — Formatbeschreibung FORMAT.md und Referenz-Leser enrich-core, beide MIT (github.com/BenPohlBasel/enrich-core), B/IAS. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
     en: "enrich dossier (.enrich) — format description FORMAT.md in the enrich repository, MIT licence, B/IAS. WebVTT (W3C) · CSV · TXT are open and unrestricted.",
     fr: "Dossier enrich (.enrich) — description du format FORMAT.md dans le dépôt enrich, licence MIT, B/IAS. WebVTT (W3C) · CSV · TXT sont ouverts et sans restriction.",
     it: "Dossier enrich (.enrich) — descrizione del formato FORMAT.md nel repository enrich, licenza MIT, B/IAS. WebVTT (W3C) · CSV · TXT sono aperti e senza restrizioni." },
@@ -475,10 +475,10 @@ const W: Record<string, Eintrag> = {
   "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
     it: "Licenze" },
   "st.lizenzen.text": {
-    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, Dossier-Format FORMAT.md MIT) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) u. a. — LocalTranscript selbst: AGPL-3.0-or-later.",
-    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, dossier format FORMAT.md MIT) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) and others — LocalTranscript itself: AGPL-3.0-or-later.",
-    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, format FORMAT.md MIT) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript : AGPL-3.0-or-later.",
-    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, format FORMAT.md MIT) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript: AGPL-3.0-or-later." },
+    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) u. a. — LocalTranscript selbst: AGPL-3.0-or-later.",
+    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) and others — LocalTranscript itself: AGPL-3.0-or-later.",
+    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript : AGPL-3.0-or-later.",
+    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeechBrain ECAPA (Apache-2.0) · PyTorch (BSD-3) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript: AGPL-3.0-or-later." },
   "st.app": { de: "LocalTranscript", en: "LocalTranscript",
     fr: "LocalTranscript", it: "LocalTranscript" },
   "st.app.sub": {

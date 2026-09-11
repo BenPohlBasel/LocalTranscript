@@ -15,7 +15,10 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RES = path.join(ROOT, "frontend/src-tauri/resources");
 const ALT = path.resolve(ROOT, "../whisper-web/electron/resources");
-const ENRICH_CORE = path.resolve(ROOT, "../enrich/packages/enrich-core");
+// enrich-core: das öffentliche MIT-Paket, genau der Stand, gegen den
+// getestet wird (backend/pyproject.toml [tool.uv.sources]) — nie mehr
+// der Geschwister-Checkout, der auch die Analyse-Module trägt.
+const ENRICH_CORE = "enrich-core @ git+https://github.com/BenPohlBasel/enrich-core@v0.1.0";
 const forceVenv = process.argv.includes("--force-venv");
 
 function da(p) { try { return fs.statSync(p).isDirectory(); } catch { return false; } }
