@@ -22,7 +22,10 @@ CSV, testo). Tutto avviene sul proprio Mac.
 | silero-vad | Attività vocale: rileva dove si parla | MIT | in locale |
 | SpeechBrain ECAPA-TDNN | Separazione dei parlanti: calcola profili vocali e li raggruppa per parlante | Apache-2.0 | in locale |
 
-Tutti e tre i modelli sono contenuti nel pacchetto dell'applicazione.
+Tutti e tre i modelli sono contenuti nel pacchetto dell'applicazione
+(un altro modello whisper.cpp può essere collocato nella cartella
+«Modelle» della libreria; non fa parte di questo elenco, e il giornale
+di ogni trascrizione indica il modello usato).
 Non c'è accesso a un servizio di IA, nessun account, nessuna chiave.
 
 **Nessuna IA generativa.** Nulla viene riassunto, riformulato o

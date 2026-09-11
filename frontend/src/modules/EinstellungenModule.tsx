@@ -5,8 +5,8 @@ import {
   Button, Flex, Grid, Karte, LabeledSelect, Switch, Text, TextField,
 } from "../components/ui";
 import {
-  apiGet, apiSend, errMsg, type ModellInfo, type Settings,
-  type ZoteroStatus,
+  apiGet, apiSend, errMsg, type ModellInfo, type ModellListe,
+  type Settings, type ZoteroStatus,
 } from "../lib/api";
 import { setSprache, useT, type Sprache } from "../lib/i18n";
 import { isTauri, ordnerOeffnen, pickOrdner } from "../lib/tauri";
@@ -22,12 +22,16 @@ export default function EinstellungenModule({ settings, onChange }: {
   const [fehler, setFehler] = useState("");
   const [modelle, setModelle] = useState<ModellInfo[]>([]);
   const [modelsDir, setModelsDir] = useState("");
-  useEffect(() => {
-    void apiGet<{ models: ModellInfo[]; models_dir: string }>(
-      "/api/models").then((r) => {
-        setModelle(r.models); setModelsDir(r.models_dir);
-      }).catch(() => undefined);
-  }, []);
+  const [eigeneDir, setEigeneDir] = useState<string | null>(null);
+  const [ungueltig, setUngueltig] = useState<ModellListe["ungueltig"]>([]);
+  // Jeder Aufruf ist ein Scan — «Neu einlesen» ruft dasselbe
+  const modelleLaden = () => {
+    void apiGet<ModellListe>("/api/models").then((r) => {
+      setModelle(r.models); setModelsDir(r.models_dir);
+      setEigeneDir(r.eigene_dir); setUngueltig(r.ungueltig);
+    }).catch(() => undefined);
+  };
+  useEffect(modelleLaden, []);
 
   const setze = (aend: Record<string, unknown>) => {
     void apiSend<Settings>("/api/settings", aend)
@@ -79,8 +83,14 @@ export default function EinstellungenModule({ settings, onChange }: {
           <LabeledSelect label={tr("bib.modell")}
             value={settings.model}
             onChange={(v) => setze({ model: v })}
-            options={(modelle.length ? modelle.map((m) => m.name)
-              : [settings.model])} />
+            options={modelle.some((m) => m.name === settings.model)
+              ? modelle.map((m) => m.name)
+              : [settings.model, ...modelle.map((m) => m.name)]}
+            optionLabels={Object.fromEntries(modelle.map((m) => [m.name,
+              `${m.name} · ${m.size_mb >= 1000
+                ? `${(m.size_mb / 1000).toFixed(1)} GB`
+                : `${Math.round(m.size_mb)} MB`}${
+                m.quelle === "eigen" ? ` · ${tr("st.modell.eigen")}` : ""}`]))} />
           <LabeledSelect label={tr("bib.sprache")}
             value={settings.language}
             onChange={(v) => setze({ language: v })}
@@ -101,9 +111,37 @@ export default function EinstellungenModule({ settings, onChange }: {
             optionLabels={{ de: "Deutsch", en: "English",
               fr: "Français", it: "Italiano" }} />
         </Flex>
+        {modelle.length > 0 && !modelle.some((m) => m.name === settings.model) && (
+          <Text size="1" color="red" mt="2" as="div">
+            {tr("st.modell.fehlt", { m: settings.model })}</Text>
+        )}
         {modelsDir && (
           <Text size="1" color="gray" mt="2" as="div">
             {tr("st.modelle", { d: modelsDir })}</Text>
+        )}
+        {/* Eigene Modelle (User 2026-09-11): still ein Ordner in der
+            Bibliothek, kein Laden-Knopf — 1–3 GB kopiert man im Finder,
+            die App merkt sich keinen Pfad, der brechen könnte. */}
+        {eigeneDir && (
+          <Flex direction="column" gap="1" mt="3">
+            <Text size="1" weight="medium">{tr("st.modell.eigene")}</Text>
+            <Text size="1" color="gray">{tr("st.modell.eigene.text")}</Text>
+            <Flex gap="2" align="center" wrap="wrap">
+              <Text size="1" style={{ fontFamily: "monospace" }}>{eigeneDir}</Text>
+              {isTauri() && (
+                <Button size="1" variant="soft"
+                        onClick={() => void ordnerOeffnen(eigeneDir)}>
+                  {tr("bib.ordner")}</Button>
+              )}
+              <Button size="1" variant="soft" onClick={modelleLaden}>
+                {tr("st.modell.neu")}</Button>
+            </Flex>
+            {ungueltig.map((u) => (
+              <Text size="1" color="red" key={u.datei}>
+                {u.datei}: {tr(`st.modell.grund.${u.grund}`)}</Text>
+            ))}
+            <Text size="1" color="gray">{tr("st.modell.eigene.hinweis")}</Text>
+          </Flex>
         )}
       </Karte>
 

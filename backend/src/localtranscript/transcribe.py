@@ -17,7 +17,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import get_models_dir, get_whisper_cli
+from .config import get_whisper_cli, model_pfad
 
 
 @dataclass
@@ -38,10 +38,7 @@ def parse_timestamp(ts: str) -> float:
 
 
 def _model_path(model: str) -> Path:
-    p = get_models_dir() / f"ggml-{model}.bin"
-    if not p.exists():
-        raise FileNotFoundError(f"Modell nicht gefunden: {p}")
-    return p
+    return model_pfad(model)   # eigener Ordner zuerst, dann Bundle
 
 
 def _segments_from_json(json_path: Path,

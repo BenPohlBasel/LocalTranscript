@@ -46,7 +46,9 @@ personali `[sì / no: …]`.
    large-v3-turbo) e la separazione dei parlanti (silero-vad, SpeechBrain
    ECAPA) girano nel processo dell'applicazione, sul processore o sulla
    scheda grafica del dispositivo. Tutti i modelli sono contenuti nel
-   pacchetto dell'applicazione; al primo avvio non viene scaricato
+   pacchetto dell'applicazione (altri modelli whisper.cpp si possono
+   aggiungere solo a mano, nella cartella «Modelle» della libreria —
+   l'applicazione non scarica mai); al primo avvio non viene scaricato
    nulla.
 3. **Archiviazione.** Per ogni trascrizione viene creata una cartella
    nella posizione scelta `[percorso, p. es.

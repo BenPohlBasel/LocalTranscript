@@ -83,7 +83,12 @@ export type ZoteroMeta = {
   select_link: string | null; creators: ZoteroCreator[];
   rollen?: string[]; origin?: string; imported_at?: string;
 };
-export type ModellInfo = { name: string; size_mb: number };
+export type ModellInfo = { name: string; size_mb: number;
+                           quelle: "bundled" | "eigen" };
+export type ModellListe = {
+  models: ModellInfo[]; models_dir: string; eigene_dir: string | null;
+  ungueltig: { datei: string; grund: string }[];
+};
 
 export function errMsg(e: unknown): string {
   if (e instanceof Error) return e.message;

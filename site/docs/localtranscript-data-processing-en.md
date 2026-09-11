@@ -45,7 +45,9 @@ conversation, special categories of personal data may be involved
    large-v3-turbo) and speaker separation (silero-vad, SpeechBrain
    ECAPA) run inside the application's process on the device's
    processor or graphics unit. All models are contained in the
-   application package; nothing is downloaded on first launch.
+   application package; nothing is downloaded on first launch. A user
+   can add whisper.cpp models only by hand, into the library's
+   “Modelle” folder — the application never downloads.
 3. **Storage.** For each transcript a folder is created at the chosen
    location `[path, e.g. ~/Documents/LocalTranscript]` holding a copy of
    the audio, the canonical transcript file (JSON), history snapshots

@@ -47,7 +47,10 @@ particulières de données personnelles peuvent être concernées
    large-v3-turbo) et la séparation des locuteurs (silero-vad,
    SpeechBrain ECAPA) s'exécutent dans le processus de l'application, sur
    le processeur ou la carte graphique de l'appareil. Tous les modèles
-   sont contenus dans le paquet de l'application ; rien n'est téléchargé
+   sont contenus dans le paquet de l'application (d'autres modèles
+   whisper.cpp ne peuvent être ajoutés qu'à la main, dans le dossier
+   « Modelle » de la bibliothèque — l'application ne télécharge
+   jamais) ; rien n'est téléchargé
    au premier lancement.
 3. **Stockage.** Pour chaque transcription, un dossier est créé à
    l'emplacement choisi `[chemin, p. ex. ~/Documents/LocalTranscript]`

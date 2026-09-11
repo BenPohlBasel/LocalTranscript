@@ -7,6 +7,14 @@ a version are the corresponding section of this file.
 
 ### Added
 
+- **Your own Whisper models.** Drop any whisper.cpp model
+  (`ggml-*.bin`) into the library's `Modelle` folder and it appears in
+  the model list, marked as your own; a file with the same name as a
+  bundled model replaces it. Files are checked (ggml magic, finished
+  copying) before they are offered; Settings show the folder, open it,
+  rescan, and name what was ignored and why. The app never downloads
+  models; the journal records which model transcribed a recording.
+
 - **Metadata from Zotero.** A third tab in the editor's side panel —
   Speakers | Find | Metadata — links a transcript to an item in your
   local Zotero library. Search by title, year, name or citekey

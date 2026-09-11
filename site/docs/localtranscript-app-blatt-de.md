@@ -23,7 +23,10 @@ CSV, Text). Alles davon geschieht auf dem eigenen Mac.
 | SpeechBrain ECAPA-TDNN | Sprechertrennung: berechnet Stimmprofile und gruppiert sie zu Sprechern | Apache-2.0 | lokal |
 
 Alle drei Modelle liegen im Programmpaket. Es gibt keinen Zugang zu
-einem KI-Dienst, kein Konto, keinen Schlüssel.
+einem KI-Dienst, kein Konto, keinen Schlüssel. Wer ein anderes
+whisper.cpp-Modell einsetzen will, legt es selbst in den Ordner
+«Modelle» der Bibliothek; ein solches Modell ist nicht Teil dieser
+Liste, und im Journal jedes Transkripts steht, womit es entstand.
 
 **Keine generative KI.** Nichts wird zusammengefasst, umformuliert oder
 interpretiert. Die App liefert, was gesagt wurde — nicht, was gemeint

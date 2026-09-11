@@ -85,8 +85,20 @@ def health() -> dict:
 
 @app.get("/api/models")
 def models() -> dict:
+    """Mitgelieferte + eigene Modelle. Jeder Aufruf ist ein Scan (ein
+    Glob) — ein in `<Bibliothek>/Modelle/` abgelegtes Modell erscheint
+    beim nächsten Öffnen der Einstellungen. Der Ordner wird hier
+    angelegt, damit er im Finder existiert."""
+    eigene = config.get_eigene_modelle_dir()
+    if eigene is not None:
+        try:
+            eigene.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
     return {"models": config.get_available_models(),
-            "models_dir": str(config.get_models_dir())}
+            "models_dir": str(config.get_models_dir()),
+            "eigene_dir": str(eigene) if eigene else None,
+            "ungueltig": config.get_ungueltige_modelle()}
 
 
 @app.get("/api/settings")

@@ -150,7 +150,16 @@ and nothing is lost on the way out or back in.
 ![Settings](docs/screenshots/06-settings.png)
 
 Storage location, default model and language, interface language,
-simultaneous runs — and the full list of bundled components with their
+simultaneous runs — and
+
+**Your own models.** The library has a `Modelle` folder. Put any
+whisper.cpp model there (`ggml-*.bin` — large-v3-turbo, a quantised
+variant, a fine-tune converted with whisper.cpp's converter) and it
+appears in the model list, marked as your own; a file with the same
+name as a bundled model replaces it. The app never downloads models.
+Files are checked (ggml magic, finished copying) before they are
+offered, and Settings names what was ignored and why. Settings also
+show the full list of bundled components with their
 licences, the interchange formats with theirs, and the links to the
 sources. The same texts appear in the *About LocalTranscript* dialog in
 the app menu.

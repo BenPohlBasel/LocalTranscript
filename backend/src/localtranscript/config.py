@@ -17,6 +17,7 @@ import json
 import os
 import shutil
 import sys
+import time
 from pathlib import Path
 
 APP_NAME = "LocalTranscript"
@@ -86,15 +87,91 @@ def get_models_dir() -> Path:
     return app_models
 
 
+#: whisper.cpp-Modelldateien beginnen mit dem ggml-Magic 0x67676d6c
+#: (little-endian auf der Platte: «lmgg»). Daran erkennt der Scan eine
+#: echte Modelldatei — eine umbenannte PDF landet nicht in der Auswahl.
+GGML_MAGIC = b"lmgg"
+#: Eine Datei, die vor weniger als so vielen Sekunden geändert wurde,
+#: wird gerade noch kopiert (3 GB aus dem Finder) — noch nicht anbieten.
+MODELL_RUHE_S = 5
+#: Ordnername in der Bibliothek (User 2026-09-11: «still ein Modell-Ordner
+#: im Bibliotheks-Ordner, in den man Modelle dropt»).
+EIGENE_MODELLE = "Modelle"
+
+
+def get_eigene_modelle_dir() -> Path | None:
+    """`<Bibliothek>/Modelle/` — der Ordner, in den die Person eigene
+    `ggml-*.bin` legt. None, solange keine Bibliothek gewählt ist.
+    Nie der Bundle-Ordner: der ist signiert, jede fremde Datei darin
+    bricht die Signatur, und jedes Update ersetzt ihn."""
+    root = library_root()
+    return root / EIGENE_MODELLE if root else None
+
+
+def _modell_pruefen(p: Path) -> str | None:
+    """None, wenn die Datei ein fertiges whisper.cpp-Modell ist — sonst
+    der Grund (für die Einstellungen, nicht für die Auswahl)."""
+    try:
+        st = p.stat()
+        if time.time() - st.st_mtime < MODELL_RUHE_S:
+            return "kopiert"
+        with p.open("rb") as f:
+            magic = f.read(4)
+    except OSError:
+        return "unlesbar"
+    if magic != GGML_MAGIC:
+        return "kein-ggml"
+    return None
+
+
 def get_available_models() -> list[dict]:
+    """Mitgelieferte und eigene Modelle als EINE Liste. Bei gleichem Namen
+    gewinnt das eigene (so ersetzt man das mitgelieferte `medium` durch
+    eine quantisierte Variante). Eigene Modelle werden geprüft (Magic,
+    fertig kopiert); was durchfällt, steht in `ungueltig`."""
+    nach_name: dict[str, dict] = {}
     d = get_models_dir()
-    aus = []
     if d.is_dir():
         for p in sorted(d.glob("ggml-*.bin")):
-            aus.append({"name": p.stem.replace("ggml-", ""),
-                        "size_mb": round(p.stat().st_size / 1e6, 1)})
-    aus.sort(key=lambda m: m["size_mb"])
+            nach_name[p.stem[5:]] = {
+                "name": p.stem[5:], "size_mb": round(p.stat().st_size / 1e6, 1),
+                "quelle": "bundled"}
+    e = get_eigene_modelle_dir()
+    if e is not None and e.is_dir():
+        for p in sorted(e.glob("ggml-*.bin")):
+            if _modell_pruefen(p) is None:
+                nach_name[p.stem[5:]] = {
+                    "name": p.stem[5:], "size_mb": round(p.stat().st_size / 1e6, 1),
+                    "quelle": "eigen"}
+    aus = sorted(nach_name.values(), key=lambda m: m["size_mb"])
     return aus
+
+
+def get_ungueltige_modelle() -> list[dict]:
+    """Dateien im eigenen Ordner, die (noch) kein Modell sind — mit Grund."""
+    e = get_eigene_modelle_dir()
+    if e is None or not e.is_dir():
+        return []
+    aus = []
+    for p in sorted(e.iterdir()):
+        if p.name.startswith(".") or p.is_dir():
+            continue
+        grund = _modell_pruefen(p) if p.name.startswith("ggml-") and p.suffix == ".bin" \
+            else "name"
+        if grund is not None:
+            aus.append({"datei": p.name, "grund": grund})
+    return aus
+
+
+def model_pfad(model: str) -> Path:
+    """Die Datei zum Modellnamen — eigener Ordner zuerst, dann Bundle."""
+    e = get_eigene_modelle_dir()
+    kandidaten = ([e / f"ggml-{model}.bin"] if e is not None else []) + \
+        [get_models_dir() / f"ggml-{model}.bin"]
+    for p in kandidaten:
+        if p.is_file():
+            return p
+    raise FileNotFoundError(f"Modell nicht gefunden: {kandidaten[-1]}")
 
 
 # ---------- Einstellungen ----------

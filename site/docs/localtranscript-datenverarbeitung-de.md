@@ -45,7 +45,9 @@ betroffen sein `[ja / nein: …]`.
    large-v3-turbo) und Sprechertrennung (silero-vad, SpeechBrain ECAPA)
    laufen im Prozess der Anwendung auf dem Prozessor bzw. der Grafikkarte
    des Endgeräts. Sämtliche Modelle sind im Programmpaket enthalten; beim
-   ersten Start wird nichts nachgeladen.
+   ersten Start wird nichts nachgeladen. Eigene whisper.cpp-Modelle
+   kann die Anwenderin nur von Hand in den Ordner «Modelle» der
+   Bibliothek legen — die Anwendung lädt nie selbst.
 3. **Ablage.** Je Transkript entsteht ein Ordner am gewählten
    Speicherort `[Pfad, z. B. ~/Documents/LocalTranscript]` mit einer
    Kopie des Audios, der kanonischen Transkriptdatei (JSON),

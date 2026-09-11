@@ -23,7 +23,10 @@ on your own Mac.
 | SpeechBrain ECAPA-TDNN | Speaker separation: computes voice profiles and clusters them into speakers | Apache-2.0 | locally |
 
 All three models ship inside the application package. There is no
-access to an AI service, no account, no API key.
+access to an AI service, no account, no API key. Anyone wishing to use
+a different whisper.cpp model places it in the library's “Modelle”
+folder themselves; such a model is not part of this list, and each
+transcript's journal records which model produced it.
 
 **No generative AI.** Nothing is summarised, rephrased or interpreted.
 The app delivers what was said — not what was meant.

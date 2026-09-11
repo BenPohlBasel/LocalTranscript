@@ -22,7 +22,10 @@ enrich ; WebVTT, CSV, texte). Tout cela se passe sur votre propre Mac.
 | silero-vad | Activité vocale : détecte où l'on parle | MIT | localement |
 | SpeechBrain ECAPA-TDNN | Séparation des locuteurs : calcule des profils de voix et les regroupe par locuteur | Apache-2.0 | localement |
 
-Les trois modèles sont contenus dans le paquet de l'application. Il n'y
+Les trois modèles sont contenus dans le paquet de l'application (un
+autre modèle whisper.cpp peut être déposé dans le dossier « Modelle »
+de la bibliothèque ; il ne fait pas partie de cette liste, et le
+journal de chaque transcription indique le modèle utilisé). Il n'y
 a ni accès à un service d'IA, ni compte, ni clé.
 
 **Pas d'IA générative.** Rien n'est résumé, reformulé ni interprété.
