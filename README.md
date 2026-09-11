@@ -36,6 +36,11 @@ dropped, and a waiting job can still be cancelled.
 
 ![Batch list with one running and one queued file](docs/screenshots/01-batch.png)
 
+The bundled models are `large-v3-turbo` and `medium`. Any other
+whisper.cpp model — a Swiss German fine-tune, a quantised variant —
+goes into the library's `Modelle` folder and appears in the model list;
+see *Your own models* under Settings below. The app never downloads.
+
 The *Speakers* option is an exact count, not a range: `1` means no
 separation and everything ends up as one speaker, `2`–`6` force exactly
 that many, `Automatic` lets the clustering decide. *Separation* sets how eagerly voices are
