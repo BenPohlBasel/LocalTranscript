@@ -46,7 +46,12 @@ export default function EditorModule({ id, onExit }: {
   // Ton führt, Bild folgt; ab 2× oder bei Sprüngen eingefroren
   const [hatVideo, setHatVideo] = useState(false);
   const [eingefroren, setEingefroren] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // Das Element als STATE, nicht als Ref: das Sprecher-Panel wird beim
+  // Wechsel auf «Suchen»/«Metadaten» ausgehängt, das Video mit ihm —
+  // der Sync-Effekt muss sich an jedes neu eingehängte Element hängen
+  // (Review 2026-09-11: vorher folgte das Bild nach einem Tab-Wechsel
+  // nie wieder dem Ton).
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
   const [fehler, setFehler] = useState("");
   const [speichert, setSpeichert] = useState(false);
   const [gespeichert, setGespeichert] = useState("");
@@ -332,8 +337,8 @@ export default function EditorModule({ id, onExit }: {
   // schneller als nötig und nie rückwärts); ein Sprung friert kurz ein,
   // bis das Bild an der neuen Stelle wieder da ist.
   useEffect(() => {
-    const a = audioRef.current, v = videoRef.current;
-    if (!a || !v || !hatVideo) return;
+    const a = audioRef.current, v = videoEl;
+    if (!a || !v || !hatVideo) { setEingefroren(false); return; }
     const zieh = () => {
       if (Math.abs(v.currentTime - a.currentTime) > 0.25)
         v.currentTime = a.currentTime;
@@ -368,7 +373,7 @@ export default function EditorModule({ id, onExit }: {
       a.removeEventListener("seeking", sprung);
       v.removeEventListener("seeked", angekommen);
     };
-  }, [hatAudio, hatVideo]);
+  }, [hatAudio, hatVideo, videoEl]);
 
   useEffect(() => {
     // Tastatur-Schema v2 (User 2026-08-30 — Ctrl+Pfeile frisst
@@ -467,7 +472,7 @@ export default function EditorModule({ id, onExit }: {
     try {
       if (isTauri()) {
         const p = await savePath(`${name || "transkript"}.${endung}`,
-                                 format === "qdpx" ? "zip" : format);
+                                 format.startsWith("qdpx") ? "zip" : format);
         if (!p) return;
         await apiSend(`/api/transcripts/${id}/export`,
                       { format, path: p });
@@ -627,7 +632,7 @@ export default function EditorModule({ id, onExit }: {
                            onRename={umbenennen} onNeu={sprecherNeu}
                            onMerge={zusammenfuehren}
                            onLeere={leereZuweisen}
-                           video={hatVideo ? { ref: videoRef,
+                           video={hatVideo ? { setEl: setVideoEl,
                              eingefroren } : null} />
           : seitenTab === "suchen"
             ? <SuchPanel segmente={segmente} onZeige={zeigeTreffer}
@@ -1020,7 +1025,7 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
   id: string; sprecher: Sprecher[]; segmente: Segment[];
   hatAudio: boolean;
   /** Video fest unter den Sprechern, ohne Knöpfe (BACKLOG 8) */
-  video?: { ref: React.RefObject<HTMLVideoElement>;
+  video?: { setEl: (el: HTMLVideoElement | null) => void;
             eingefroren: boolean } | null;
   onRename: (id: string, name: string) => void;
   onNeu: () => void;
@@ -1134,7 +1139,7 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
       // weichgezeichnet.
       <div style={{ padding: "8px 16px 12px",
                     borderTop: "1px solid var(--gray-a4)" }}>
-        <video ref={video.ref} muted playsInline preload="auto"
+        <video ref={video.setEl} muted playsInline preload="auto"
                src={`${API_BASE}/api/transcripts/${id}/video`}
                style={{ width: "100%", borderRadius: 6,
                         background: "#000", display: "block",

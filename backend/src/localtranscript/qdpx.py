@@ -204,9 +204,12 @@ def baue_projekt(name: str, segmente: list[dict], sprecher: list[dict],
 
 def baue_zip(name: str, segmente: list[dict], sprecher: list[dict],
              audio: Path | None, codes: bool = True,
-             video: Path | None = None) -> bytes:
+             video: Path | None = None, ziel: Path | None = None) -> bytes:
     """Das ganze Paket: <Name>.qdpx + <Name> Media/ in EINEM Zip.
-    `video` statt `audio`: die Mediendatei ist das Video (VideoSource)."""
+    `video` statt `audio`: die Mediendatei ist das Video (VideoSource).
+    Mit `ziel` wird direkt in die Datei geschrieben (Rückgabe leer) —
+    ein Video kann Gigabytes haben, das gehört nie als bytes in den
+    Speicher; `z.write` streamt es."""
     if video is not None and video.is_file():
         audio = video
     audio_name = audio.name if audio and audio.is_file() else None
@@ -224,7 +227,7 @@ def baue_zip(name: str, segmente: list[dict], sprecher: list[dict],
         # Zeichen des BOM-losen Textes
         z.writestr(f"sources/{txt_guid}.txt", text.encode("utf-8"))
 
-    aussen = io.BytesIO()
+    aussen: io.BytesIO | Path = ziel if ziel is not None else io.BytesIO()
     # Audio wird nicht noch einmal komprimiert (mp3 ist es schon) —
     # ZIP_STORED spart bei 300-MB-Mitschnitten Minuten.
     with zipfile.ZipFile(aussen, "w", zipfile.ZIP_DEFLATED) as z:
@@ -233,4 +236,4 @@ def baue_zip(name: str, segmente: list[dict], sprecher: list[dict],
             z.write(audio, f"{name} Media/{audio_guid}"
                            f"{Path(audio_name).suffix}",
                     compress_type=zipfile.ZIP_STORED)
-    return aussen.getvalue()
+    return aussen.getvalue() if isinstance(aussen, io.BytesIO) else b""

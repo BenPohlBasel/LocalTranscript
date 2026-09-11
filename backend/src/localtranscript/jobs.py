@@ -200,10 +200,22 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
         ist_video = _video.pruefe(quelle) is not None
         wav = _konvertiere(job, quelle, tmp)
         audio_fuer_bibliothek = quelle
-        if ist_video:
-            _setze(job, message="Tonspur")
-            audio_fuer_bibliothek = _video.ton_extrahieren(
-                quelle, tmp / "audio.mp3")
+        if quelle.suffix.lower() in bibliothek.VIDEO_ENDUNGEN:
+            # Aus einem Video-Container (auch ohne Bild) kommt die
+            # Bibliotheks-Tonspur als mp3 — als Job-Prozess, damit
+            # «Abbrechen» auch hier greift (Review 2026-09-11)
+            _setze(job, message="tonspur")
+            mp3 = tmp / "audio.mp3"
+            proc = subprocess.Popen(_video.ton_befehl(quelle, mp3),
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL)
+            _PROC[job["id"]] = proc
+            proc.wait()
+            _PROC[job["id"]] = None
+            _pruefe_abbruch(job)
+            if proc.returncode != 0 or not mp3.is_file():
+                raise RuntimeError("Tonspur konnte nicht gelesen werden (ffmpeg)")
+            audio_fuer_bibliothek = mp3
         segmente: list[dict] = []
         sprecher: list[dict] = []
 

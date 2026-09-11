@@ -54,17 +54,7 @@ def export_bytes(eid: str, format: str) -> tuple[bytes, str, str]:
                               bibliothek.audio_pfad(eid)),
                 f"{stamm}.qdpx.zip", "application/zip")
     if format == "qdpx-video":
-        # «Video mitgeben» (BACKLOG 8): VideoSource, die Videodatei im
-        # Media-Ordner — nur angeboten, wenn der Eintrag ein Video hat
-        from . import qdpx
-        if not seg:
-            raise ValueError("Leeres Transkript — nichts zu exportieren")
-        video = bibliothek.video_pfad(eid)
-        if video is None:
-            raise ValueError("Dieser Eintrag hat kein Video")
-        return (qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
-                              bibliothek.audio_pfad(eid), video=video),
-                f"{stamm}.qdpx.zip", "application/zip")
+        raise ValueError("qdpx-video wird gestreamt — export_nach() nutzen")
     raise ValueError(f"Unbekanntes Format: {format}")
 
 
@@ -153,6 +143,29 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
         # Journal der Bibliothek davor, producer/title, dann die Sendung
         # (Profil handover) über enrichs eigenen Packer.
         return baue_container(daten, d, stamm)
+
+
+def export_nach(eid: str, format: str, ziel: Path) -> str:
+    """Export direkt in eine Datei. «REFI-QDA mit Video» (BACKLOG 8)
+    streamt das Video in das Zip — es kann Gigabytes haben und darf nie
+    als EIN bytes-Objekt durch den Speicher (Review 2026-09-11); alle
+    anderen Formate schreiben ihre Bytes. Gibt den Dateinamen zurück."""
+    if format != "qdpx-video":
+        inhalt, name, _media = export_bytes(eid, format)
+        ziel.write_bytes(inhalt)
+        return name
+    from . import qdpx
+    daten = bibliothek.lese(eid)
+    seg = bibliothek.export_segmente(daten)
+    stamm = bibliothek._slug(daten["name"])
+    if not seg:
+        raise ValueError("Leeres Transkript — nichts zu exportieren")
+    video = bibliothek.video_pfad(eid)
+    if video is None:
+        raise ValueError("Dieser Eintrag hat kein Video")
+    qdpx.baue_zip(stamm, seg, daten.get("sprecher", []),
+                  bibliothek.audio_pfad(eid), video=video, ziel=ziel)
+    return f"{stamm}.qdpx.zip"
 
 
 def packe_verzeichnis(ordner: Path) -> bytes:

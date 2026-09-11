@@ -81,12 +81,17 @@ def pruefe(pfad: Path) -> dict | None:
     return info
 
 
+def ton_befehl(quelle: Path, ziel: Path) -> list[str]:
+    """ffmpeg-Aufruf: die Tonspur als mp3 (q2, wie der enrich-Export) —
+    Arbeitskopie für Whisper, Editor und Exporte. Das Video selbst bleibt
+    unangetastet. Als Befehl, damit ein Job ihn selbst starten und beim
+    Abbruch killen kann."""
+    return [get_ffmpeg_cli(), "-y", "-i", str(quelle), "-vn",
+            "-c:a", "libmp3lame", "-q:a", "2", str(ziel)]
+
+
 def ton_extrahieren(quelle: Path, ziel: Path) -> Path:
-    """Die Tonspur als mp3 (q2, wie der enrich-Export) — Arbeitskopie für
-    Whisper, Editor und Exporte. Das Video selbst bleibt unangetastet."""
-    r = subprocess.run(
-        [get_ffmpeg_cli(), "-y", "-i", str(quelle), "-vn", "-c:a", "libmp3lame",
-         "-q:a", "2", str(ziel)], capture_output=True)
+    r = subprocess.run(ton_befehl(quelle, ziel), capture_output=True)
     if r.returncode != 0 or not ziel.is_file():
         raise RuntimeError("Tonspur konnte nicht gelesen werden (ffmpeg)")
     return ziel

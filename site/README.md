@@ -60,9 +60,9 @@ Zeile.
 
 ## Bildschirmfotos
 
-`img/<motiv>-<sprache>.png`, zehn Motive mal vier Sprachen — das
+`img/<motiv>-<sprache>.png`, elf Motive mal vier Sprachen — das
 Hero-Bild und zu jedem Schritt der Anleitung eines (Zotero: zwei,
-Suche und verknüpft). Dazu zwei sprachneutrale Bilder: der Import-
+Suche und verknüpft; Editor: zwei, Sprecher und Video). Dazu zwei sprachneutrale Bilder: der Import-
 Dialog (`import-dialog.png`) und eine **schematische** Ansicht
 (`models-folder.png`) — ein nachgebautes Finder-Fenster als
 Illustration, kein echtes Bildschirmfoto, beschriftet als

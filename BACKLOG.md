@@ -106,7 +106,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    `com.apple.icloud.desktop`-Marker prüfen), und einen Ort ausserhalb
    anbieten.
 
-7. ~~**Zotero-Rollen nicht übersetzen (User-Entscheid 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG Unreleased). Die
+7. ~~**Zotero-Rollen nicht übersetzen (User-Entscheid 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG 2.4.0). Die
    Rollen kommen aus Zotero (creatorType: interviewer, interviewee,
    director, producer, castMember, podcaster, guest …) und sollen im
    Metadaten-Reiter und in der verknüpften Ansicht so stehen, wie Zotero
@@ -117,7 +117,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Rollen (interviewee, castMember, guest … nicht vorausgewählt).
    Optional die Hilfezeile «Rollen wie in Zotero» viersprachig.
 
-8. ~~**Video (User-Konzept 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG Unreleased; geprüft in Chromium und WebKit: Bild folgt dem Ton auf < 0,25 s, Sprung, Einfrieren ab 2×). Konzept: Eingang: **keine Grenze bei
+8. ~~**Video (User-Konzept 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG 2.4.0; geprüft in Chromium und WebKit: Bild folgt dem Ton auf < 0,25 s, Sprung, Einfrieren ab 2×). Konzept: Eingang: **keine Grenze bei
    Dauer oder Auflösung, nur Dateigrösse ≤ 10 GB.** Es wird **nichts
    umgewandelt**: angenommen wird, was der WKWebKit nativ spielt — H.264
    und HEVC in MP4/MOV/M4V (AV1 nur, wo die Hardware es dekodiert);

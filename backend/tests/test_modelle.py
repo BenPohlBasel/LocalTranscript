@@ -70,7 +70,7 @@ def test_ausgelagerte_icloud_datei_wird_nicht_geoeffnet(client, tmp_path, monkey
         return echt_open(self, *a, **k)
     monkeypatch.setattr(Path, "open", _open)
     m = client.get("/api/models").json()
-    assert [u for u in m["ungueltig"] if u["datei"] == "ggml-wolke.bin"][0]["grund"] == "icloud"
+    assert next(u for u in m["ungueltig"] if u["datei"] == "ggml-wolke.bin")["grund"] == "icloud"
     assert not [x for x in m["models"] if x["name"] == "wolke"] and not geoeffnet
 
 

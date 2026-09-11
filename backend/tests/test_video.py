@@ -73,7 +73,7 @@ def test_import_mit_video_zieht_ton_und_behaelt_video(client, tmp_path):
     assert d["audio"] == "audio.mp3" and d["video"] == "video.mp4"
     assert bibliothek.video_pfad(eid).read_bytes() == mp4.read_bytes()   # unverändert
     assert bibliothek.audio_pfad(eid).stat().st_size > 1000
-    assert [e for e in bibliothek.liste() if e["id"] == eid][0]["video"] is True
+    assert next(e for e in bibliothek.liste() if e["id"] == eid)["video"] is True
     # Video-Route mit Range (der WebView springt so an die Stelle)
     r = client.get(f"/api/transcripts/{eid}/video", headers={"Range": "bytes=0-99"})
     assert r.status_code == 206 and len(r.content) == 100
@@ -84,14 +84,32 @@ def test_import_mit_video_zieht_ton_und_behaelt_video(client, tmp_path):
     assert any(n.endswith("/source/audio.mp3") for n in namen)
     assert not any(n.endswith(".mp4") for n in namen)
     # qdpx: wahlweise mit Video (VideoSource + Datei im Media-Ordner)
-    inhalt, _n, _m = exporte.export_bytes(eid, "qdpx-video")
-    aussen = zipfile.ZipFile(io.BytesIO(inhalt))
+    ziel = tmp_path / "aus.qdpx.zip"
+    assert exporte.export_nach(eid, "qdpx-video", ziel) == "interview.qdpx.zip"
+    aussen = zipfile.ZipFile(ziel)                               # gestreamt, nie als bytes
     assert any(n.endswith(".mp4") for n in aussen.namelist())
     qde = zipfile.ZipFile(io.BytesIO(aussen.read("interview.qdpx"))).read("interview.qde").decode()
     assert "<VideoSource" in qde and "<AudioSource" not in qde and "SyncPoint" in qde
     inhalt, _n, _m = exporte.export_bytes(eid, "qdpx")
     aussen = zipfile.ZipFile(io.BytesIO(inhalt))
     assert any(n.endswith(".mp3") for n in aussen.namelist())
+
+
+def test_ton_container_ohne_bild_ist_kein_video(client, tmp_path):
+    """Eine .mp4 mit nur Tonspur (m4a-artig) wird zur mp3 — kein
+    video.mp4, kein schwarzes Bild, kein «mit Video»-Export."""
+    nur_ton = tmp_path / "ton.mp4"
+    subprocess.run([config.get_ffmpeg_cli(), "-v", "quiet", "-y", "-f", "lavfi",
+                    "-i", "sine=frequency=440", "-t", "2", "-c:a", "aac", str(nur_ton)], check=True)
+    assert video.pruefe(nur_ton) is None
+    r = client.post("/api/import", files={
+        "datei": ("ton.vtt", VTT.encode(), "text/vtt"),
+        "audio": ("ton.mp4", nur_ton.read_bytes(), "video/mp4")})
+    assert r.status_code == 200, r.text
+    d = bibliothek.lese(r.json()["eintrag"])
+    assert d["audio"] == "audio.mp3" and not d.get("video")
+    r = client.get(f"/api/transcripts/{d['id']}/export/qdpx-video")
+    assert r.status_code == 409
 
 
 def test_fremder_container_wird_vor_dem_job_abgewiesen(client, tmp_path):

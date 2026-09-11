@@ -248,22 +248,28 @@ def _import_turns(turns: list[dict], name: str, quelle_art: str,
                   audio: Path | None) -> dict:
     """`audio` darf auch ein Video sein: dann wird der Ton gezogen und
     das Video unverändert mitgenommen (BACKLOG 8)."""
+    import shutil
     import tempfile
 
     from . import video as _video
     tmp: Path | None = None
-    video_pfad: Path | None = None
-    if audio is not None and audio.is_file() \
-            and audio.suffix.lower() in bibliothek.VIDEO_ENDUNGEN:
-        _video_pruefen(audio)
-        tmp = Path(tempfile.mkdtemp(prefix="lt-imp-video-"))
-        video_pfad = audio
-        audio = _video.ton_extrahieren(audio, tmp / "audio.mp3")
     try:
+        video_pfad: Path | None = None
+        if audio is not None and audio.is_file() \
+                and audio.suffix.lower() in bibliothek.VIDEO_ENDUNGEN:
+            _video_pruefen(audio)
+            # Video nur, wenn ein Bild drin ist (pruefe() sagt es) — ein
+            # reiner Ton-Container (.m4a-artige .mp4) wird zur mp3
+            if _video.pruefe(audio) is not None:
+                video_pfad = audio
+            tmp = Path(tempfile.mkdtemp(prefix="lt-imp-video-"))
+            try:
+                audio = _video.ton_extrahieren(audio, tmp / "audio.mp3")
+            except RuntimeError as e:
+                raise HTTPException(status_code=422, detail=str(e)) from e
         return _import_turns_roh(turns, name, quelle_art, audio, video_pfad)
     finally:
         if tmp is not None:
-            import shutil
             shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -601,6 +607,18 @@ def sprecher_sample(eid: str, sid: str, tasks: BackgroundTasks):
 
 @app.get("/api/transcripts/{eid}/export/{format}")
 def export_download(eid: str, format: str) -> Response:
+    if format == "qdpx-video":
+        # Das Video kann Gigabytes haben: auf die Platte streamen, nie
+        # als ein bytes-Objekt (Review 2026-09-11)
+        from starlette.background import BackgroundTask
+        tmp = _tmpdatei(".zip", "lt-exp-")
+        try:
+            name = exporte.export_nach(eid, format, tmp)
+        except (BibliothekFehler, ValueError) as e:
+            tmp.unlink(missing_ok=True)
+            raise HTTPException(status_code=409, detail=str(e)) from e
+        return FileResponse(tmp, media_type="application/zip", filename=name,
+                            background=BackgroundTask(tmp.unlink, missing_ok=True))
     try:
         inhalt, name, media = exporte.export_bytes(eid, format)
     except (BibliothekFehler, ValueError) as e:
@@ -617,10 +635,6 @@ class ExportReq(ApiModel):
 @app.post("/api/transcripts/{eid}/export")
 def export_datei(eid: str, req: ExportReq) -> dict:
     """App-Weg: nativer Save-Dialog liefert den Zielpfad."""
-    try:
-        inhalt, _name, _media = exporte.export_bytes(eid, req.format)
-    except (BibliothekFehler, ValueError) as e:
-        raise HTTPException(status_code=409, detail=str(e)) from e
     ziel = Path(req.path).expanduser().resolve()
     if not ziel.parent.is_dir():
         raise HTTPException(status_code=409,
@@ -634,7 +648,10 @@ def export_datei(eid: str, req: ExportReq) -> dict:
     if ziel.suffix.lower() != erlaubt:
         raise HTTPException(status_code=409,
                             detail=f"Zieldatei muss auf {erlaubt} enden")
-    ziel.write_bytes(inhalt)
+    try:
+        exporte.export_nach(eid, req.format, ziel)
+    except (BibliothekFehler, ValueError) as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
     return {"status": "exported", "path": str(ziel)}
 
 
