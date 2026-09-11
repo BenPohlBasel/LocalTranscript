@@ -221,6 +221,11 @@ def lies(z: zipfile.ZipFile, wurzel: str, m: dict) -> dict | None:
         sl = zotero.get("select_link")
         if not (isinstance(sl, str) and sl.startswith("zotero://select/")):
             zotero["select_link"] = None
+        # Die Rollenwahl reist nicht als Feld mit (enrichs Schema kennt sie
+        # nicht), steckt aber in den mitgenommenen Personen: «Neu laden»
+        # soll dieselben Rollen holen, nicht die Vorauswahl
+        zotero["rollen"] = sorted({c.get("role") or "author"
+                                   for c in zotero.get("creators") or []})
     return {"name": m.get("title") or t.get("name") or "",
             "segmente": segmente, "sprecher": sprecher,
             "audio_name": audio_name, "audio_bytes": audio_bytes,

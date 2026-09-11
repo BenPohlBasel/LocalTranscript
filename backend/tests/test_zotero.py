@@ -109,6 +109,8 @@ def test_export_traegt_zotero_schicht(client, zot, eintrag):
     assert neu["zotero"]["citekey"] == "whitfield2026"
     assert neu["zotero"]["origin"] == "source"
     assert neu["zotero"]["select_link"].startswith("zotero://select/")
+    # die Rollenwahl kommt aus den mitgereisten Personen zurück
+    assert neu["zotero"]["rollen"] == ["interviewee", "interviewer"]
 
 
 def test_fremder_select_link_wird_verworfen(client, zot, eintrag):
