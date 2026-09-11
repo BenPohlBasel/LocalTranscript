@@ -1,13 +1,14 @@
 """Der .enrich-Container nach FORMAT.md, Format 2 — enrich-core schreibt,
 LocalTranscript ergänzt.
 
-Das gevendorte enrich-Werkzeug (`enrich_export.textsatz`) setzt aus dem
-Transkript das Dossier: Transkript-Schicht (die QUELLE, `source/
-transcript.json`), PDF (`rendered`), Layout, T0, T1, Zeitkarte — und
-enrich-core führt dabei das Manifest nach Format 2 (Inventar `files`,
-Lineage `layers`, `source`, Journal mit `prev`-Kette, Namenskonvention
-Anhang A). Dieser Modul legt darauf NUR, was enrich nicht wissen kann
-(Stand enrich@5e169b8, 2026-09-11):
+`exporte._enrich_paket` legt das Dossier über enrich-core an:
+Transkript-Schicht (die QUELLE, `source/transcript.json`), Audio,
+Zotero — kein gesetztes PDF mehr (FORMAT.md §5, enrich f871d33: die
+empfangende Anwendung setzt die Lesefassung selbst). enrich-core führt
+dabei das Manifest nach Format 2 (Inventar `files`, Lineage `layers`,
+`source`, Journal mit `prev`-Kette, Namenskonvention Anhang A). Dieser
+Modul legt darauf NUR, was enrich nicht wissen kann (Stand
+enrich@f871d33, 2026-09-11):
 
 - Die Transkript-Schicht selbst — aus der Bibliotheksform, mit `origin`
   je Segment und Sprecher und dem `by` (Whisper-Modell, Sprechertrennung,

@@ -82,7 +82,7 @@ def test_verknuepfen_waehlt_rollen_und_journalt(client, zot, eintrag):
     assert "zotero" not in d and d["journal"][-1]["changed"] == {"zotero": "removed"}
 
 
-def test_export_traegt_zotero_schicht_und_kopfzeile(client, zot, eintrag):
+def test_export_traegt_zotero_schicht(client, zot, eintrag):
     client.post("/api/settings", json={"zotero_consent": True})
     client.post(f"/api/transcripts/{eintrag}/zotero",
                 json={"item_key": "ABCD1234", "roles": ["interviewer", "interviewee"]})
@@ -97,10 +97,10 @@ def test_export_traegt_zotero_schicht_und_kopfzeile(client, zot, eintrag):
     # Schicht-id, die Lineage sagt, welche Datei das ist
     lay = next(k for k, v in m["layers"].items() if v["path"] == "source/zotero.json")
     assert any(r["layer"] == lay for r in m["runs"])
-    # Kopfzeile: Titel · Datum · Interviewer:in · Citekey — im Nebenstrom
-    clean = json.loads(z.read(f"{w}/text/clean.json"))
-    andere = json.dumps(clean["streams"], ensure_ascii=False)
-    assert "Whitfield" in andere and "whitfield2026" in andere
+    # Die Kopfzeile «Titel · Datum · Interviewer:in · Citekey» setzt
+    # enrich aus dieser Schicht, wenn es die Lesefassung baut — hier
+    # reist nur die Schicht mit, kein PDF
+    assert not any(n.endswith(".pdf") for n in z.namelist())
     # und beim Wiedereinlesen kommt der Block als Quelle zurück
     r = client.post("/api/import", files={"datei": ("x.enrich", inhalt, "application/zip")})
     assert r.status_code == 200, r.text

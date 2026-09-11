@@ -168,8 +168,8 @@ def test_inventar_erkennt_veraenderte_datei(client, eintrag):
     with zipfile.ZipFile(aus, "w", zipfile.ZIP_STORED) as neu:
         for i in alt.infolist():
             roh = alt.read(i.filename)
-            if i.filename.endswith("/text/clean.json"):
+            if i.filename.endswith("/source/transcript.json"):
                 roh = roh.replace(b"Hallo", b"Hallx")
             neu.writestr(i, roh)
-    with pytest.raises(paket.PaketFehler, match="text/clean.json ver"):
+    with pytest.raises(paket.PaketFehler, match="source/transcript.json ver"):
         paket.lies(aus.getvalue())

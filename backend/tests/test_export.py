@@ -40,11 +40,10 @@ def test_txt(client, eintrag):
 
 
 def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
-    """Der Export ist ein Format-2-Container, wie enrich ihn heute
-    schreibt (Anhang A: source/, text/): eine Wurzel, Inventar mit Hash für JEDE
-    Datei, Lineage, das Transkript als Quelle, das PDF als Lesefassung.
-    Der Inhalt der Text-Schichten ist der aus textsatz: main = reine
-    Rede, Label-Zeilen im other-Strom."""
+    """Der Export ist ein Format-2-Container nach Anhang A: eine Wurzel,
+    Inventar mit Hash für JEDE Datei, Lineage, das Transkript als Quelle
+    — und KEIN gesetztes PDF, keine Textschichten (FORMAT.md §5: die
+    empfangende Anwendung setzt die Lesefassung selbst)."""
     r = client.get(f"/api/transcripts/{eintrag}/export/enrich")
     assert r.status_code == 200, r.text
     z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -55,21 +54,14 @@ def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
     assert m["analyse_kette"] == "narrativ" and m["profile"] == "handover"
     assert m["source"]["kind"] == "transcript"
     assert m["source"]["canonical"] == "source/transcript.json"
-    assert m["source"]["rendered"] == "source/document.pdf"
+    assert m["source"].get("rendered") is None
     assert m["producer"] == {"app": "localtranscript", "version": m["producer"]["version"]}
-    t1 = json.loads(z.read(f"{w}/text/clean.json"))
-    assert t1["kind"] == "text-clean" and t1["origin"] == "machine"
-    haupt = t1["streams"]["main"]
-    assert haupt.startswith("Hallo und willkommen")
-    assert "Anna" not in haupt and "[00:" not in haupt
-    other = t1["streams"].get("other", "")
-    assert "Anna" in other and "[00:00:00]" in other
-    # Kopfzeile (Titel · Datum) steht im other-Strom, nie in main
-    assert "probe" in other and "probe" not in haupt
-    zk = json.loads(z.read(f"{w}/text/timemap.json"))
-    assert len(zk["einheiten"]) == 2 and zk["einheiten"][1]["speaker"] == "Ben"
-    assert z.read(f"{w}/source/document.pdf")[:5] == b"%PDF-"
-    assert m["files"]["source/document.pdf"]["role"] == "rendered"
+    assert set(m["files"]) == {"source/transcript.json"}        # Fixture ohne Audio
+    t = json.loads(z.read(f"{w}/source/transcript.json"))
+    assert t["kind"] == "transcript" and t["by"]["tool"] == "localtranscript"
+    namen = {p["id"]: p["name"] for p in t["speakers"]}
+    assert [namen[s["speaker"]] for s in t["segments"]] == ["Anna", "Ben"]
+    assert t["segments"][0]["text"].startswith("Hallo und willkommen")
 
 
 def test_export_in_datei(client, eintrag, tmp_path):
@@ -110,6 +102,10 @@ def test_enrich_export_konvertiert_wav_zu_mp3(client, tmp_path):
     namen = zipfile.ZipFile(__import__("io").BytesIO(r.content)).namelist()
     assert any(n.endswith("/source/audio.mp3") for n in namen), namen
     assert not any(n.endswith(".wav") for n in namen)
+    w = namen[0].split("/", 1)[0]
+    m = json.loads(zipfile.ZipFile(__import__("io").BytesIO(r.content)).read(f"{w}/manifest.json"))
+    assert m["source"]["media"] == "source/audio.mp3"
+    assert m["files"]["source/audio.mp3"]["role"] == "media"
 
 
 VTT_MINI = """WEBVTT

@@ -91,7 +91,7 @@ if (forceVenv || leer(venv) || !fs.existsSync(path.join(venv, "bin/python3"))) {
                   path.join(venv, "lib/libpython3.13.dylib"));
   // Smoke-Test
   execFileSync(path.join(venv, "bin/python3"),
-    ["-c", "import localtranscript.main, enrich_core, fitz, torch, speechbrain, silero_vad, sklearn; print('venv ok')"],
+    ["-c", "import localtranscript.main, enrich_core, torch, speechbrain, silero_vad, sklearn; print('venv ok')"],
     { stdio: "inherit" });
 } else {
   // venv steht — aber unser Backend-Code ändert sich laufend:

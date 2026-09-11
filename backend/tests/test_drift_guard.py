@@ -1,5 +1,5 @@
-"""Drift-Guard: die gevendorten enrich-Bausteine gegen die lokale
-enrich-Quelle halten (Muster enrich/praedikate-Worker). Läuft nur,
+"""Drift-Guard: den gevendorten enrich-Baustein (turns.py, reine
+Transkript-Funktionen aus textimport) gegen die lokale enrich-Quelle halten (Muster enrich/praedikate-Worker). Läuft nur,
 wenn ../enrich auf dieser Maschine liegt."""
 from __future__ import annotations
 
@@ -25,17 +25,6 @@ def _ohne_kopf(text: str) -> str:
     return "\n".join(zeilen) + "\n"
 
 
-def test_textsatz_drift():
-    quelle = (ENRICH / "textsatz.py").read_text()
-    vendor = (VENDOR / "textsatz.py").read_text()
-    quelle = quelle.replace(
-        "from .refi_text import _FONT_DIR, _sichtbar",
-        "from .schrift import _FONT_DIR, _sichtbar")
-    assert _ohne_kopf(vendor) == quelle, (
-        "textsatz.py ist gegen enrich gedriftet — neu vendoren "
-        "(cp + Import-Patch, s. Kopfkommentar)")
-
-
 def test_turns_drift():
     quelle = (ENRICH / "textimport.py").read_text()
     vendor = (VENDOR / "turns.py").read_text()
@@ -43,16 +32,3 @@ def test_turns_drift():
     assert kern in quelle, (
         "turns.py (pure Transkript-Funktionen) ist gegen "
         "enrich/textimport.py gedriftet")
-
-
-def test_sichtbar_drift():
-    quelle = (ENRICH / "refi_text.py").read_text()
-    vendor = (VENDOR / "schrift.py").read_text()
-    kern = vendor.split("def _sichtbar", 1)[1]
-    kern_zeilen = [z for z in kern.splitlines() if z.strip()
-                   and not z.strip().startswith(('"""', "Format",
-                                                 "weicht", "Zeichen"))]
-    for zeile in kern_zeilen:
-        if zeile.strip().startswith("#"):
-            continue
-        assert zeile in quelle, f"schrift.py driftet bei: {zeile!r}"

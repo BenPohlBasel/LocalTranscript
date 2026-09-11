@@ -13,7 +13,9 @@ Electron-Prototyps `../whisper-web` als Tauri-App. Plan:
 - `transkript.json` ist die kanonische Wahrheit; Exporte sind
   abgeleitet. Schreiben immer atomar + history/-Snapshot; Löschen =
   `_papierkorb/`, nie destruktiv.
-- `backend/src/localtranscript/enrich_export/` ist VENDOR-Code
+- `backend/src/localtranscript/enrich_export/turns.py` ist VENDOR-Code
+  (nur noch turns.py — textsatz/schrift/fonts sind seit 2.3.0 weg, der
+  Export setzt kein PDF mehr, FORMAT.md §5)
   (enrich@3d2b131): nie formatieren/fixen (ruff-exclude!), Drift-Guard
   `tests/test_drift_guard.py` vergleicht gegen `../enrich`. Bei
   enrich-Änderungen an textsatz/textimport: neu vendoren (Kopf-
@@ -21,7 +23,7 @@ Electron-Prototyps `../whisper-web` als Tauri-App. Plan:
 - Die Shell beendet NUR selbst gestartete Backends (ps-identifiziert);
   fremde Prozesse auf Port 5628 sind tabu (5628 = „LOCT" auf der
   Telefontastatur, enrich-Muster; `LT_SERVE_PORT` überschreibt).
-- Recursive-Fonts: SIL OFL 1.1 — Nennung in Einstellungen (steht) und
+- Recursive-Fonts (nur noch auf der Website, site/fonts): SIL OFL 1.1 — Nennung dort und
   bei jeder Veröffentlichung.
 
 ## Stand 2026-08-30 (Erstbau, eine Session)

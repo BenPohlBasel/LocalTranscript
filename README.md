@@ -100,10 +100,11 @@ across a line, so searching `cooperative` also finds `coope- rative`.
 - **enrich dossier (`.enrich`)** — one uncompressed file in Format 2
   of the enrich dossier (`FORMAT.md` in the enrich repository): the
   transcript as the source with `origin` on every segment and speaker,
-  a PDF typeset in Recursive as the rendered form, T0/T1 and a time
-  map, the audio, and a manifest — written with enrich-core's own
-  models — that inventories every file with its hash and carries the
-  chained journal of who wrote what and when. Import it into enrich
+  the audio as mp3, the Zotero metadata if linked, and a manifest —
+  written with enrich-core's own models — that inventories every file
+  with its hash and carries the chained journal of who wrote what and
+  when. No PDF: enrich typesets the reading copy itself on import
+  (FORMAT.md §5), so the container stays small. Import it into enrich
   directly.
 - **REFI-QDA for ATLAS.ti (`.qdpx.zip`)** — the transcript as a
   `TextSource` *and* as the `Transcript` of an `AudioSource` with one
@@ -284,14 +285,13 @@ proposal — under the **MIT licence** (B/IAS).
 
 ## Licence
 
-**AGPL-3.0-or-later** (BIAS.City). The app adopts the licence of the
-strictest bundled tool — and that is **PyMuPDF (AGPL-3.0)**, not ffmpeg.
-PyMuPDF typesets the dossier PDF in the enrich export
-(`enrich_export/textsatz.py`: `fitz.Font`, `fitz.TextWriter`) and brings
-MuPDF along as a binary component (58 MB in the bundle). GPLv3 §13
-explicitly permits linking GPL and AGPL code, but lets the AGPL network
-clause apply "to the combination as such" — so the whole thing is under
-the AGPL.
+**AGPL-3.0-or-later** (BIAS.City), by choice. Up to 2.2.0 the licence
+was also forced by PyMuPDF (AGPL-3.0), which typeset the dossier PDF;
+since 2.3.0 the enrich export carries no PDF (enrich typesets the
+reading copy itself on import, FORMAT.md §5), so PyMuPDF and the
+Recursive fonts are no longer bundled. The strictest bundled tool is
+now ffmpeg (GPL-3.0 build); GPLv3 and AGPLv3 are compatible (GPLv3
+§13).
 
 **The network clause is satisfied before it applies:** LocalTranscript
 binds to `127.0.0.1` only, and the host guard in `main.py` turns
@@ -300,9 +300,7 @@ of §13. The source is public anyway; the "Source code (GitHub)" button
 in the About dialog is the offer inside the app itself.
 
 Bundled, among others: whisper.cpp (MIT), large-v3-turbo model (OpenAI,
-MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0), PyMuPDF
-(AGPL-3.0), Recursive typeface (SIL OFL 1.1,
-`backend/src/localtranscript/enrich_export/fonts/LICENSE-OFL.txt`),
+MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0),
 FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
 (GPL-3.0 build, `--enable-gpl --enable-version3`) — the complete list is
 in the settings.

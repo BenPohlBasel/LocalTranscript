@@ -9,7 +9,6 @@ dependencies = [
     "uvicorn[standard]>=0.30",
     "python-multipart>=0.0.9",
     "pydantic>=2.7",
-    "pymupdf>=1.24",
     "enrich-core",
     # Diarisierung
     "speechbrain>=1.0.0",
@@ -39,9 +38,7 @@ packages = ["src/localtranscript"]
 line-length = 79
 # Gevendorte enrich-Bausteine bleiben BYTE-IDENTISCH zur Quelle
 # (Drift-Guard-Test) — ruff darf sie nie "fixen".
-exclude = ["src/localtranscript/enrich_export/textsatz.py",
-           "src/localtranscript/enrich_export/schrift.py",
-           "src/localtranscript/enrich_export/turns.py"]
+exclude = ["src/localtranscript/enrich_export/turns.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

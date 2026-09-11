@@ -5,6 +5,18 @@ a version are the corresponding section of this file.
 
 ## 2.3.0 — 2026-09-11
 
+### Changed
+
+- **The `.enrich` export carries no PDF any more.** FORMAT.md §5 now
+  says transcript + audio are a valid input state and the receiving
+  application typesets the reading copy itself — enrich does so on
+  import. The export shrinks to the transcript layer
+  (`source/transcript.json`, origin per record), the audio as mp3 and
+  the Zotero layer; PDF typesetting, PyMuPDF (AGPL-3.0) and the
+  Recursive fonts leave the bundle (about 60 MB smaller). The app's
+  licence stays AGPL-3.0-or-later by choice; the strictest bundled tool
+  is now ffmpeg.
+
 ### Added
 
 - **Your own Whisper models.** Drop any whisper.cpp model
@@ -23,8 +35,8 @@ a version are the corresponding section of this file.
   transcript does not get their name through the back door), link,
   reload, unlink. The snapshot is stored in the transcript as `source`
   and the link is a human run in the journal. In the `.enrich` export
-  it becomes the layer `source/zotero.json`, and the first page of the
-  typeset PDF reads "Title · Date · Interviewer · Citekey". Zotero is
+  it becomes the layer `source/zotero.json`; enrich puts "Title · Date ·
+  Interviewer · Citekey" on page 1 when it typesets the text. Zotero is
   read only on request, only read-only (`zotero.sqlite` opened
   immutable — Zotero can stay open), only on this computer, and only
   after you enable it in Settings (optional data directory; the usual
