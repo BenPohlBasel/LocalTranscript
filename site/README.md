@@ -62,11 +62,12 @@ Zeile.
 
 `img/<motiv>-<sprache>.png`, zehn Motive mal vier Sprachen — das
 Hero-Bild und zu jedem Schritt der Anleitung eines (Zotero: zwei,
-Suche und verknüpft). Dazu drei sprachneutrale Bilder: der Import-
-Dialog (`import-dialog.png`) und zwei **schematische** Ansichten
-(`zotero-item.png`, `models-folder.png`) — nachgebaute Fenster von
-Zotero und Finder als Illustration, keine echten Bildschirmfotos,
-beschriftet als «Schematische Ansicht». Die Zotero-Bilder zeigen
+Suche und verknüpft). Dazu zwei sprachneutrale Bilder: der Import-
+Dialog (`import-dialog.png`) und eine **schematische** Ansicht
+(`models-folder.png`) — ein nachgebautes Finder-Fenster als
+Illustration, kein echtes Bildschirmfoto, beschriftet als
+«Schematische Ansicht». Ein nachgebautes Zotero-Fenster gab es kurz
+und ist auf Wunsch des Users wieder raus. Die Zotero-Bilder zeigen
 erfundene Einträge zum erfundenen Interview, nie eine echte Bibliothek.
 Die Anleitungsbilder stammen aus einem 1200 × 750-Fenster (bis 2.2.0
 800 × 500): neben dem Text bleibt so alles lesbar, was in einem
