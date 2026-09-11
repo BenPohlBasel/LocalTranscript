@@ -106,6 +106,17 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    `com.apple.icloud.desktop`-Marker prüfen), und einen Ort ausserhalb
    anbieten.
 
+7. **Zotero-Rollen nicht übersetzen (User-Entscheid 2026-09-11).** Die
+   Rollen kommen aus Zotero (creatorType: interviewer, interviewee,
+   director, producer, castMember, podcaster, guest …) und sollen im
+   Metadaten-Reiter und in der verknüpften Ansicht so stehen, wie Zotero
+   sie führt — **englisch, für alle Typen gleich**, keine Übersetzung
+   auch nicht der sechs Interview-Rollen. Umbau: `rolleName()` in
+   EditorModule.tsx gibt den Schlüssel zurück, die i18n-Keys
+   `ed.meta.rolle.*` fallen weg; Vorauswahl bleibt eine Liste bekannter
+   Rollen (interviewee, castMember, guest … nicht vorausgewählt).
+   Optional die Hilfezeile «Rollen wie in Zotero» viersprachig.
+
 ## Gemessen, nicht gebaut
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
