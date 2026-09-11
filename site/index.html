@@ -286,7 +286,27 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
     </div>
     <div class="row schritt gross">
       <div class="t">
-        <h3><span class="nr">6</span><span data-t="g6h"></span></h3>
+        <h3><span class="nr">6</span><span data-t="zH"></span></h3>
+        <p data-t="zA"></p>
+        <p data-t="zB"></p>
+        <ol>
+          <li data-t="zS1"></li><li data-t="zS2"></li>
+          <li data-t="zS3"></li><li data-t="zS4"></li>
+        </ol>
+        <p data-t="zC"></p>
+      </div>
+      <div>
+        <div class="shot"><img src="img/zotero-item.png"
+          width="1200" height="301" alt="" data-alt="altZoteroItem"></div>
+        <div class="shot" style="margin-top:1rem"><img data-img="zotero" src="img/zotero-de.png"
+          width="1200" height="750" alt="" data-alt="altZotero"></div>
+        <div class="shot" style="margin-top:1rem"><img data-img="zotero-linked" src="img/zotero-linked-de.png"
+          width="1200" height="750" alt="" data-alt="altZoteroLinked"></div>
+      </div>
+    </div>
+    <div class="row schritt gross">
+      <div class="t">
+        <h3><span class="nr">7</span><span data-t="g6h"></span></h3>
         <p data-t="g6a"></p>
         <p data-t="g6b"></p>
         <ol>
@@ -303,11 +323,17 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
     </div>
     <div class="row schritt gross">
       <div class="t">
-        <h3><span class="nr">7</span><span data-t="g7h"></span></h3>
+        <h3><span class="nr">8</span><span data-t="g7h"></span></h3>
         <p data-t="g7a"></p>
+        <p data-t="g7b"></p>
+        <p data-t="g7c"></p>
       </div>
-      <div class="shot"><img data-img="settings" src="img/settings-de.png"
-        width="1200" height="750" alt="" data-alt="altSettings"></div>
+      <div>
+        <div class="shot"><img data-img="settings" src="img/settings-de.png"
+          width="1200" height="750" alt="" data-alt="altSettings"></div>
+        <div class="shot" style="margin-top:1rem"><img src="img/models-folder.png"
+          width="1200" height="221" alt="" data-alt="altModelsFolder"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1467,7 +1493,21 @@ de:{
   altSettings:"Einstellungen mit Speicherort, Lizenzen und Formaten",
 
   guideH:"Bedienungsanleitung",
-  guideLede:"Von der Audiodatei bis zum Export in sieben Schritten. Dieselben Schritte stehen ausführlicher im README auf GitHub.",
+  guideLede:"Von der Audiodatei bis zum Export in acht Schritten. Dieselben Schritte stehen ausführlicher im README auf GitHub.",
+  zH:"Metadaten aus Zotero",
+  zA:"Wer Interviews in Zotero führt, verknüpft das Transkript mit seinem Zotero-Eintrag. Titel, Datum, Interviewer:in und Citekey reisen dann im enrich-Export mit — als Schicht source/zotero.json; enrich setzt sie auf Seite 1 der Lesefassung.",
+  zB:"Die Reihenfolge: erst in Zotero anlegen, dann hier zuweisen.",
+  zS1:"In Zotero den Eintrag anlegen: Typ «Interview», Interviewer:in und befragte Person als Beteiligte, Datum, Titel. Better BibTeX vergibt den Citekey.",
+  zS2:"In LocalTranscript einmalig in den Einstellungen «Lokale Zotero-Datenbank lesen erlauben» einschalten.",
+  zS3:"Im Editor den Reiter «Metadaten» öffnen, nach Titel, Jahr, Name oder Citekey suchen und den Eintrag anklicken — Interviews stehen zuoberst.",
+  zS4:"Rollen wählen und «Verknüpfen». Die befragte Person ist nicht vorausgewählt: Ein pseudonymisiertes Transkript soll ihren Namen nicht über Zotero bekommen.",
+  zC:"Zotero wird dabei nur gelesen — die Datenbank schreibgeschützt geöffnet, Zotero kann offen bleiben —, nur auf Anfrage, und nichts geht ins Netz. «Lösen» entfernt die Verknüpfung wieder, «Neu laden» holt Änderungen aus Zotero nach.",
+  altZoteroItem:"Schematische Zotero-Ansicht: ein Eintrag vom Typ Interview mit Interviewer:in, befragter Person, Datum und Citekey",
+  altZotero:"Reiter Metadaten im Editor mit Suchtreffern aus Zotero und der Rollenwahl",
+  altZoteroLinked:"Reiter Metadaten nach dem Verknüpfen: Titel, Datum, Citekey und Interviewer:in",
+  g7b:"Eigene Modelle: Die Bibliothek hat einen Ordner «Modelle». Jedes whisper.cpp-Modell — eine Datei ggml-….bin, etwa large-v3-turbo-swiss-german für Schweizerdeutsch oder eine quantisierte Variante — dort hineinlegen; nach «Neu einlesen» oder dem nächsten Öffnen der Einstellungen steht es in der Modell-Auswahl, als «eigenes» markiert. Ein eigenes Modell mit dem Namen eines mitgelieferten ersetzt dieses.",
+  g7c:"Die App lädt nie selbst. Geprüft wird nur, ob die Datei ein fertiges ggml-Modell ist; was durchfällt, nennen die Einstellungen mit Grund. Ein Feintuning von Hugging Face wandelt scripts/hf-nach-ggml.py aus dem Repository um. Eigene Modelle sind nicht Teil der geprüften Liste im Datenschutzblatt — womit transkribiert wurde, steht im Journal jedes Transkripts.",
+  altModelsFolder:"Schematische Finder-Ansicht des Ordners Modelle mit zwei ggml-Dateien",
   g1h:"Audio ablegen und transkribieren",
   g1a:"Im Reiter «AI-Transkript» ziehst du eine oder mehrere Dateien in das gestrichelte Feld – MP3, WAV, M4A, OGG oder FLAC. Unter «Optionen» wählst du Whisper-Modell, Sprache, Sprecherzahl und Trennschärfe.",
   g1b:"Die Sprecherzahl ist eine exakte Angabe: «1» bedeutet keine Trennung, alles wird ein Sprecher; «2» bis «6» erzwingen genau diese Zahl; «Automatisch» überlässt es der Clusterung. Mehrere Dateien laufen standardmässig nacheinander – wieviele gleichzeitig rechnen dürfen, stellst du in den Einstellungen ein.",
@@ -1562,7 +1602,21 @@ en:{
   altSettings:"Settings with storage location, licences and formats",
 
   guideH:"User guide",
-  guideLede:"From the audio file to the export in seven steps. The same steps are covered in more detail in the README on GitHub.",
+  guideLede:"From the audio file to the export in eight steps. The same steps are covered in more detail in the README on GitHub.",
+  zH:"Metadata from Zotero",
+  zA:"If you keep interviews in Zotero, link the transcript to its Zotero item. Title, date, interviewer and citekey then travel with the enrich export — as the layer source/zotero.json; enrich puts them on page 1 of the reading copy.",
+  zB:"The order: create it in Zotero first, then assign it here.",
+  zS1:"Create the item in Zotero: type “Interview”, interviewer and interviewee as creators, date, title. Better BibTeX assigns the citekey.",
+  zS2:"In LocalTranscript, switch on “Allow reading the local Zotero database” once in Settings.",
+  zS3:"In the editor open the “Metadata” tab, search by title, year, name or citekey and click the item — interviews come first.",
+  zS4:"Choose the roles and “Link”. The interviewee is not preselected: a pseudonymised transcript should not receive their name through Zotero.",
+  zC:"Zotero is only read — the database is opened read-only, Zotero can stay open —, only on request, and nothing goes online. “Unlink” removes the link again, “Reload” fetches changes made in Zotero.",
+  altZoteroItem:"Schematic Zotero view: an item of type Interview with interviewer, interviewee, date and citekey",
+  altZotero:"Metadata tab in the editor with search results from Zotero and the role selection",
+  altZoteroLinked:"Metadata tab after linking: title, date, citekey and interviewer",
+  g7b:"Your own models: the library has a folder “Modelle”. Put any whisper.cpp model there — a file ggml-….bin, for instance large-v3-turbo-swiss-german for Swiss German or a quantised variant — and after “Rescan” or the next time Settings open it appears in the model list, marked as your own. An own model with the name of a bundled one replaces it.",
+  g7c:"The app never downloads anything. It only checks that the file is a finished ggml model; what fails the check is named in Settings with the reason. A Hugging Face fine-tune is converted with scripts/hf-nach-ggml.py from the repository. Own models are not part of the checked list in the privacy sheet — each transcript’s journal records which model was used.",
+  altModelsFolder:"Schematic Finder view of the Modelle folder with two ggml files",
   g1h:"Drop audio and transcribe",
   g1a:"In the “AI Transcript” tab, drag one or more files into the dashed area – MP3, WAV, M4A, OGG or FLAC. Under “Options” you pick the Whisper model, the language, the number of speakers and the separation threshold.",
   g1b:"The speaker count is an exact figure: “1” means no separation and everything becomes one speaker; “2” to “6” force exactly that many; “Automatic” leaves it to the clustering. Several files run one after another by default – how many may compute at once is a setting.",
@@ -1657,7 +1711,21 @@ fr:{
   altSettings:"Réglages avec emplacement, licences et formats",
 
   guideH:"Mode d'emploi",
-  guideLede:"Du fichier audio à l'export en sept étapes. Les mêmes étapes sont détaillées dans le README sur GitHub.",
+  guideLede:"Du fichier audio à l'export en huit étapes. Les mêmes étapes sont détaillées dans le README sur GitHub.",
+  zH:"Métadonnées depuis Zotero",
+  zA:"Qui gère ses entretiens dans Zotero lie la transcription à son entrée Zotero. Titre, date, intervieweur·euse et citekey voyagent alors avec l’export enrich — comme couche source/zotero.json ; enrich les place en page 1 de la version de lecture.",
+  zB:"L’ordre : d’abord créer dans Zotero, puis attribuer ici.",
+  zS1:"Créer l’entrée dans Zotero : type « Entretien », intervieweur·euse et personne interviewée comme créateurs, date, titre. Better BibTeX attribue la citekey.",
+  zS2:"Dans LocalTranscript, activer une fois dans les réglages « Autoriser la lecture de la base Zotero locale ».",
+  zS3:"Dans l’éditeur, ouvrir l’onglet « Métadonnées », chercher par titre, année, nom ou citekey et cliquer l’entrée — les entretiens viennent en premier.",
+  zS4:"Choisir les rôles et « Lier ». La personne interviewée n’est pas présélectionnée : une transcription pseudonymisée ne doit pas recevoir son nom via Zotero.",
+  zC:"Zotero est seulement lu — la base est ouverte en lecture seule, Zotero peut rester ouvert —, uniquement sur demande, et rien ne part en ligne. « Dissocier » retire le lien, « Recharger » reprend les modifications faites dans Zotero.",
+  altZoteroItem:"Vue schématique de Zotero : une entrée de type Entretien avec intervieweur·euse, personne interviewée, date et citekey",
+  altZotero:"Onglet Métadonnées dans l’éditeur avec les résultats de recherche Zotero et le choix des rôles",
+  altZoteroLinked:"Onglet Métadonnées après la liaison : titre, date, citekey et intervieweur·euse",
+  g7b:"Tes propres modèles : la bibliothèque a un dossier « Modelle ». Dépose-y n’importe quel modèle whisper.cpp — un fichier ggml-….bin, par exemple large-v3-turbo-swiss-german pour le suisse allemand ou une variante quantifiée ; après « Relire » ou à la prochaine ouverture des réglages, il figure dans la liste des modèles, marqué « perso ». Un modèle perso portant le nom d’un modèle fourni le remplace.",
+  g7c:"L’application ne télécharge jamais rien. Elle vérifie seulement que le fichier est un modèle ggml complet ; ce qui échoue est nommé dans les réglages avec la raison. Un fine-tuning de Hugging Face se convertit avec scripts/hf-nach-ggml.py du dépôt. Les modèles perso ne font pas partie de la liste vérifiée de la fiche de protection des données — le journal de chaque transcription indique le modèle utilisé.",
+  altModelsFolder:"Vue schématique du Finder : le dossier Modelle avec deux fichiers ggml",
   g1h:"Déposer l'audio et transcrire",
   g1a:"Dans l'onglet « Transcription IA », glissez un ou plusieurs fichiers dans la zone pointillée – MP3, WAV, M4A, OGG ou FLAC. Sous « Options » se règlent le modèle Whisper, la langue, le nombre de locuteurs et le seuil de séparation.",
   g1b:"Le nombre de locuteurs est une valeur exacte : « 1 » signifie aucune séparation, tout devient un seul locuteur ; « 2 » à « 6 » imposent exactement ce nombre ; « Automatique » laisse décider le regroupement. Plusieurs fichiers s'exécutent par défaut l'un après l'autre – le nombre de calculs simultanés est un réglage.",
@@ -1752,7 +1820,21 @@ it:{
   altSettings:"Impostazioni con posizione, licenze e formati",
 
   guideH:"Guida all'uso",
-  guideLede:"Dal file audio all'esportazione in sette passi. Gli stessi passi sono descritti in dettaglio nel README su GitHub.",
+  guideLede:"Dal file audio all'esportazione in otto passi. Gli stessi passi sono descritti in dettaglio nel README su GitHub.",
+  zH:"Metadati da Zotero",
+  zA:"Chi gestisce le interviste in Zotero collega la trascrizione alla sua voce Zotero. Titolo, data, intervistatore/trice e citekey viaggiano allora con l’export enrich — come livello source/zotero.json; enrich li mette a pagina 1 della versione di lettura.",
+  zB:"L’ordine: prima creare in Zotero, poi assegnare qui.",
+  zS1:"Creare la voce in Zotero: tipo «Intervista», intervistatore/trice e persona intervistata come autori, data, titolo. Better BibTeX assegna la citekey.",
+  zS2:"In LocalTranscript attivare una volta nelle impostazioni «Consenti la lettura del database Zotero locale».",
+  zS3:"Nell’editor aprire la scheda «Metadati», cercare per titolo, anno, nome o citekey e fare clic sulla voce — le interviste vengono per prime.",
+  zS4:"Scegliere i ruoli e «Collega». La persona intervistata non è preselezionata: una trascrizione pseudonimizzata non deve ricevere il suo nome tramite Zotero.",
+  zC:"Zotero viene solo letto — il database è aperto in sola lettura, Zotero può restare aperto —, solo su richiesta, e nulla va in rete. «Scollega» rimuove il collegamento, «Ricarica» riprende le modifiche fatte in Zotero.",
+  altZoteroItem:"Vista schematica di Zotero: una voce di tipo Intervista con intervistatore/trice, persona intervistata, data e citekey",
+  altZotero:"Scheda Metadati nell’editor con i risultati della ricerca da Zotero e la scelta dei ruoli",
+  altZoteroLinked:"Scheda Metadati dopo il collegamento: titolo, data, citekey e intervistatore/trice",
+  g7b:"Modelli propri: la libreria ha una cartella «Modelle». Mettici qualsiasi modello whisper.cpp — un file ggml-….bin, ad esempio large-v3-turbo-swiss-german per lo svizzero tedesco o una variante quantizzata; dopo «Rileggi» o alla prossima apertura delle impostazioni compare nell’elenco dei modelli, contrassegnato come «proprio». Un modello proprio con il nome di uno fornito lo sostituisce.",
+  g7c:"L’app non scarica mai nulla. Verifica solo che il file sia un modello ggml completo; ciò che non passa è indicato nelle impostazioni con il motivo. Un fine-tuning da Hugging Face si converte con scripts/hf-nach-ggml.py del repository. I modelli propri non fanno parte dell’elenco verificato nella scheda sulla privacy — il giornale di ogni trascrizione indica il modello usato.",
+  altModelsFolder:"Vista schematica del Finder: la cartella Modelle con due file ggml",
   g1h:"Trascinare l'audio e trascrivere",
   g1a:"Nella scheda « Trascrizione IA » trascina uno o più file nell'area tratteggiata – MP3, WAV, M4A, OGG o FLAC. Sotto « Opzioni » si scelgono modello Whisper, lingua, numero di parlanti e soglia di separazione.",
   g1b:"Il numero di parlanti è un valore esatto: « 1 » significa nessuna separazione, tutto diventa un solo parlante; da « 2 » a « 6 » impongono esattamente quel numero; « Automatico » lascia decidere al raggruppamento. Più file girano in sequenza per impostazione predefinita – quanti possano calcolare insieme è un'impostazione.",
