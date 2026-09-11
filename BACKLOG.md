@@ -133,16 +133,21 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    weichzeichnen, danach scharf und weiter (WebKit kann nicht rückwärts;
    Suchen landet auf dem vorigen Keyframe — bei langen Keyframe-
    Abständen einer Aufnahme dauert der Sprung entsprechend, das ist der
-   Preis dafür, nichts umzuwandeln). Fusszeile rechts ein Video-Icon:
-   erst PROBE Bild-in-Bild des Systems (`requestPictureInPicture` im
-   WKWebKit; eigene PiP-Knöpfe abfangen), sonst zweites Tauri-Fenster
-   mit Position/Rate über Events. Export: qdpx-Häkchen «Video mitgeben»
+   Preis dafür, nichts umzuwandeln). **Ort des Bilds (User 2026-09-11):
+   in der rechten Seitenleiste unten, unter den Sprechern — fest
+   eingebaut, nicht schwebend, ohne Knöpfe.** Ein stummes `<video>` im
+   Sprecher-Panel, Breite = Panelbreite (resizable wie das Panel),
+   keine Controls; einzige Bedienung ist der Audioplayer. Kein PiP, kein
+   zweites Fenster, kein Icon in der Fusszeile (die Idee ist damit vom
+   Tisch — falls doch je gewünscht, wäre PiP der Weg). Im Reiter
+   «Suchen»/«Metadaten» bleibt das Bild aus dem Sichtfeld, Ton läuft
+   weiter. Export: qdpx-Häkchen «Video mitgeben»
    (`VideoSource`, Datei im `Media/`-Ordner); **enrich bleibt Ton
    (mp3) — Entscheid User 2026-09-11: «enrich hat nur Ton».**
    Datenschutzblätter ×4 um Video (Gesichter, biometrisch) ergänzen;
-   iCloud-Warnung (6) wird damit dringend. Aufwand 2–3 Tage (ohne
-   Umwandlung weniger); erster Schritt eine Stunde Probe (PiP,
-   Keyframe-Abstände echter Aufnahmen).
+   iCloud-Warnung (6) wird damit dringend. Aufwand ~2 Tage; erster Schritt eine halbe Stunde Probe:
+   Keyframe-Abstände echter Aufnahmen und Sync-Jitter Ton→Bild im
+   WKWebKit messen.
 
 ## Gemessen, nicht gebaut
 
