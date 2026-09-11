@@ -2,10 +2,11 @@
 // (inkl. Recursive-OFL-Nennung — Pflicht, Fonts liegen im Bundle).
 import { useEffect, useState } from "react";
 import {
-  Button, Flex, Grid, Karte, LabeledSelect, Text, TextField,
+  Button, Flex, Grid, Karte, LabeledSelect, Switch, Text, TextField,
 } from "../components/ui";
 import {
   apiGet, apiSend, errMsg, type ModellInfo, type Settings,
+  type ZoteroStatus,
 } from "../lib/api";
 import { setSprache, useT, type Sprache } from "../lib/i18n";
 import { isTauri, ordnerOeffnen, pickOrdner } from "../lib/tauri";
@@ -36,6 +37,16 @@ export default function EinstellungenModule({ settings, onChange }: {
   const [mail, setMail] = useState(settings?.user_email ?? "");
   useEffect(() => { setMail(settings?.user_email ?? ""); },
             [settings?.user_email]);
+  // Zotero: Verzeichnis ebenso; der Status (gefunden?) kommt vom
+  // Backend und folgt jeder Änderung an Einwilligung oder Pfad
+  const [zdir, setZdir] = useState(settings?.zotero_dir ?? "");
+  useEffect(() => { setZdir(settings?.zotero_dir ?? ""); },
+            [settings?.zotero_dir]);
+  const [zstatus, setZstatus] = useState<ZoteroStatus | null>(null);
+  useEffect(() => {
+    void apiGet<ZoteroStatus>("/api/zotero/status").then(setZstatus)
+      .catch(() => setZstatus(null));
+  }, [settings?.zotero_consent, settings?.zotero_dir]);
   if (!settings) return null;
 
   return (
@@ -119,6 +130,34 @@ export default function EinstellungenModule({ settings, onChange }: {
                 {tr("st.install.neu")}</Button>
             </Flex>
             <Text size="1" color="gray">{tr("st.install.hinweis")}</Text>
+          </Flex>
+        </Flex>
+      </Karte>
+
+      <Karte titel={tr("st.zotero")} subline={tr("st.zotero.sub")}>
+        <Flex direction="column" gap="3">
+          <Flex align="center" gap="2">
+            <Switch checked={settings.zotero_consent}
+                    onCheckedChange={(v) => setze({ zotero_consent: v })} />
+            <Text size="2">{tr("st.zotero.consent")}</Text>
+          </Flex>
+          <Text size="1" color="gray">{tr("st.zotero.hinweis")}</Text>
+          <Flex direction="column" gap="1">
+            <Text size="1" weight="medium">{tr("st.zotero.dir")}</Text>
+            <TextField.Root size="2" value={zdir}
+              placeholder="~/Zotero"
+              onChange={(e) => setZdir(e.target.value)}
+              onBlur={() => { if (zdir.trim() !== settings.zotero_dir)
+                setze({ zotero_dir: zdir.trim() }); }}
+              onKeyDown={(e) => { if (e.key === "Enter")
+                (e.target as HTMLInputElement).blur(); }} />
+            <Text size="1" color="gray">{tr("st.zotero.dir.hinweis")}</Text>
+            {zstatus && (
+              <Text size="1" color={zstatus.found ? "gray" : "red"}>
+                {zstatus.found
+                  ? tr("st.zotero.gefunden", { d: zstatus.dir ?? "" })
+                  : tr("st.zotero.fehlt")}</Text>
+            )}
           </Flex>
         </Flex>
       </Karte>

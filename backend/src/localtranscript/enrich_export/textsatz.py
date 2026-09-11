@@ -1,5 +1,6 @@
 # VENDORED aus enrich (privates Repo BenPohlBasel/PDFenrichCLI),
-# Stand enrich@94ba895 — packages/enrich-serve/src/enrich_serve/textsatz.py.
+# Stand enrich@5e169b8 + Arbeitsstand 2026-09-11 (Quelle-und-Person:
+# SourceInfo beim Anlegen) — packages/enrich-serve/src/enrich_serve/textsatz.py.
 # Einzige Abweichung: der Import von _FONT_DIR/_sichtbar zeigt auf
 # .schrift (lokaler Extrakt aus refi_text.py). Drift-Guard:
 # tests/test_drift_guard.py. NIE formatieren/fixen (ruff-exclude).
@@ -26,9 +27,11 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from enrich_core.dossier import Dossier, utc_now
 from enrich_core.ids import new_id
+from enrich_core.pfade import schicht_datei
 from enrich_core.schemas.common import Agent
 from enrich_core.schemas.intake import IntakeLayer
 from enrich_core.schemas.layout import Block, LayoutLayer
@@ -44,6 +47,9 @@ from enrich_core.schemas.text import (
 )
 
 from .schrift import _FONT_DIR, _sichtbar
+
+if TYPE_CHECKING:
+    from enrich_core.schemas.transcript import TranscriptLayer
 
 TOOL = "enrich-textimport"
 TOOL_VERSION = "0.1.0"
@@ -592,54 +598,100 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
                           zeiten: list[dict] | None = None,
                           audio: Path | None = None,
                           zeiten_quelle: str = "",
-                          kopfzeile: str | None = None
+                          kopfzeile: str | None = None,
+                          transkript: TranscriptLayer | None = None
                           ) -> tuple[Dossier, dict]:
     """Vollständiges Dossier aus einer Struktur; optional Zeitkarte
     (Transkript) + Audio-Kopie sowie eine `kopfzeile` fürs gesetzte PDF
-    (s. setze_struktur). Gibt (Dossier, bericht)."""
+    (s. setze_struktur). Gibt (Dossier, bericht).
+
+    `transkript` (FORMAT.md §5, Format 2 Schritt 3) ist die QUELLE eines
+    Transkript-Dossiers: sie wird als ERSTE Schicht geschrieben — vor
+    Intake, Layout und Text —, damit das Manifest von Anfang an weiss,
+    was hier die Quelle ist (`source.kind: transcript`, das gesetzte PDF
+    ist `rendered`). Die Zeitkarte wird DARAUS abgeleitet (`from` zeigt
+    auf die Transkript-Schicht), nicht mehr aus der CSV.
+    """
     import shutil
     import tempfile
 
     from enrich_core.canonical import content_hash
     from enrich_core.diffmap import project_span
+    from enrich_core.dossier import TRANSCRIPT_LAYER
     from enrich_core.schemas.zeitkarte import ZeitEinheit, ZeitkarteLayer
 
     satz = setze_struktur(struktur, kopfzeile=kopfzeile)
     can = canary(satz["pdf"], satz["gezeichnet"])
+    # Die Quelle steht beim Anlegen fest (FORMAT.md §3): das gesetzte PDF
+    # ist von der ersten Sekunde an `rendered`, nie «Quelle bis jemand
+    # es nachzieht» (BACKLOG 000).
+    from enrich_core.dossier import SOURCE_PDF, quelle_kind_von_name
+    from enrich_core.schemas.manifest import SourceInfo
+    art = "transcript" if transkript is not None else (
+        quelle_kind_von_name(quelle) or "text")
+    quelle_info = SourceInfo(
+        kind=art,  # type: ignore[arg-type]
+        canonical=TRANSCRIPT_LAYER if art == "transcript" else "text/raw.json",
+        rendered=SOURCE_PDF)
     with tempfile.NamedTemporaryFile(suffix=".pdf") as tf:
         tf.write(satz["pdf"])
         tf.flush()
-        d = Dossier.create(pfad, source_pdf=Path(tf.name))
+        d = Dossier.create(pfad, source_pdf=Path(tf.name), quelle=quelle_info)
     agent = Agent(type="derived", tool=f"{TOOL}/{TOOL_VERSION}")
+    # Das Transkript wird nicht GERECHNET, sondern ÜBERNOMMEN — darum
+    # `extracted`, und darum trägt jedes Segment sein eigenes `origin`
+    # (FORMAT.md §5). Der Kopf der Schicht wird `mixed`, sobald benannte
+    # Sprecher dabei sind.
+    quell_agent = Agent(type="extracted", tool=f"{TOOL}/{TOOL_VERSION}")
     warnungen: list[RunWarning] = []
     if can:
         warnungen.append(RunWarning(
             code="W-REFI-RENDER",
             message=f"Render-Canary: {can} Zeichen-Abweichungen"))
 
-    def lauf(layer_name: str, extra: dict) -> RunRecord:
+    def lauf(layer_name: str, extra: dict, *,
+             ag: Agent | None = None,
+             inputs: dict[str, str] | None = None) -> RunRecord:
         return RunRecord(id=new_id("run"), tool=TOOL,
                          tool_version=TOOL_VERSION, layer=layer_name,
-                         agent=agent, inputs={},
+                         agent=ag or agent, inputs=inputs or {},
                          config={"quelle": quelle,
                                  "renderer": DETECTOR},
                          started=utc_now(), warnings=warnungen,
                          summary=extra)
 
-    d.write_layer("0-intake.json", IntakeLayer(
-        agent=agent, verdict="accept", doc_class="born-digital",
-        page_count=satz["seiten"], text_source="embedded"),
-        lauf("0-intake.json", {"quelle": quelle}))
-    d.write_layer("1-layout.json", LayoutLayer(
+    if transkript is not None:
+        transkript.did = (
+            f"Transkript aus {quelle} übernommen: "
+            f"{len(transkript.segments)} Segmente, "
+            f"{len(transkript.speakers)} Sprecher.")
+        d.write_layer(TRANSCRIPT_LAYER, transkript,
+                      lauf(TRANSCRIPT_LAYER,
+                           {"segmente": len(transkript.segments),
+                            "sprecher": len(transkript.speakers)},
+                           ag=quell_agent))
+
+    intake = IntakeLayer(agent=agent, verdict="accept",
+                         doc_class="born-digital",
+                         page_count=satz["seiten"], text_source="embedded")
+    if transkript is not None:
+        # Bei einem Transkript beschreibt der Intake die eingegangene
+        # QUELLE, nicht eine Rechnung über ihr — ein Import darf `origin`
+        # nie auf `derived` einebnen (FORMAT.md §5). Ohne Transkript
+        # bleibt es beim abgeleiteten Wert.
+        intake.origin = "source"
+    d.write_layer("source/intake.json", intake,
+                  lauf("source/intake.json", {"quelle": quelle}))
+    d.write_layer("text/layout.json", LayoutLayer(
         agent=agent, detector=DETECTOR, page_count=satz["seiten"],
         heading_size_ranking=satz["ranking"],
         blocks=satz["bloecke"]),
-        lauf("1-layout.json", {"bloecke": len(satz["bloecke"])}))
-    d.write_layer("2-text-raw.json", TextRawLayer(
+        lauf("text/layout.json", {"bloecke": len(satz["bloecke"])}))
+    d.write_layer("text/raw.json", TextRawLayer(
         agent=agent, streams=satz["streams"], spans=satz["rects"],
         block_spans=satz["block_spans"],
         note_markers=satz["note_markers"]),
-        lauf("2-text-raw.json",
+        lauf("text/raw.json",
              {"zeichen": sum(len(t) for t in satz["streams"].values()),
               "woerter": len(satz["rects"])}))
     # T1: main ohne Marker-Ziffern, andere Ströme identisch
@@ -667,10 +719,10 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
             t1_streams[name] = text
             diffmaps[name] = StreamDiff(ops=[])
         hashes[name] = content_hash(t1_streams[name])
-    d.write_layer("3-text-clean.json", TextCleanLayer(
+    d.write_layer("text/clean.json", TextCleanLayer(
         revision="r1", agent=agent, streams=t1_streams,
         diffmaps=diffmaps, stream_hashes=hashes),
-        lauf("3-text-clean.json", {"canary_fehler": can}))
+        lauf("text/clean.json", {"canary_fehler": can}))
 
     bericht = {"seiten": satz["seiten"], "canary": can,
                "bloecke": len(satz["bloecke"]),
@@ -690,13 +742,22 @@ def baue_struktur_dossier(pfad: Path, struktur: dict, *, quelle: str,
                 t1_s=z["t1_s"], speaker=z.get("speaker", "")))
         audio_name = ""
         if audio is not None and audio.is_file():
+            # Der NAME bleibt schlicht („audio.mp3"), der ORT ist
+            # Konvention (Anhang A: `source/`) — `schicht_datei` löst
+            # beides auf, auch in einem noch nicht migrierten Dossier.
             audio_name = f"audio{audio.suffix.lower()}"
-            shutil.copyfile(audio, d.path / audio_name)
+            ziel = schicht_datei(d.path, audio_name)
+            ziel.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(audio, ziel)
             bericht["audio"] = audio_name
-        d.write_layer("2z-zeitkarte.json", ZeitkarteLayer(
+        # Woraus? Aus dem Transkript (FORMAT.md §5) — solange es eines
+        # gibt; ein Alt-Import ohne Transkript-Schicht bleibt ohne `from`.
+        tsha = d.layer_hash(TRANSCRIPT_LAYER)
+        d.write_layer("text/timemap.json", ZeitkarteLayer(
             agent=agent, revision="r1", audio=audio_name,
             quelle=zeiten_quelle, einheiten=einheiten),
-            lauf("2z-zeitkarte.json", {"turns": len(einheiten)}))
+            lauf("text/timemap.json", {"turns": len(einheiten)},
+                 inputs={TRANSCRIPT_LAYER: tsha} if tsha else None))
         bericht["turns"] = len(einheiten)
 
     note = "Text-Import: deterministisch gesetzt, nichts zu prüfen"

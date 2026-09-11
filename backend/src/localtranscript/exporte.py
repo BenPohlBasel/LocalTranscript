@@ -97,19 +97,36 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
         # Transkript Titel und Datum; Interviewer:in und Citekey kommen,
         # sobald die Zotero-Schicht in LocalTranscript entsteht.
         from .enrich_export.textsatz import kopfzeile_aus_meta
-        meta = {"title": daten.get("name") or stamm,
-                "date": (daten.get("created") or "")[:10]}
+        zot = daten.get("zotero")
+        meta = ({"title": zot.get("title") or daten.get("name") or stamm,
+                 "date": zot.get("date") or zot.get("year") or (daten.get("created") or "")[:10],
+                 "creators": zot.get("creators") or [],
+                 "citekey": zot.get("citekey")}
+                if zot else
+                {"title": daten.get("name") or stamm,
+                 "date": (daten.get("created") or "")[:10]})
+        # Die Quelle des Dossiers ist das Transkript (FORMAT.md §5): der
+        # Setzer schreibt es als ERSTE Schicht, leitet die Zeitkarte daraus
+        # ab und trägt das PDF als `rendered` ein.
+        from .format2 import baue_container, transkript_schicht
         d, _bericht = baue_struktur_dossier(
             dp, struktur, quelle=daten["name"],
             user=wer["user"] or wer["app"],
             zeiten=zeiten, audio=audio,
             zeiten_quelle="localtranscript",
-            kopfzeile=kopfzeile_aus_meta(meta))
+            kopfzeile=kopfzeile_aus_meta(meta),
+            transkript=transkript_schicht(daten, wer))
         d.set_analyse_kette("narrativ", "localtranscript")
-        # Aus dem Format-1-Verzeichnis den Format-2-Container bauen:
-        # Konvention, Schicht-Köpfe, Transkript als Quelle mit origin je
-        # Record, Inventar mit Hash für jede Datei, Journal verkettet.
-        from .format2 import baue_container
+        if zot:
+            # Die Zotero-Schicht über enrichs EINEN Schreibweg —
+            # registriert Schicht, Run und Inventar (source/zotero.json)
+            from enrich_core.zotero import write_zotero_layer
+
+            from .config import APP_VERSION
+            write_zotero_layer(d, dict(zot, collections=[]), force=True,
+                               tool="localtranscript", tool_version=APP_VERSION)
+        # Journal der Bibliothek davor, producer/title, dann die Sendung
+        # (Profil handover) über enrichs eigenen Packer.
         return baue_container(daten, d, stamm)
 
 

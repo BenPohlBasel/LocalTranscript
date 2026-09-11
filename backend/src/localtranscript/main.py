@@ -266,7 +266,7 @@ def _import_paket(daten: bytes, fallback: str) -> dict:
                     "erzeugt": "import-enrich",
                     "genau": p["genau"]},
             audio=audio_tmp, origin="source",
-            journal=p.get("journal") or [])
+            journal=p.get("journal") or [], zotero=p.get("zotero"))
     finally:
         if audio_tmp is not None:
             audio_tmp.unlink(missing_ok=True)
@@ -349,6 +349,53 @@ def import_path(req: ImportPathReq) -> dict:
 
 
 # ---------- Bibliothek ----------
+
+# ---------- Zotero (Metadaten, lokal, lesend, mit Einwilligung) ----------
+
+@app.get("/api/zotero/status")
+def zotero_status() -> dict:
+    from . import zotero
+    return zotero.status()
+
+
+@app.get("/api/zotero/candidates")
+def zotero_candidates(q: str = "") -> dict:
+    from . import zotero
+    try:
+        return {"candidates": zotero.kandidaten(q)}
+    except zotero.ZoteroFehler as e:
+        raise HTTPException(status_code=424, detail=str(e)) from e
+
+
+class ZoteroLinkReq(ApiModel):
+    item_key: str
+    roles: list[str]
+
+
+@app.post("/api/transcripts/{eid}/zotero")
+def zotero_link(eid: str, req: ZoteroLinkReq) -> dict:
+    from . import zotero
+    try:
+        bibliothek.lese(eid)
+    except (OSError, ValueError) as e:
+        raise HTTPException(status_code=404, detail=eid) from e
+    try:
+        it = zotero.eintrag(req.item_key)
+    except zotero.ZoteroFehler as e:
+        raise HTTPException(status_code=424, detail=str(e)) from e
+    d = bibliothek.zotero_setzen(eid, zotero.schnappschuss(it, req.roles))
+    return {"status": "linked", "zotero": d["zotero"]}
+
+
+@app.delete("/api/transcripts/{eid}/zotero")
+def zotero_unlink(eid: str) -> dict:
+    try:
+        bibliothek.lese(eid)
+    except (OSError, ValueError) as e:
+        raise HTTPException(status_code=404, detail=eid) from e
+    bibliothek.zotero_loesen(eid)
+    return {"status": "unlinked"}
+
 
 @app.get("/api/transcripts")
 def transcripts() -> dict:

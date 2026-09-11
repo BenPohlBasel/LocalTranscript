@@ -220,23 +220,57 @@ def _aenderungen(alt: dict, neu: dict) -> dict:
     return aus
 
 
+def _schnappschuss(eid: str) -> Path:
+    """Alten Stand nach history/ retten (rotierend), Pfad der Datei."""
+    ordner = eintrag_pfad(eid)
+    tj = ordner / "transkript.json"
+    hist = ordner / "history"
+    hist.mkdir(exist_ok=True)
+    shutil.copyfile(tj, hist / f"{_stamp()}.json")
+    for alt in sorted(hist.glob("*.json"))[:-HISTORY_MAX]:
+        alt.unlink()
+    return tj
+
+
+def zotero_setzen(eid: str, meta: dict) -> dict:
+    """Zotero-Schnappschuss ins Transkript — ein menschlicher Akt (die
+    Person hat gewählt), der Schnappschuss selbst bleibt `source`."""
+    tj = _schnappschuss(eid)
+    d = _ergaenze_schema1(json.loads(tj.read_text("utf-8")))
+    d["zotero"] = dict(meta, imported_at=_jetzt())
+    journal_eintrag(d, origin="human",
+                    did=f"Zotero-Eintrag {meta.get('citekey') or meta.get('item_key')} verknüpft",
+                    changed={"zotero": "linked"})
+    d["updated"] = _jetzt()
+    _atomar(tj, d)
+    return d
+
+
+def zotero_loesen(eid: str) -> dict:
+    tj = _schnappschuss(eid)
+    d = _ergaenze_schema1(json.loads(tj.read_text("utf-8")))
+    alt = d.pop("zotero", None)
+    if alt is not None:
+        journal_eintrag(d, origin="human",
+                        did=f"Zotero-Verknüpfung {alt.get('citekey') or alt.get('item_key')} gelöst",
+                        changed={"zotero": "removed"})
+    d["updated"] = _jetzt()
+    _atomar(tj, d)
+    return d
+
+
 def schreibe(eid: str, daten: dict, *, did: str = "Im Editor bearbeitet",
              origin: str = "human") -> dict:
     """Snapshot des alten Stands nach history/, dann atomar schreiben.
     Was sich gegenüber dem alten Stand geändert hat, wird `origin:
     human` (der Editor ist der einzige Weg hierher) und steht als Run
     im Journal — je Sitzung gebündelt."""
-    ordner = eintrag_pfad(eid)
-    tj = ordner / "transkript.json"
-    hist = ordner / "history"
-    hist.mkdir(exist_ok=True)
-    shutil.copyfile(tj, hist / f"{_stamp()}.json")
-    alte = sorted(hist.glob("*.json"))
-    for alt in alte[:-HISTORY_MAX]:
-        alt.unlink()
+    tj = _schnappschuss(eid)
     alt_stand = _ergaenze_schema1(json.loads(tj.read_text("utf-8")))
     daten = _ergaenze_schema1(daten)
     daten["journal"] = alt_stand.get("journal", [])   # das Journal führt die Bibliothek
+    if "zotero" in alt_stand:                           # der Editor kennt den Block nicht
+        daten.setdefault("zotero", alt_stand["zotero"])
     changed = _aenderungen(alt_stand, daten)
     if changed:
         by_id = {s["id"]: s for s in daten["segmente"]}
@@ -253,7 +287,7 @@ def schreibe(eid: str, daten: dict, *, did: str = "Im Editor bearbeitet",
 def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
             quelle: dict, audio: Path | None = None, *,
             origin: str = "machine", journal: list[dict] | None = None,
-            by: dict | None = None) -> dict:
+            by: dict | None = None, zotero: dict | None = None) -> dict:
     """Neuer Eintrag (aus Transkriptions-Job oder Import). segmente:
     [{start, end, sprecher: id|None, text}] — IDs werden hier vergeben,
     wenn sie fehlen. `origin` gilt für alle Records ohne eigenes Flag:
@@ -278,6 +312,8 @@ def anlegen(name: str, segmente: list[dict], sprecher: list[dict],
              "created": jetzt, "updated": jetzt, "audio": audio_name,
              "quelle": quelle, "sprecher": sprecher,
              "segmente": segmente, "journal": _kette_schliessen(journal or [])}
+    if zotero:                       # aus einem Dossier mitgebracht (source)
+        daten["zotero"] = dict(zotero, origin="source")
     art = quelle.get("erzeugt", "")
     did = ("Whisper-Transkript mit Sprechertrennung" if art == "transcription"
            else f"Import aus {quelle.get('datei', '?')}")

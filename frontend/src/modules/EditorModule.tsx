@@ -11,11 +11,12 @@ import {
 import { Icon } from "../components/icons";
 import {
   API_BASE, apiGet, apiSend, errMsg, hms, kuerze, sprecherFarbe,
-  type Segment, type Sprecher, type Transkript,
+  type Segment, type Sprecher, type Transkript, type ZoteroKandidat,
+  type ZoteroMeta, type ZoteroStatus,
 } from "../lib/api";
 import { useT } from "../lib/i18n";
 import { KEYS, lget, lset, sget, sset } from "../lib/storage";
-import { isTauri, savePath } from "../lib/tauri";
+import { isTauri, ordnerOeffnen, savePath } from "../lib/tauri";
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
 
@@ -51,8 +52,13 @@ export default function EditorModule({ id, onExit }: {
   const [loop, setLoop] = useState(false);
   const [folgen, setFolgen] = useState(
     lget(KEYS.editorFolgen) !== "0");
-  const [seitenTab, setSeitenTab] = useState<"sprecher" | "suchen">(
-    sget(KEYS.editorSeitenTab) === "suchen" ? "suchen" : "sprecher");
+  // Seitenleiste: Sprecher | Suchen | Metadaten (User 2026-09-11:
+  // «neben Suche ein Subtab»)
+  const [seitenTab, setSeitenTab] = useState<SeitenTab>(() => {
+    const g = sget(KEYS.editorSeitenTab);
+    return g === "suchen" || g === "metadaten" ? g : "sprecher";
+  });
+  const [zotero, setZotero] = useState<ZoteroMeta | null>(null);
   // Zähler je Segment: die Textareas sind UNKONTROLLIERT
   // (defaultValue) und zeigen programmatisch geänderten Text nur
   // nach Remount. Statt — wie bei Teilen/Verbinden — die id zu
@@ -78,6 +84,7 @@ export default function EditorModule({ id, onExit }: {
   useEffect(() => {
     void apiGet<Transkript>(`/api/transcripts/${id}`).then((t) => {
       setName(t.name);
+      setZotero(t.zotero ?? null);
       setSprecher(t.sprecher);
       setSegmente(t.segmente.map((s) => ({ ...s,
         id: s.id || neueId() })));
@@ -555,12 +562,14 @@ export default function EditorModule({ id, onExit }: {
                    <SegTabs value={seitenTab}
                      onChange={(v) => {
                        sset(KEYS.editorSeitenTab, v);
-                       setSeitenTab(v as "sprecher" | "suchen");
+                       setSeitenTab(v as SeitenTab);
                        if (v !== "suchen") setSuchZeile(-1);
                      }}
                      options={[
                        { value: "sprecher", label: tr("ed.sprecher") },
-                       { value: "suchen", label: tr("ed.tab.suchen") }]} />
+                       { value: "suchen", label: tr("ed.tab.suchen") },
+                       { value: "metadaten",
+                         label: tr("ed.tab.metadaten") }]} />
                  }>
         {seitenTab === "sprecher"
           ? <SprecherPanel id={id} sprecher={sprecher}
@@ -568,10 +577,187 @@ export default function EditorModule({ id, onExit }: {
                            onRename={umbenennen} onNeu={sprecherNeu}
                            onMerge={zusammenfuehren}
                            onLeere={leereZuweisen} />
-          : <SuchPanel segmente={segmente} onZeige={zeigeTreffer}
-                       onErsetze={textErsetzen}
-                       onAlleErsetzen={alleErsetzen} />}
+          : seitenTab === "suchen"
+            ? <SuchPanel segmente={segmente} onZeige={zeigeTreffer}
+                         onErsetze={textErsetzen}
+                         onAlleErsetzen={alleErsetzen} />
+            : <MetadatenPanel id={id} name={name} zotero={zotero}
+                              onChange={setZotero} />}
       </SidePanel>
+    </Flex>
+  );
+}
+
+type SeitenTab = "sprecher" | "suchen" | "metadaten";
+
+/** Rollen, die Zotero für Interviews kennt — Anzeige-Reihenfolge. Die
+    befragte Person ist NICHT vorausgewählt: ein pseudonymisiertes
+    Transkript soll ihren Klarnamen nicht über die Hintertür Zotero
+    bekommen (Backend zotero.py). */
+const ROLLEN = ["interviewer", "interviewee", "author", "contributor",
+                "editor", "translator"] as const;
+const ROLLEN_VORAB = new Set(["interviewer", "author", "contributor",
+                              "editor", "translator"]);
+
+function personen(cs: { first: string; last: string }[]): string {
+  return cs.map((c) => `${c.first} ${c.last}`.trim()).join(", ");
+}
+
+/** Metadaten aus Zotero: verknüpfen, zeigen, lösen. Liest die lokale
+    Zotero-Datenbank nur auf Anfrage und nur mit Einwilligung (Einstel-
+    lungen); was ins Transkript kommt, wählt die Person je Rolle. */
+function MetadatenPanel({ id, name, zotero, onChange }: {
+  id: string; name: string; zotero: ZoteroMeta | null;
+  onChange: (z: ZoteroMeta | null) => void;
+}) {
+  const tr = useT();
+  const [status, setStatus] = useState<ZoteroStatus | null>(null);
+  const [q, setQ] = useState(name);
+  const [treffer, setTreffer] = useState<ZoteroKandidat[] | null>(null);
+  const [wahl, setWahl] = useState<ZoteroKandidat | null>(null);
+  const [rollen, setRollen] = useState<Set<string>>(new Set(ROLLEN_VORAB));
+  const [laeuft, setLaeuft] = useState(false);
+  const [fehler, setFehler] = useState("");
+  useEffect(() => {
+    void apiGet<ZoteroStatus>("/api/zotero/status").then(setStatus)
+      .catch((e) => setFehler(errMsg(e)));
+  }, []);
+  useEffect(() => { if (!q) setQ(name); }, [name, q]);
+
+  const suche = async () => {
+    setLaeuft(true); setFehler(""); setWahl(null);
+    try {
+      const r = await apiGet<{ candidates: ZoteroKandidat[] }>(
+        `/api/zotero/candidates?q=${encodeURIComponent(q)}`);
+      setTreffer(r.candidates);
+    } catch (e) { setFehler(errMsg(e)); } finally { setLaeuft(false); }
+  };
+  const verknuepfe = async (item_key: string, roles: string[]) => {
+    setLaeuft(true); setFehler("");
+    try {
+      const r = await apiSend<{ zotero: ZoteroMeta }>(
+        `/api/transcripts/${id}/zotero`, { item_key, roles });
+      onChange(r.zotero); setWahl(null); setTreffer(null);
+    } catch (e) { setFehler(errMsg(e)); } finally { setLaeuft(false); }
+  };
+  const loese = async () => {
+    setLaeuft(true); setFehler("");
+    try {
+      await apiSend(`/api/transcripts/${id}/zotero`, undefined, "DELETE");
+      onChange(null);
+    } catch (e) { setFehler(errMsg(e)); } finally { setLaeuft(false); }
+  };
+
+  if (status && !status.consent) {
+    return (
+      <Flex direction="column" gap="2" p="3">
+        <Text size="2">{tr("ed.meta.aus")}</Text>
+        <Text size="1" color="gray">{tr("ed.meta.hinweis")}</Text>
+      </Flex>
+    );
+  }
+  if (zotero) {
+    const rollenJetzt = zotero.rollen ?? Array.from(ROLLEN_VORAB);
+    return (
+      <Flex direction="column" gap="3" p="3">
+        <Flex align="center" gap="2">
+          <Badge color="green">{tr("ed.meta.verknuepft")}</Badge>
+          {zotero.item_type && <Badge variant="soft">{zotero.item_type}</Badge>}
+        </Flex>
+        <Text size="2" weight="medium">{zotero.title}</Text>
+        <Text size="1" color="gray">
+          {[zotero.date ?? zotero.year, zotero.citekey, zotero.publication]
+            .filter(Boolean).join(" · ")}</Text>
+        {ROLLEN.map((r) => {
+          const cs = zotero.creators.filter((c) => c.role === r);
+          return cs.length ? (
+            <Text size="1" key={r}>
+              <Text color="gray">{tr(`ed.meta.rolle.${r}`)}: </Text>
+              {personen(cs)}</Text>
+          ) : null;
+        })}
+        {zotero.doi && <Text size="1" color="gray">DOI {zotero.doi}</Text>}
+        <Flex gap="2" wrap="wrap">
+          {zotero.select_link && (
+            <Button size="1" variant="soft"
+                    onClick={() => void ordnerOeffnen(zotero.select_link!)}>
+              {tr("ed.meta.zotero.oeffnen")}</Button>
+          )}
+          <Button size="1" variant="soft" disabled={laeuft}
+                  onClick={() => void verknuepfe(zotero.item_key, rollenJetzt)}>
+            {tr("ed.meta.neuladen")}</Button>
+          <Button size="1" variant="soft" color="red" disabled={laeuft}
+                  onClick={() => void loese()}>
+            {tr("ed.meta.loesen")}</Button>
+        </Flex>
+        {fehler && <ErrorNote>{fehler}</ErrorNote>}
+        <Text size="1" color="gray">{tr("ed.meta.hinweis")}</Text>
+      </Flex>
+    );
+  }
+  return (
+    <Flex direction="column" gap="3" p="3">
+      <Flex gap="2">
+        <TextField.Root size="2" value={q} style={{ flex: 1 }}
+          placeholder={tr("ed.meta.suchen.platz")}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") void suche(); }} />
+        <Button size="2" onClick={() => void suche()}
+                disabled={laeuft || !status?.found}>
+          {tr("ed.meta.suchen")}</Button>
+      </Flex>
+      {status && !status.found && (
+        <Text size="1" color="red">{tr("st.zotero.fehlt")}</Text>
+      )}
+      {fehler && <ErrorNote>{fehler}</ErrorNote>}
+      {treffer && !treffer.length && (
+        <Text size="1" color="gray">{tr("ed.meta.keine")}</Text>
+      )}
+      {treffer?.map((k) => (
+        <Flex key={k.item_key} direction="column" gap="1" p="2"
+              onClick={() => { setWahl(k);
+                setRollen(new Set(ROLLEN_VORAB)); }}
+              style={{ cursor: "pointer", borderRadius: 6,
+                       border: "1px solid var(--gray-a5)",
+                       background: wahl?.item_key === k.item_key
+                         ? "var(--accent-a3)" : undefined }}>
+          <Flex align="center" gap="2">
+            {k.item_type && <Badge variant="soft" size="1">{k.item_type}</Badge>}
+            <Text size="1" color="gray">
+              {[k.year, k.citekey].filter(Boolean).join(" · ")}</Text>
+          </Flex>
+          <Text size="2">{k.title}</Text>
+          <Text size="1" color="gray">{personen(k.creators)}</Text>
+        </Flex>
+      ))}
+      {wahl && (
+        <Flex direction="column" gap="2" p="2"
+              style={{ border: "1px solid var(--gray-a5)", borderRadius: 6 }}>
+          <Text size="1" weight="medium">{tr("ed.meta.rollen")}</Text>
+          {ROLLEN.filter((r) => wahl.creators.some((c) => c.role === r))
+            .map((r) => (
+              <Flex key={r} align="center" gap="2" asChild>
+                <label>
+                  <Checkbox checked={rollen.has(r)}
+                    onCheckedChange={(v) => {
+                      const n = new Set(rollen);
+                      if (v === true) n.add(r); else n.delete(r);
+                      setRollen(n);
+                    }} />
+                  <Text size="1">
+                    {tr(`ed.meta.rolle.${r}`)}: {personen(
+                      wahl.creators.filter((c) => c.role === r))}</Text>
+                </label>
+              </Flex>
+            ))}
+          <Text size="1" color="gray">{tr("ed.meta.rollen.hinweis")}</Text>
+          <Button size="1" disabled={laeuft}
+                  onClick={() => void verknuepfe(wahl.item_key,
+                                                 Array.from(rollen))}>
+            {tr("ed.meta.verknuepfen")}</Button>
+        </Flex>
+      )}
+      <Text size="1" color="gray">{tr("ed.meta.hinweis")}</Text>
     </Flex>
   );
 }

@@ -132,6 +132,12 @@ DEFAULTS = {
     # sichtbar und neu würfelbar — NIE Hardware-UUID oder Hostname.
     "user_email": "",
     "install_id": "",
+    # Zotero (2026-09-11): Metadaten aus der LOKALEN zotero.sqlite, nur
+    # lesend (immutable), nur auf Anfrage, nur mit Einwilligung — dieselbe
+    # Semantik wie enrichs `zotero_consent`. `zotero_dir` leer = suchen
+    # (~/Zotero, Zotero-Profil, /Volumes/*/Zotero).
+    "zotero_consent": False,
+    "zotero_dir": "",
 }
 
 

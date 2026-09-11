@@ -7,11 +7,29 @@ a version are the corresponding section of this file.
 
 ### Added
 
+- **Metadata from Zotero.** A third tab in the editor's side panel —
+  Speakers | Find | Metadata — links a transcript to an item in your
+  local Zotero library. Search by title, year, name or citekey
+  (interviews ranked first), pick which people go into the transcript
+  by role (the interviewee is not preselected, so a pseudonymised
+  transcript does not get their name through the back door), link,
+  reload, unlink. The snapshot is stored in the transcript as `source`
+  and the link is a human run in the journal. In the `.enrich` export
+  it becomes the layer `source/zotero.json`, and the first page of the
+  typeset PDF reads "Title · Date · Interviewer · Citekey". Zotero is
+  read only on request, only read-only (`zotero.sqlite` opened
+  immutable — Zotero can stay open), only on this computer, and only
+  after you enable it in Settings (optional data directory; the usual
+  places are searched otherwise). Nothing is sent to Zotero or the
+  network.
+
 - **Export and import follow Format 2 of the enrich dossier**
   (`FORMAT.md` in the enrich repository), built on enrich-core's own
   manifest models so enrich reads it. The container is one uncompressed
-  `.enrich` file, laid out as enrich writes dossiers today: the
-  transcript is the source (`transcript.json`, schema
+  `.enrich` file, laid out by enrich's naming convention (FORMAT.md
+  Appendix A: `source/`, `text/`) and packed by enrich-core's own
+  `handover` profile: the transcript is the source
+  (`source/transcript.json`, schema
   `transcript/1.0.0`, registered in inventory and lineage,
   `source.canonical`), the typeset PDF is `rendered`, every layer
   carries the header `kind · id · origin · from · by · did · result`,

@@ -43,20 +43,24 @@ def test_inventar_ist_vollstaendig_und_stimmt(client, eintrag):
 def test_journal_ist_verkettet(client, eintrag):
     _z, _w, m = _container(eintrag)
     runs = m["runs"]
-    assert runs and runs[0]["prev"] is None
+    assert runs and runs[0].get("prev") is None
     from enrich_core.dossier import run_eintrag_hash
     from enrich_core.schemas.manifest import RunRecord
     for vor, nach in itertools.pairwise(runs):
         assert nach["prev"] == run_eintrag_hash(RunRecord.model_validate(vor))
-    eigene = [r for r in runs if r["tool"] == "localtranscript"]
+    eigene = [r for r in runs if r["who"]["app"] == "localtranscript"]
     assert eigene and runs[:len(eigene)] == eigene       # Bibliothek zuerst
     for r in eigene:
         assert r["origin"] in ("source", "machine", "llm", "human")
         assert r["who"]["app"] == "localtranscript"
         assert r["who"]["install"].startswith("ins-")
-        assert r["summary"]["did"] and r["started"]
-        for verboten in ("did", "from", "by", "result"):     # FORMAT.md §3.1
-            assert verboten not in r
+        assert r["did"] and r["started"] and r["path"] == "source/transcript.json"
+        assert r["layer"] in m["layers"]                      # WO: die Schicht-ID
+        # schlank (FORMAT.md §3.1): wann, was, wer, wo — sonst nichts
+        # (enrich schreibt leere Defaults mit; gefüllt darf keines sein)
+        for verboten in ("from", "by", "result", "summary", "agent",
+                         "tool", "tool_version", "inputs", "config"):
+            assert not r.get(verboten), (verboten, r[verboten])
 
 
 def test_editor_macht_records_human_und_schreibt_ins_journal(client, eintrag):
@@ -128,6 +132,7 @@ def test_enrich_liest_den_container(client, eintrag, tmp_path):
     kette = d.journal_pruefen()
     assert not kette.get("kette"), kette
     m = d.manifest
-    assert m.source.kind == "transcript" and m.source.canonical == "transcript.json"
-    assert m.files["transcript.json"].role == "layer"
+    assert m.source.kind == "transcript"
+    assert m.source.canonical == "source/transcript.json"
+    assert m.files["source/transcript.json"].role == "layer"
     assert any(li.kind == "transcript" and li.current for li in m.layers.values())

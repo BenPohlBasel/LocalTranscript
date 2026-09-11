@@ -65,6 +65,19 @@ and forward the way Audition does — `←` `→` and Space do the same;
 each one. With `⌥` held, `J` / `K` / `L` also work **while typing**.
 `Ctrl+L` toggles the loop, `Ctrl+X` cycles the playback speed.
 
+### Metadata from Zotero
+
+The side panel has a third tab, **Metadata**. If you keep your
+interviews in Zotero, link the transcript to its Zotero item: search by
+title, year, name or citekey (interviews come first), choose which
+people go into the transcript by role — the interviewee is not
+preselected, so a pseudonymised transcript does not get their name
+through Zotero — and link. Title, date, interviewer and citekey then
+appear on page 1 of the `.enrich` export and travel as the layer
+`source/zotero.json`. LocalTranscript reads Zotero only on request,
+read-only (Zotero can stay open) and only after you enable it in
+Settings; nothing is sent to Zotero or the network.
+
 ## Find and replace
 
 The second tab in the side panel searches **literally** — no

@@ -12,12 +12,22 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
 2. ~~**Journal im Transkript**~~ — GEBAUT 2026-09-10/11 (Runs je
    Whisper-Lauf, Import, Editor-Sitzung; im Container als RunRecords
    mit enrichs Kette). Offen daraus: der Hinweis in der App, dass ein
-   Run offen ist, und `enrich_core`-Umzug von `zotero.py` abwarten für
-   die Metadaten-Schicht (enrich-Backlog 000).
+   Run offen ist.
 
 2a. ~~**Neu vendoren nach enrichs Kopfzeile**~~ — ERLEDIGT 2026-09-11
    (textsatz@94ba895; Kopfzeile «Titel · Datum» aus dem Transkript).
-   OFFEN daraus: **Metadaten-Panel mit Zotero** — `enrich_core.zotero`
+   ~~OFFEN daraus: **Metadaten-Panel mit Zotero**~~ — GEBAUT 2026-09-11
+   (Subtab «Metadaten» neben Suchen, Einstellungs-Karte, Schicht
+   `source/zotero.json`, Kopfzeile mit Interviewer:in und Citekey;
+   CHANGELOG). Zugleich beide Umgehungen gestrichen, die enrich
+   angemahnt hatte (Installations-Kennung als `agent.user`, Rollen-
+   Korrektur nach dem Textsatz): der Setzer bekommt die Transkript-
+   Schicht (`baue_struktur_dossier(transkript=…)`), enrich packt die
+   Sendung (`Dossier.pack(profile="handover")`), Namen nach Anhang A.
+   Zwei neue Befunde an enrich (BACKLOG 000 dort): `producer` wird
+   hart auf «enrich» gesetzt (hier nach dem Packen zurückgeschrieben),
+   `by` der übernommenen Quelle kommt aus dem Setzer-Run.
+   Ursprüngliche Spezifikation: `enrich_core.zotero`
    liegt jetzt in enrich-core (24333d4): Einwilligung als Einstellung
    (Semantik `zotero_consent`, im Datenfluss nennen), lokale
    `zotero.sqlite` immutable lesen, Kandidaten nach Titel-Nähe (kein

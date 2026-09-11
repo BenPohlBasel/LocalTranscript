@@ -190,6 +190,6 @@ def lies(daten: bytes) -> dict:
             sp.get("name", "")) else "human")
     return {"name": name, "segmente": segmente, "sprecher": sprecher,
             "audio_name": audio_name, "audio_bytes": audio_bytes,
-            "genau": genau, "journal": []}
+            "genau": genau, "journal": [], "zotero": None}
 
 

@@ -34,6 +34,8 @@ export type Transkript = {
   updated: string; audio: string | null;
   quelle: Record<string, unknown>;
   sprecher: Sprecher[]; segmente: Segment[];
+  /** Zotero-Schnappschuss, wenn verknüpft */
+  zotero?: ZoteroMeta | null;
 };
 export type EintragMeta = {
   id: string; name: string; created: string; updated: string;
@@ -58,6 +60,28 @@ export type Settings = {
   user_email: string;
   /** zufällige Kennung dieser Installation (nie Gerät, nie Person) */
   install_id: string;
+  /** Zotero: lokale zotero.sqlite lesen — nur mit Einwilligung */
+  zotero_consent: boolean;
+  /** leer = Standardorte suchen (~/Zotero, Zotero-Profil, Volumes) */
+  zotero_dir: string;
+};
+export type ZoteroStatus = { consent: boolean; found: boolean;
+                             dir: string | null };
+export type ZoteroCreator = { first: string; last: string; role: string };
+/** ein Treffer der Kandidatensuche (schlank: ohne Abstract) */
+export type ZoteroKandidat = {
+  item_key: string; title: string | null; year: string | null;
+  date: string | null; item_type: string | null; citekey: string | null;
+  creators: ZoteroCreator[]; publication: string | null;
+  library: string | null; select_link: string | null; score: number;
+};
+/** der Schnappschuss im Transkript (origin: source) */
+export type ZoteroMeta = {
+  item_key: string; citekey: string | null; item_type: string | null;
+  title: string | null; date: string | null; year: string | null;
+  publication: string | null; doi: string | null; abstract: string | null;
+  select_link: string | null; creators: ZoteroCreator[];
+  rollen?: string[]; origin?: string; imported_at?: string;
 };
 export type ModellInfo = { name: string; size_mb: number };
 
