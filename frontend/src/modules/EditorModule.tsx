@@ -596,20 +596,23 @@ type SeitenTab = "sprecher" | "suchen" | "metadaten";
     bekommen (Backend zotero.py). */
 const ROLLEN = ["interviewer", "interviewee", "author", "contributor",
                 "editor", "translator"] as const;
+/** Vorausgewählt: die Rollen, die typischerweise die forschende Seite
+    sind. Die befragte Seite — interviewee, guest, castMember,
+    performer, presenter — bleibt aus, bis jemand sie anhakt. */
 const ROLLEN_VORAB = new Set(["interviewer", "author", "contributor",
-                              "editor", "translator"]);
+                              "editor", "translator", "director",
+                              "producer", "scriptwriter", "podcaster"]);
 
-/** Rollen, die in den Creators vorkommen: die bekannten in fester
-    Reihenfolge, unbekannte (performer, podcaster, guest …) dahinter —
-    Zotero kennt mehr Rollen als das Interview (Review 2026-09-11). */
+/** Rollen, die in den Creators vorkommen: die Interview-Rollen in fester
+    Reihenfolge, alle anderen (director, performer, guest …) dahinter.
+    Angezeigt werden sie UNÜBERSETZT, so wie Zotero sie führt (User
+    2026-09-11, BACKLOG 7): sie sind Zoteros creatorType, kein App-Text. */
 function rollenVon(cs: { role: string }[]): string[] {
   const da = new Set(cs.map((c) => c.role || "author"));
   return [...ROLLEN.filter((r) => da.has(r)),
           ...Array.from(da).filter((r) => !(ROLLEN as readonly string[]).includes(r)).sort()];
 }
-function rolleName(r: string, tr: (k: string) => string): string {
-  return (ROLLEN as readonly string[]).includes(r) ? tr(`ed.meta.rolle.${r}`) : r;
-}
+function rolleName(r: string): string { return r; }
 
 function personen(cs: { first: string; last: string }[]): string {
   return cs.map((c) => `${c.first} ${c.last}`.trim()).join(", ");
@@ -685,7 +688,7 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
             .filter(Boolean).join(" · ")}</Text>
         {rollenVon(zotero.creators).map((r) => (
           <Text size="1" key={r}>
-            <Text color="gray">{rolleName(r, tr)}: </Text>
+            <Text color="gray">{rolleName(r)}: </Text>
             {personen(zotero.creators.filter((c) => c.role === r))}</Text>
         ))}
         {zotero.doi && <Text size="1" color="gray">DOI {zotero.doi}</Text>}
@@ -758,7 +761,7 @@ function MetadatenPanel({ id, name, zotero, onChange }: {
                       setRollen(n);
                     }} />
                   <Text size="1">
-                    {rolleName(r, tr)}: {personen(
+                    {rolleName(r)}: {personen(
                       wahl.creators.filter((c) => c.role === r))}</Text>
                 </label>
               </Flex>

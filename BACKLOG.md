@@ -106,7 +106,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    `com.apple.icloud.desktop`-Marker prüfen), und einen Ort ausserhalb
    anbieten.
 
-7. **Zotero-Rollen nicht übersetzen (User-Entscheid 2026-09-11).** Die
+7. ~~**Zotero-Rollen nicht übersetzen (User-Entscheid 2026-09-11).**~~ GEBAUT 2026-09-11 (CHANGELOG Unreleased). Die
    Rollen kommen aus Zotero (creatorType: interviewer, interviewee,
    director, producer, castMember, podcaster, guest …) und sollen im
    Metadaten-Reiter und in der verknüpften Ansicht so stehen, wie Zotero

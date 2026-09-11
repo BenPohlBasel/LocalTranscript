@@ -3,6 +3,17 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## Unreleased
+
+### Changed
+
+- **Zotero roles are shown as Zotero names them** — `interviewer`,
+  `interviewee`, `director`, `castMember`, … in English, for every item
+  type alike, no longer translated: they are Zotero's creator types, not
+  app text. Any item type can be linked (video, audio, podcast, film,
+  document …); the interviewed side (`interviewee`, `guest`,
+  `castMember`, `performer`, `presenter`) is never preselected.
+
 ## 2.3.0 — 2026-09-11
 
 ### Changed
