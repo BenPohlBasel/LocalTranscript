@@ -349,30 +349,40 @@ export default function EditorModule({ id, onExit }: {
   }, [speed, hatAudio]);
 
   // Ton führt, Bild folgt (BACKLOG 8): das Video hängt am Audio-Element
-  // — Position alle ~250 ms nachgezogen, Play/Pause gespiegelt, Rate
-  // mit. Ab 2× steht das Bild eingefroren (WebKit dekodiert nicht
-  // schneller als nötig und nie rückwärts); ein Sprung friert kurz ein,
-  // bis das Bild an der neuen Stelle wieder da ist.
+  // — Play/Pause gespiegelt, Rate mit. Ab 2× steht das Bild eingefroren
+  // (WebKit dekodiert nicht schneller als nötig und nie rückwärts); ein
+  // Sprung friert kurz ein, bis das Bild an der neuen Stelle wieder da
+  // ist.
+  //
+  // FREILAUF (Befund 2026-09-12, 4K-HEVC vom iPhone «hakelt»): jede
+  // Korrektur ruckelt — eine Suche kostet bei 4K 100–300 ms, und schon
+  // ein Ratenwechsel setzt WebKits Decoder neu an. Darum läuft das Bild
+  // mit der Rate des Tons frei; nachgezogen wird nur bei Play/Pause,
+  // bei einem Sprung des Tons und wenn der Abstand > 1 s wird (beide
+  // Uhren hängen an derselben Media-Engine, das passiert selten).
   useEffect(() => {
     const a = audioRef.current, v = videoEl;
     if (!a || !v || !hatVideo) { setEingefroren(false); return; }
+    const WEICH = 1.0;
+    const soll = () => Math.min(a.playbackRate, 2);
     const zieh = () => {
-      if (Math.abs(v.currentTime - a.currentTime) > 0.25)
-        v.currentTime = a.currentTime;
+      if (v.seeking || a.paused || a.playbackRate >= 2) return;
+      if (Math.abs(a.currentTime - v.currentTime) > WEICH) v.currentTime = a.currentTime;
     };
     const lauf = () => {
       const frieren = a.playbackRate >= 2;
       setEingefroren(frieren);
-      v.playbackRate = Math.min(a.playbackRate, 2);
-      zieh();
+      v.playbackRate = soll();
+      if (Math.abs(v.currentTime - a.currentTime) > 0.3 && !v.seeking)
+        v.currentTime = a.currentTime;
       if (a.paused || frieren) v.pause(); else void v.play().catch(() => undefined);
     };
     const sprung = () => { setEingefroren(true); v.currentTime = a.currentTime; };
-    // nach dem Sprung noch einmal nachziehen: bei langen Keyframe-
-    // Abständen dauert das Dekodieren, der Ton ist derweil weitergelaufen
+    // nach dem Sprung ist der Ton derweil weitergelaufen: einmal nachziehen,
+    // dann übernimmt wieder die weiche Regelung
     const angekommen = () => {
       if (a.playbackRate < 2) setEingefroren(false);
-      if (!a.paused && Math.abs(v.currentTime - a.currentTime) > 0.25)
+      if (!a.paused && Math.abs(v.currentTime - a.currentTime) > 0.3)
         v.currentTime = a.currentTime;
     };
     a.addEventListener("timeupdate", zieh);
