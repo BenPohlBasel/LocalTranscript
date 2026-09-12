@@ -220,6 +220,12 @@ def _cluster(embeddings: np.ndarray,
     # (User 2026-09-09, beim Umbau der Sprecherzahl-Liste aufgefallen).
     if num_speakers == 1:
         return np.zeros(len(embeddings), dtype=int)
+    # Ein einziges Fenster (kurzer Clip, ein Satz): nichts zu clustern —
+    # AgglomerativeClustering verlangt mindestens zwei Proben und brach
+    # den Job mit «Found array with 1 sample(s)» ab (Live-Befund
+    # 2026-09-12, 8-s-Video vom iPhone).
+    if len(embeddings) < 2:
+        return np.zeros(len(embeddings), dtype=int)
 
     if num_speakers and num_speakers >= 2 and num_speakers < len(embeddings):
         sc = SpectralClustering(
