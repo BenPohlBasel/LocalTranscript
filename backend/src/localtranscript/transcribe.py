@@ -17,7 +17,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import get_whisper_cli, model_pfad
+from .config import get_vad_model, get_whisper_cli, model_pfad
 
 
 @dataclass
@@ -90,10 +90,20 @@ def transcribe_classic(audio_path: Path, model: str, language: str,
                        | None = None,
                        register: Callable[[subprocess.Popen | None], None]
                        | None = None) -> list[TranscriptSegment]:
-    """Ganze Datei, natürliche Whisper-Segmente, Fortschritt gestreamt."""
+    """Ganze Datei, natürliche Whisper-Segmente, Fortschritt gestreamt.
+
+    Mit whisper.cpps Sprachaktivitätserkennung (`--vad`, Silero v5):
+    ohne sie halluziniert Whisper auf Stille und Umgebungsgeräusch —
+    «* Musik *», erfundene Sätze, Wiederholungsschleifen (Live-Befund
+    2026-09-12: 25-s-Clip ohne Sprache ergab achtmal denselben Satz).
+    Gemessen am Feldmitschnitt: gleiche Zeit, gleich viele Wörter,
+    0 statt 8 Schleifen, Zeitstempel bleiben auf der Originalachse."""
     cmd = [get_whisper_cli(), "-m", str(_model_path(model)),
            "-l", language, "-f", str(audio_path), "-oj",
            "--print-progress"]
+    vad = get_vad_model()
+    if vad is not None:
+        cmd += ["--vad", "--vad-model", str(vad)]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, bufsize=1)
     if register:

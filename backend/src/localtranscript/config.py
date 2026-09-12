@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 APP_NAME = "LocalTranscript"
-APP_VERSION = "2.4.2"
+APP_VERSION = "2.4.3"
 #: DER LocalTranscript-Port (2026-09-09): 5628 = „LOCT" auf der
 #: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
 #: (23119 = „ZOT"). Vier Buchstaben, nicht fünf: „LOCTR" wäre 56287
@@ -141,6 +141,14 @@ def _modell_pruefen(p: Path) -> str | None:
     if st.st_size < MODELL_MIN_BYTES:
         return "unvollstaendig"
     return None
+
+
+def get_vad_model() -> Path | None:
+    """Silero-VAD als ggml für whisper.cpps `--vad` (im Paket, s.
+    vad/README.md). None, wenn die Datei fehlt — dann läuft Whisper wie
+    bisher ohne VAD."""
+    p = Path(__file__).resolve().parent / "vad" / "silero-v5.1.2.bin"
+    return p if p.is_file() else None
 
 
 def get_available_models() -> list[dict]:

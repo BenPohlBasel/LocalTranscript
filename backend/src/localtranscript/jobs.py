@@ -118,6 +118,29 @@ def abbrechen(job_id: str) -> bool:
     return True
 
 
+def schleifen_zusammenziehen(segmente: list[dict],
+                             mindestens: int = 3) -> list[dict]:
+    """Whisper-Schleifen entschärfen: läuft derselbe Wortlaut drei- oder
+    mehrmals direkt hintereinander, bleibt EIN Segment über die ganze
+    Spanne. Zwei gleiche Zeilen nacheinander sind noch Sprache («Ja.
+    Ja.»), ab drei ist es die bekannte Halluzination — mit VAD selten,
+    aber nicht unmöglich."""
+    aus: list[dict] = []
+    i = 0
+    while i < len(segmente):
+        j = i
+        while j + 1 < len(segmente) and \
+                segmente[j + 1].get("text", "").strip() == segmente[i].get("text", "").strip() \
+                and segmente[i].get("text", "").strip():
+            j += 1
+        if j - i + 1 >= mindestens:
+            aus.append({**segmente[i], "end": segmente[j]["end"]})
+        else:
+            aus.extend(segmente[i:j + 1])
+        i = j + 1
+    return aus
+
+
 def merge_consecutive_speakers(diarization: list,
                                min_segment_duration: float = 0.5) -> list:
     """v1-Logik unverändert: Mikro-Segmente (<0.5 s) dem Vorgänger
@@ -290,6 +313,7 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
                          "end": round(t.end, 3), "sprecher": None,
                          "text": t.text} for t in teile]
 
+        segmente = schleifen_zusammenziehen(segmente)
         _setze(job, status="saving", progress=90, message="speichere")
         eintrag = bibliothek.anlegen(
             name=name, segmente=segmente, sprecher=sprecher,

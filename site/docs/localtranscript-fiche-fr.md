@@ -3,7 +3,7 @@
 Ce qu'est l'application, quelle IA y fait quoi, où se trouve le code,
 et pourquoi la transcription ne quitte jamais l'ordinateur. À remettre à
 une direction de projet, un comité d'éthique ou des collègues. État au
-11 septembre 2026, version 2.4.2.
+11 septembre 2026, version 2.4.3.
 
 ## Ce que fait l'application
 
@@ -98,7 +98,7 @@ enregistrements.
 
 ## Pour la partie méthodologique
 
-> Les enregistrements ont été transcrits avec LocalTranscript 2.4.2
+> Les enregistrements ont été transcrits avec LocalTranscript 2.4.3
 > (B/IAS Bâle, AGPL-3.0 ; reconnaissance vocale whisper.cpp avec le
 > modèle large-v3-turbo, séparation des locuteurs avec SpeechBrain
 > ECAPA-TDNN) entièrement en local sur un ordinateur du groupe de

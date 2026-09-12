@@ -3,7 +3,7 @@
 Bloc de texte à insérer dans un registre des activités de traitement,
 une analyse d'impact relative à la protection des données, une demande
 au comité d'éthique ou un plan de gestion des données. État au
-11 septembre 2026, LocalTranscript 2.4.2. Les mentions entre
+11 septembre 2026, LocalTranscript 2.4.3. Les mentions entre
 `[crochets]` sont complétées par le responsable du traitement.
 
 Ce texte décrit ce que le logiciel fait et ne fait pas. La
@@ -15,7 +15,7 @@ remplace pas un avis juridique.
 
 ## 1. Logiciel utilisé
 
-LocalTranscript, version `[2.4.2]`. Logiciel libre sous
+LocalTranscript, version `[2.4.3]`. Logiciel libre sous
 AGPL-3.0-or-later, développé au B/IAS – Basel Institut für angewandte
 Stadtforschung. Code source public :
 <https://github.com/BenPohlBasel/LocalTranscript>. Le logiciel

@@ -3,6 +3,23 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## 2.4.3 — 2026-09-12
+
+### Fixed
+
+- **No more invented lines on silence.** Whole-file transcription now
+  runs with whisper.cpp's voice-activity detection (Silero VAD v5 as
+  ggml, bundled inside the package): passages without speech are
+  skipped instead of being filled with “* Musik *” or a sentence that
+  repeats eight times. Measured on a five-minute field recording: same
+  time, same word count, zero repetition loops instead of eight,
+  timestamps unchanged. A clip with no speech at all yields an empty
+  transcript. As a safety net, three or more identical consecutive
+  segments are collapsed into one.
+- **Short clips no longer crash speaker separation.** A recording with
+  a single speech window made the clustering abort (“Found array with
+  1 sample(s)”); it is now one speaker.
+
 ## 2.4.2 — 2026-09-12
 
 ### Changed
