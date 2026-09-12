@@ -16,6 +16,11 @@ a version are the corresponding section of this file.
   timestamps unchanged. A clip with no speech at all yields an empty
   transcript. As a safety net, three or more identical consecutive
   segments are collapsed into one.
+- **Smooth video playback.** The picture now runs freely at the
+  audio's rate and is only re-aligned on play/pause, on a jump, or when
+  it drifts more than a second; the former quarter-second corrections
+  (a seek every few seconds) made 4K HEVC from an iPhone stutter.
+  Measured: 20 s of 4K, zero seeks, zero stalls, zero dropped frames.
 - **Short clips no longer crash speaker separation.** A recording with
   a single speech window made the clustering abort (“Found array with
   1 sample(s)”); it is now one speaker.
