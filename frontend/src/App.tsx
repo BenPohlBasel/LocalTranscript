@@ -2,8 +2,8 @@
 // (Speicherort), dann Bibliothek ⇄ Editor (Drilldown, enrich-
 // Werkstatt-Muster) + Einstellungen.
 import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, ErrorNote, Flex, Heading, ModalDialog, SegTabs,
-  Text } from "./components/ui";
+import { Badge, Busy, Button, ErrorNote, Flex, Heading, ModalDialog,
+  SegTabs, Text } from "./components/ui";
 import { Icon } from "./components/icons";
 import { apiGet, apiSend, errMsg, type Settings } from "./lib/api";
 import { setSprache, useT, type Sprache } from "./lib/i18n";
@@ -121,6 +121,7 @@ export default function App() {
             style={{ borderBottom: "1px solid var(--gray-a5)",
                      background: "var(--gray-a3)" }}>
         <Heading size="4">{tr("app.titel")}</Heading>
+        <Busy />
         <div style={{ flex: 1 }} />
         {/* im Editor-Drilldown ist KEIN Tab aktiv — so feuert der
             Klick auf „Human-Editor" ein onChange und verlässt den

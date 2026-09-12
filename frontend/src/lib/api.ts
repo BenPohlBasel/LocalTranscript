@@ -1,4 +1,5 @@
 // API-Typen + Fetch-Helfer — EINE Stelle (enrich-Kit-Regel).
+import { beginne, ende } from "./busy";
 import { isTauri } from "./tauri";
 
 /** Backend-Adresse im Tauri-Fenster. Der Port lebt an EINER Stelle je
@@ -112,26 +113,35 @@ async function _check(r: Response): Promise<Response> {
 }
 
 export async function apiGet<T>(pfad: string): Promise<T> {
-  const r = await _check(await fetch(`${API_BASE}${pfad}`));
-  return r.json() as Promise<T>;
+  beginne();
+  try {
+    const r = await _check(await fetch(`${API_BASE}${pfad}`));
+    return await (r.json() as Promise<T>);
+  } finally { ende(); }
 }
 
 export async function apiSend<T>(pfad: string, body?: unknown,
                                  method = "POST"): Promise<T> {
-  const r = await _check(await fetch(`${API_BASE}${pfad}`, {
-    method,
-    headers: body === undefined ? undefined
-      : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  }));
-  return r.json() as Promise<T>;
+  beginne();
+  try {
+    const r = await _check(await fetch(`${API_BASE}${pfad}`, {
+      method,
+      headers: body === undefined ? undefined
+        : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }));
+    return await (r.json() as Promise<T>);
+  } finally { ende(); }
 }
 
 export async function apiUpload<T>(pfad: string,
                                    form: FormData): Promise<T> {
-  const r = await _check(await fetch(`${API_BASE}${pfad}`,
-                                     { method: "POST", body: form }));
-  return r.json() as Promise<T>;
+  beginne();
+  try {
+    const r = await _check(await fetch(`${API_BASE}${pfad}`,
+                                       { method: "POST", body: form }));
+    return await (r.json() as Promise<T>);
+  } finally { ende(); }
 }
 
 /** Farbpalette für Sprecher-Chips (Radix-Badge-Farben, Index = stabil

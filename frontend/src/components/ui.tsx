@@ -3,8 +3,9 @@
 // NUR von hier; die Bibliothek bleibt austauschbar.
 import {
   Badge, Box, Button, Callout, Checkbox, Dialog, Flex, Heading, HoverCard,
-  ScrollArea, SegmentedControl, Select, Slider, Table, Text, TextField,
+  ScrollArea, SegmentedControl, Select, Slider, Spinner, Table, Text, TextField,
 } from "@radix-ui/themes";
+import { useBusy } from "../lib/busy";
 import {
   createContext, useContext, useEffect, useId, useLayoutEffect, useMemo,
   useRef, useState,
@@ -1464,4 +1465,23 @@ export function mapPalettePair(keys: string[]
     out[k] = { a: `hsl(${hue} 75% 52%)`, b: `hsl(${hue} 65% 78%)` };
   });
   return out;
+}
+
+export { Spinner };
+
+/** Drehendes Rad in der Kopfzeile, solange eine Backend-Anfrage läuft
+    oder ein grosser Aufbau (Editor mit vielen Zeilen) angemeldet ist
+    (User 2026-09-12). Erst nach 150 ms — ein kurzer Abruf soll nicht
+    flackern. Die Drehung läuft als CSS-Animation weiter, auch wenn
+    React gerade tausend Zeilen baut. */
+export function Busy() {
+  const tr = useT();
+  const busy = useBusy();
+  const [zeige, setZeige] = useState(false);
+  useEffect(() => {
+    if (!busy) { setZeige(false); return; }
+    const t = window.setTimeout(() => setZeige(true), 150);
+    return () => window.clearTimeout(t);
+  }, [busy]);
+  return zeige ? <Spinner size="2" aria-label={tr("ui.laedt")} /> : null;
 }

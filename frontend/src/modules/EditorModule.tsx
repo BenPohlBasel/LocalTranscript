@@ -6,7 +6,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState }
   from "react";
 import {
   Badge, Button, Checkbox, ErrorNote, Flex, IconButton,
-  SearchField, SegTabs, Select, SidePanel, Text, TextField,
+  SearchField, SegTabs, Select, SidePanel, Spinner, Text, TextField,
 } from "../components/ui";
 import { Icon } from "../components/icons";
 import {
@@ -14,6 +14,7 @@ import {
   type Segment, type Sprecher, type Transkript, type ZoteroKandidat,
   type ZoteroMeta, type ZoteroStatus,
 } from "../lib/api";
+import { beginne, ende } from "../lib/busy";
 import { useT } from "../lib/i18n";
 import { KEYS, lget, lset, sget, sset } from "../lib/storage";
 import { isTauri, ordnerOeffnen, savePath } from "../lib/tauri";
@@ -91,17 +92,33 @@ export default function EditorModule({ id, onExit }: {
   const aktivRef = useRef(aktiv);
   aktivRef.current = aktiv;
 
+  // Aufbau in zwei Schritten (User 2026-09-12: bei langen Transkripten
+  // ~20 s ohne Rückmeldung): erst Kopf + Platzhalter «n Segmente werden
+  // aufgebaut», dann — nach dem nächsten Bild — die Zeilen. So ist der
+  // Platzhalter gezeichnet, bevor React den grossen Baum baut; das Rad
+  // in der Kopfzeile bleibt bis nach dem Einbau angemeldet.
+  const [ladeN, setLadeN] = useState(0);
   useEffect(() => {
+    beginne();
+    let offen = true;
     void apiGet<Transkript>(`/api/transcripts/${id}`).then((t) => {
+      if (!offen) return;
       setName(t.name);
       setZotero(t.zotero ?? null);
-      setSprecher(t.sprecher);
-      setSegmente(t.segmente.map((s) => ({ ...s,
-        id: s.id || neueId() })));
       setHatAudio(!!t.audio);
       setHatVideo(!!t.video);
-    }).catch((e) => setFehler(errMsg(e)));
+      setLadeN(t.segmente.length);
+      requestAnimationFrame(() => {
+        if (!offen) return;
+        setSprecher(t.sprecher);
+        setSegmente(t.segmente.map((s) => ({ ...s,
+          id: s.id || neueId() })));
+        setLadeN(0);
+      });
+    }).catch((e) => { setFehler(errMsg(e)); setLadeN(0); });
+    return () => { offen = false; };
   }, [id]);
+  useEffect(() => { if (ladeN === 0) ende(); }, [ladeN]);
 
   const speichere = useCallback(async () => {
     setSpeichert(true);
@@ -512,7 +529,13 @@ export default function EditorModule({ id, onExit }: {
         <div ref={listRef}
              style={{ flex: 1, overflowY: "auto", minHeight: 0,
                       padding: "8px 16px 96px" }}>
-          {segmente.length === 0 && (
+          {ladeN > 0 && (
+            <Flex align="center" gap="2" py="4">
+              <Spinner size="2" />
+              <Text size="2" color="gray">{tr("ed.laedt", { n: ladeN })}</Text>
+            </Flex>
+          )}
+          {ladeN === 0 && segmente.length === 0 && (
             <Text size="2" color="gray">{tr("ed.leer")}</Text>
           )}
           {segmente.map((seg, i) => (
@@ -885,6 +908,27 @@ function MenueEintrag({ label, farbe, onClick }: {
 // `liste` (Dropdown-Inhalt) ist BEWUSST vom Vergleich ausgenommen;
 // die Textarea misst ihre Höhe nur bei Mount + Eingabe (erzwungenes
 // Layout je Render war der Haupt-Kostenpunkt × 558 Zeilen).
+// Erstmessung der Zeilenhöhen GEBÜNDELT (User 2026-09-12): je Zeile
+// beim Anhängen messen hiess Schreiben→Lesen→Schreiben pro Zeile, also
+// ein erzwungenes Layout je Zeile bei wachsendem DOM — quadratisch,
+// bei 1200 Zeilen Sekunden. Jetzt: alle angehängten Felder sammeln und
+// im nächsten Bild erst ALLE auf «auto» setzen, dann ALLE lesen, dann
+// ALLE setzen — zwei Layouts für die ganze Liste.
+const wachsWarteschlange: HTMLTextAreaElement[] = [];
+let wachsGeplant = false;
+function planeWachsen(el: HTMLTextAreaElement) {
+  wachsWarteschlange.push(el);
+  if (wachsGeplant) return;
+  wachsGeplant = true;
+  requestAnimationFrame(() => {
+    const felder = wachsWarteschlange.splice(0);
+    wachsGeplant = false;
+    for (const f of felder) f.style.height = "auto";
+    const hoehen = felder.map((f) => f.scrollHeight + 2);
+    felder.forEach((f, i) => { f.style.height = `${hoehen[i]}px`; });
+  });
+}
+
 const SegmentZeile = memo(function SegmentZeile({
   seg, index, aktiv, treffer, name, farbe, hatAudio, onSpringe, onText,
   onMenue, onTeilen, onVerbinden, onEntfernen,
@@ -959,7 +1003,7 @@ const SegmentZeile = memo(function SegmentZeile({
                   // wäre es ein erzwungenes Layout pro Zeile
                   if (el && el.dataset.auto !== "1") {
                     el.dataset.auto = "1";
-                    wachsen(el);
+                    planeWachsen(el);
                   }
                 }}
                 defaultValue={seg.text}
