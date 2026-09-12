@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 pytest.importorskip("sklearn")
-from localtranscript.diarize import _cluster  # noqa: E402
+from localtranscript.diarize import _cluster
 
 
 def test_ein_fenster_ergibt_einen_sprecher():
