@@ -3,7 +3,7 @@
 Blocco di testo da inserire in un registro delle attività di
 trattamento, una valutazione d'impatto sulla protezione dei dati, una
 domanda al comitato etico o un piano di gestione dei dati. Stato al
-11 settembre 2026, LocalTranscript 2.4.1. Le voci tra `[parentesi
+11 settembre 2026, LocalTranscript 2.4.2. Le voci tra `[parentesi
 quadre]` vengono completate dal titolare del trattamento.
 
 Il testo descrive che cosa il software fa e che cosa non fa. La
@@ -15,7 +15,7 @@ consulenza legale.
 
 ## 1. Software impiegato
 
-LocalTranscript, versione `[2.4.1]`. Software libero sotto
+LocalTranscript, versione `[2.4.2]`. Software libero sotto
 AGPL-3.0-or-later, sviluppato al B/IAS – Basel Institut für angewandte
 Stadtforschung. Codice sorgente pubblico:
 <https://github.com/BenPohlBasel/LocalTranscript>. Il software gira

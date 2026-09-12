@@ -3,6 +3,26 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## 2.4.2 — 2026-09-12
+
+### Changed
+
+- **Loading feedback everywhere.** A spinner in the header turns while
+  any request to the backend is running or the editor is building a
+  long transcript; the editor shows “n segments being built …” while
+  the rows appear.
+- **The editor opens long transcripts three times faster.** Row
+  heights were measured one row at a time while the list grew (a forced
+  layout per row); they are now measured in one batch — 1200 segments
+  in 0.6 s instead of 2.1 s in WebKit.
+- **Re-importing a dossier keeps the Zotero role selection.** The
+  chosen roles are reconstructed from the people who travelled with the
+  layer, so “Reload” after an import fetches the same roles.
+- Release tooling: the app is notarised outside `tauri build` with a
+  two-hour timeout (`scripts/notarize-app.mjs`), the DMG is built and
+  signed by `scripts/build-dmg.mjs` — a slow Apple queue no longer
+  costs the build.
+
 ## 2.4.1 — 2026-09-11
 
 ### Changed

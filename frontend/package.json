@@ -1,14 +1,14 @@
 {
   "name": "localtranscript",
   "private": true,
-  "version": "2.4.1",
+  "version": "2.4.2",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "tauri": "tauri",
-    "release": "node ../scripts/bundle-resources.mjs && node ../scripts/sign-resources.mjs && tauri build && node ../scripts/notarize-dmg.mjs"
+    "release": "node ../scripts/bundle-resources.mjs && node ../scripts/sign-resources.mjs && env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID tauri build --bundles app && node ../scripts/notarize-app.mjs && node ../scripts/build-dmg.mjs && node ../scripts/notarize-dmg.mjs"
   },
   "dependencies": {
     "@radix-ui/themes": "^3.3.0",

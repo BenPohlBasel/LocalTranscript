@@ -154,7 +154,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Probe: Keyframe-Abstände echter Aufnahmen und Sync-Jitter Ton→Bild
    im WKWebKit messen.
 
-9. **Notarisierung aus Tauri herausnehmen (Befund Release 2.4.1,
+9. ~~**Notarisierung aus Tauri herausnehmen (Befund Release 2.4.1,~~ GEBAUT 2026-09-12 (scripts/notarize-app.mjs, build-dmg.mjs, npm run release). Ursprünglich:
    2026-09-11 abends).** Apples Warteschlange brauchte 22 min statt
    12–15; Tauris interne Wartezeit lief ab und `tauri build` brach mit
    leerer Meldung ab — die Einreichung lief bei Apple weiter, das DMG

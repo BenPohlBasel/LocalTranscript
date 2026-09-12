@@ -269,9 +269,13 @@ cd frontend && npm run release
 spctl -a -vv /Applications/LocalTranscript.app   # → Notarized Developer ID
 ```
 
-`npm run release` chains the four steps: stage the resources, sign the
-executables, build (Tauri notarises the `.app`) and finally
-`notarize-dmg.mjs` — because **Tauri does not notarise the DMG**.
+`npm run release` chains the steps: stage the resources, sign the
+executables, `tauri build --bundles app` *without* the `APPLE_*`
+variables (signature only), `notarize-app.mjs` (submit with a two-hour
+timeout, staple), `build-dmg.mjs` (hdiutil + codesign) and finally
+`notarize-dmg.mjs`. Notarisation used to run inside `tauri build`;
+its internal wait expired on a slow Apple queue and took the whole
+build with it, so it lives in its own step now.
 Without that step Gatekeeper reports "Unnotarized Developer ID" when the
 downloaded image is opened, even though the app inside it is clean. If
 the ticket is already stapled the script does nothing and saves the
