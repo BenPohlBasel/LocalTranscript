@@ -391,6 +391,8 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
           <tr><th data-t="r4"></th><td class="us" data-t="r4a"></td><td data-t="r4b"></td><td data-t="no"></td><td data-t="r4d"></td><td data-t="yes"></td></tr>
           <tr><th data-t="r5"></th><td class="us" data-t="r5a"></td><td data-t="r5b"></td><td data-t="r5c"></td><td data-t="r5d"></td><td data-t="r5e"></td></tr>
           <tr><th data-t="r6"></th><td class="us" data-t="r6a"></td><td data-t="no"></td><td data-t="no"></td><td data-t="no"></td><td data-t="r6e"></td></tr>
+          <tr><th data-t="r10"></th><td class="us" data-t="r10a"></td><td data-t="r10b"></td><td data-t="no"></td><td data-t="r10d"></td><td data-t="r10e"></td></tr>
+          <tr><th data-t="r11"></th><td class="us" data-t="r11a"></td><td data-t="r11b"></td><td data-t="r11c"></td><td data-t="r11d"></td><td data-t="yes"></td></tr>
           <tr><th data-t="r7"></th><td class="us">DE · EN · FR · IT</td><td>EN</td><td>EN</td><td data-t="r7d"></td><td data-t="r7e"></td></tr>
           <tr><th data-t="r8"></th><td class="us">macOS (Apple Silicon)</td><td>macOS</td><td>macOS, iOS, visionOS</td><td>macOS, Windows, Linux</td><td data-t="r8e"></td></tr>
           <tr><th data-t="r9"></th><td class="us" data-t="r9a"></td><td data-t="r9b"></td><td data-t="r9c"></td><td data-t="r9d"></td><td data-t="r9e"></td></tr>
@@ -1600,7 +1602,9 @@ de:{
   r7:"Interface-Sprachen", r7d:"mehrere", r7e:"meist EN",
   r8:"Plattform", r8e:"Browser",
   r9:"Stärker als LocalTranscript bei", r9a:"—", r9b:"Watch-Folder, YouTube-Links, Meeting-Aufnahme, Diktat", r9c:"iPhone, Einfachheit", r9d:"Windows und Linux", r9e:"Zusammenfassungen, Teamfunktionen",
-  cmpFn:"Geprüft am 10. September 2026 an den Herstellerseiten (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko und Buzz sind Produkte ihrer Entwickler. Korrekturen nehmen wir gern per Issue entgegen.",
+  r10:"Eigene Modelle nachrüstbar", r10a:"Ja, Ordner «Modelle» der Bibliothek", r10b:"Ja, eigene GGML-Modelle", r10d:"Ja, ggml und Hugging Face", r10e:"Meist nein, nur Wortlisten",
+  r11:"Video als Quelle", r11a:"Ja, nur die Tonspur wird gelesen", r11b:"Ja, MP4 und MOV", r11c:"Ja, MP4 und MOV", r11d:"Ja, über FFmpeg",
+  cmpFn:"Geprüft am 13. September 2026 an den Herstellerseiten (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko und Buzz sind Produkte ihrer Entwickler. Korrekturen nehmen wir gern per Issue entgegen.",
   yes:"Ja", no:"Nein",
   proofsH:"Sicherheit, die du selbst prüfen kannst",
   p1a:"Localhost only", p1b:"Der interne Dienst bindet ausschliesslich an localhost. Anfragen von jedem anderen Host werden mit 421 abgewiesen. Der Code dafür steht in main.py.",
@@ -1711,7 +1715,9 @@ en:{
   r7:"Interface languages", r7d:"several", r7e:"mostly EN",
   r8:"Platform", r8e:"Browser",
   r9:"Stronger than LocalTranscript at", r9a:"—", r9b:"Watch folders, YouTube links, meeting recording, dictation", r9c:"iPhone, simplicity", r9d:"Windows and Linux", r9e:"Summaries, team features",
-  cmpFn:"Checked on 10 September 2026 against the vendors' sites (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko and Buzz are products of their respective developers. Corrections welcome as an issue.",
+  r10:"Own models can be added", r10a:"Yes, the library's “Modelle” folder", r10b:"Yes, custom GGML models", r10d:"Yes, ggml and Hugging Face", r10e:"Mostly no, word lists only",
+  r11:"Video as a source", r11a:"Yes, only the audio track is read", r11b:"Yes, MP4 and MOV", r11c:"Yes, MP4 and MOV", r11d:"Yes, via FFmpeg",
+  cmpFn:"Checked on 13 September 2026 against the vendors' sites (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko and Buzz are products of their respective developers. Corrections welcome as an issue.",
   yes:"Yes", no:"No",
   proofsH:"Security you can check yourself",
   p1a:"Localhost only", p1b:"The internal service binds to localhost only. Requests from any other host are rejected with 421. The code is in main.py.",
@@ -1822,7 +1828,9 @@ fr:{
   r7:"Langues de l'interface", r7d:"plusieurs", r7e:"surtout EN",
   r8:"Plateforme", r8e:"Navigateur",
   r9:"Plus fort que LocalTranscript pour", r9a:"—", r9b:"Dossiers surveillés, liens YouTube, enregistrement de réunions, dictée", r9c:"iPhone, simplicité", r9d:"Windows et Linux", r9e:"Résumés, fonctions d'équipe",
-  cmpFn:"Vérifié le 10 septembre 2026 sur les sites des éditeurs (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko et Buzz sont des produits de leurs développeurs respectifs. Corrections bienvenues par issue.",
+  r10:"Modèles personnels possibles", r10a:"Oui, dossier « Modelle » de la bibliothèque", r10b:"Oui, modèles GGML personnels", r10d:"Oui, ggml et Hugging Face", r10e:"Le plus souvent non, seulement des lexiques",
+  r11:"Vidéo comme source", r11a:"Oui, seule la piste audio est lue", r11b:"Oui, MP4 et MOV", r11c:"Oui, MP4 et MOV", r11d:"Oui, via FFmpeg",
+  cmpFn:"Vérifié le 13 septembre 2026 sur les sites des éditeurs (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko et Buzz sont des produits de leurs développeurs respectifs. Corrections bienvenues par issue.",
   yes:"Oui", no:"Non",
   proofsH:"Une sécurité que vous pouvez vérifier vous-même",
   p1a:"Localhost only", p1b:"Le service interne se lie uniquement à localhost. Toute requête d'un autre hôte est refusée avec un 421. Le code est dans main.py.",
@@ -1933,7 +1941,9 @@ it:{
   r7:"Lingue dell'interfaccia", r7d:"diverse", r7e:"per lo più EN",
   r8:"Piattaforma", r8e:"Browser",
   r9:"Più forte di LocalTranscript in", r9a:"—", r9b:"Cartelle monitorate, link YouTube, registrazione riunioni, dettatura", r9c:"iPhone, semplicità", r9d:"Windows e Linux", r9e:"Riassunti, funzioni di team",
-  cmpFn:"Verificato il 10 settembre 2026 sui siti dei produttori (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko e Buzz sono prodotti dei rispettivi sviluppatori. Correzioni benvenute via issue.",
+  r10:"Modelli propri aggiungibili", r10a:"Sì, cartella «Modelle» della libreria", r10b:"Sì, modelli GGML propri", r10d:"Sì, ggml e Hugging Face", r10e:"Per lo più no, solo glossari",
+  r11:"Video come sorgente", r11a:"Sì, viene letta solo la traccia audio", r11b:"Sì, MP4 e MOV", r11c:"Sì, MP4 e MOV", r11d:"Sì, tramite FFmpeg",
+  cmpFn:"Verificato il 13 settembre 2026 sui siti dei produttori (macwhisper.com, sindresorhus.com/aiko, buzzcaptions.com). MacWhisper, Aiko e Buzz sono prodotti dei rispettivi sviluppatori. Correzioni benvenute via issue.",
   yes:"Sì", no:"No",
   proofsH:"Sicurezza che puoi verificare da solo",
   p1a:"Localhost only", p1b:"Il servizio interno si collega esclusivamente a localhost. Le richieste da qualsiasi altro host vengono rifiutate con 421. Il codice è in main.py.",
