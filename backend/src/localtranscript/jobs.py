@@ -245,7 +245,7 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
         if p["diarize"]:
             _setze(job, status="diarizing", progress=10,
                    message="sprecher")
-            from .diarize import diarize_audio
+            from .diarize import DiarisierungAbgebrochen, diarize_audio
             # 10 → 25 % füllen, sonst steht der Balken die ganze
             # Diarisierung still; nebenbei greift der Abbruch dann
             # SOFORT und nicht erst nach dem ganzen Lauf.
@@ -253,14 +253,20 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
                 _pruefe_abbruch(job)
                 _setze(job, progress=10 + int(i / max(n, 1) * 15))
 
-            diar = diarize_audio(str(wav), p["min_speakers"],
-                                 p["max_speakers"],
-                                 p["cluster_threshold"],
-                                 fortschritt=_diar_fortschritt,
-                                 register=_register_fuer(job["id"]))
+            try:
+                diar = diarize_audio(str(wav), p["min_speakers"],
+                                     p["max_speakers"],
+                                     p["cluster_threshold"],
+                                     fortschritt=_diar_fortschritt,
+                                     register=_register_fuer(job["id"]))
+            except DiarisierungAbgebrochen as e:
+                # Der Prozess wurde getötet: erst prüfen, ob WIR das
+                # waren (dann fliegt Abbruch), sonst als Fehler melden.
+                _pruefe_abbruch(job)
+                raise RuntimeError("Sprechertrennung abgebrochen") from e
             _pruefe_abbruch(job)
             bloecke = merge_consecutive_speakers(diar)
-            labels: dict[str, str] = {}   # SPEAKER_00 → Entitäts-ID
+            labels: dict[str, str] = {}   # Rohlabel (A, B …) → Entitäts-ID
             # Reihenfolge nach Gesamt-Sprechzeit (dominanter zuerst)
             zeit: dict[str, float] = {}
             for b in bloecke:

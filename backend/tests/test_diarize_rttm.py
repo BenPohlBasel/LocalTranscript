@@ -59,3 +59,10 @@ def test_sprecher_zum_zeitpunkt():
     assert get_speaker_at_time(s, 0.0) == "A"
     assert get_speaker_at_time(s, 2.0) == "B"       # Grenze gehört nach rechts
     assert get_speaker_at_time(s, 9.0) is None
+
+
+def test_leerzeichen_im_dateinamen_verschiebt_nichts():
+    """Die CLI schreibt den Dateinamen ins RTTM — «ton 01.wav» ergab
+    sonst den Sprecher «<NA>» und lauter falsche Zeiten."""
+    s = rttm_lesen("SPEAKER ton 01 1 3.000 1.500 <NA> <NA> B <NA> <NA>")
+    assert [(x.start, x.end, x.speaker) for x in s] == [(3.0, 4.5, "B")]

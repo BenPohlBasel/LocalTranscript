@@ -25,10 +25,15 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 from .config import get_argmax_cli, get_speakerkit_dir
+
+
+class DiarisierungAbgebrochen(Exception):
+    """Der Unterprozess wurde von aussen getötet (Job-Abbruch)."""
 
 
 @dataclass
@@ -60,15 +65,19 @@ def rttm_lesen(text: str) -> list[SpeakerSegment]:
     roh: list[SpeakerSegment] = []
     for zeile in text.splitlines():
         f = zeile.split()
-        if len(f) < 8 or f[0] != "SPEAKER":
+        # Von HINTEN zählen: Feld 2 ist der Dateiname, und ein
+        # Leerzeichen darin verschöbe jede feste Position (Befund
+        # 2026-09-13 — aus «ton 01.wav» wurde der Sprecher «<NA>»,
+        # alle Zeiten falsch, ohne jede Fehlermeldung).
+        if len(f) < 10 or f[0] != "SPEAKER":
             continue
         try:
-            start, dauer = float(f[3]), float(f[4])
+            start, dauer = float(f[-7]), float(f[-6])
         except ValueError:
             continue
         if dauer <= 0:
             continue
-        roh.append(SpeakerSegment(start, start + dauer, f[7]))
+        roh.append(SpeakerSegment(start, start + dauer, f[-3]))
     roh.sort(key=lambda s: (s.start, s.end))
     aus: list[SpeakerSegment] = []
     for s in roh:
@@ -100,23 +109,42 @@ def diarize_audio(
         fortschritt(0, 1)
     with tempfile.TemporaryDirectory(prefix="lt-diar-") as td:
         rttm = Path(td) / "aus.rttm"
-        cmd = [cli, "diarize", "--audio-path", str(audio_path),
+        # Die CLI schreibt den Dateinamen ins RTTM; über einen Link mit
+        # unverfänglichem Namen bleibt er garantiert ohne Leerzeichen.
+        quelle = Path(audio_path).resolve()
+        link = Path(td) / ("ton" + quelle.suffix)
+        try:
+            link.symlink_to(quelle)
+        except OSError:
+            link = quelle
+        log = Path(td) / "cli.log"
+        cmd = [cli, "diarize", "--audio-path", str(link),
                "--model-path", str(modelle), "--rttm-path", str(rttm),
                "--cluster-distance-threshold", str(_schwelle(threshold)),
                "--use-exclusive-reconciliation"]
         if min_speakers > 0 and min_speakers == max_speakers:
             cmd += ["--num-speakers", str(min_speakers)]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, text=True)
-        if register:
-            register(proc)
-        ausgabe, _ = proc.communicate()
+        with log.open("w") as aus:
+            proc = subprocess.Popen(cmd, stdout=aus,
+                                    stderr=subprocess.STDOUT, text=True)
+            if register:
+                register(proc)
+            # Warten, aber regelmässig Bescheid geben: nur so kommt der
+            # Job zum Abbrechen, solange die CLI läuft.
+            t0 = time.monotonic()
+            while proc.poll() is None:
+                time.sleep(0.25)
+                if fortschritt is not None:
+                    fortschritt(min(9, int((time.monotonic() - t0) / 2)), 10)
         if register:
             register(None)
         if proc.returncode != 0 or not rttm.is_file():
-            letzte = (ausgabe or "").strip().splitlines()[-3:]
+            if proc.returncode is not None and proc.returncode < 0:
+                # Von aussen getötet — das ist ein Abbruch, kein Fehler.
+                raise DiarisierungAbgebrochen()
+            letzte = log.read_text("utf-8", "replace").strip().splitlines()[-3:]
             raise RuntimeError("Sprechertrennung fehlgeschlagen: "
-                               + " / ".join(letzte))
+                               + (" / ".join(letzte) or "kein Hinweis"))
         segmente = rttm_lesen(rttm.read_text("utf-8"))
     if fortschritt is not None:
         fortschritt(1, 1)

@@ -78,14 +78,16 @@ def get_argmax_cli() -> str:
     """Die SpeakerKit-Kommandozeile (Argmax OSS, MIT). Im Bundle unter
     Resources/bin, im Checkout unter <repo>/bin — dorthin legt sie
     `node scripts/hole-argmax.mjs`."""
-    try:
-        return _find_executable("argmax-cli", get_app_root() / "bin" / "argmax-cli")
-    except FileNotFoundError as e:
-        raise FileNotFoundError(
-            "argmax-cli fehlt — Sprechertrennung nicht möglich. "
-            "Im Checkout einmal `node scripts/hole-argmax.mjs` laufen "
-            "lassen (baut die CLI und lädt die Core-ML-Modelle)."
-        ) from e
+    # Anders als bei whisper-cli/ffmpeg NIE auf Homebrew ausweichen:
+    # die CLI ist auf einen Commit angeheftet und muss zum Layout der
+    # Modelle passen (Review-Befund 2026-09-13).
+    p = get_app_root() / "bin" / "argmax-cli"
+    if p.is_file() and os.access(p, os.X_OK):
+        return str(p)
+    raise FileNotFoundError(
+        f"argmax-cli fehlt ({p}) — Sprechertrennung nicht möglich. "
+        "Im Checkout einmal `node scripts/hole-argmax.mjs` laufen "
+        "lassen (baut die CLI und lädt die Core-ML-Modelle).")
 
 
 def get_speakerkit_dir() -> Path:
