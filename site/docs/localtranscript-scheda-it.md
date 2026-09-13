@@ -3,7 +3,7 @@
 Che cos'è l'app, quale IA al suo interno fa che cosa, dove si trova il
 codice e perché la trascrizione non lascia mai il computer. Da
 consegnare alla direzione del progetto, al comitato etico o ai colleghi.
-Stato al 11 settembre 2026, versione 2.4.3.
+Stato al 13 settembre 2026, versione 2.5.0.
 
 ## Che cosa fa l'app
 
@@ -96,7 +96,7 @@ registrazioni.
 
 ## Per la sezione metodologica
 
-> Le registrazioni sono state trascritte con LocalTranscript 2.4.3
+> Le registrazioni sono state trascritte con LocalTranscript 2.5.0
 > (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
 > modello large-v3-turbo, separazione dei parlanti con pyannote
 > community-1) interamente in locale su un computer del gruppo di ricerca,

@@ -2,8 +2,8 @@
 
 What the app is, which AI in it does what, where the code lives, and
 why the transcript never leaves your computer. For handing to a project
-lead, an ethics board or colleagues. As of 11 September 2026, version
-2.4.3.
+lead, an ethics board or colleagues. As of 13 September 2026, version
+2.5.0.
 
 ## What the app does
 
@@ -90,7 +90,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ## For the methods section
 
-> The recordings were transcribed with LocalTranscript 2.4.3 (B/IAS
+> The recordings were transcribed with LocalTranscript 2.5.0 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
 > large-v3-turbo, speaker separation with pyannote community-1-TDNN)
 > entirely locally on a computer of the research group, without
