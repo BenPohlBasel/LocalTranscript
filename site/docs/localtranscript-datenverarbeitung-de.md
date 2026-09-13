@@ -44,7 +44,7 @@ betroffen sein `[ja / nein: …]`.
    MP4, MOV, M4V mit H.264/HEVC — aus Video wird nur die Tonspur
    gelesen, das Video wird nie umgewandelt).
 2. **Verarbeitung.** Spracherkennung (whisper.cpp, Modell
-   large-v3-turbo) und Sprechertrennung (silero-vad, SpeechBrain ECAPA)
+   large-v3-turbo) und Sprechertrennung (silero-vad, pyannote community-1)
    laufen im Prozess der Anwendung auf dem Prozessor bzw. der Grafikkarte
    des Endgeräts. Sämtliche Modelle sind im Programmpaket enthalten; beim
    ersten Start wird nichts nachgeladen. Eigene whisper.cpp-Modelle

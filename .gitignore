@@ -15,6 +15,8 @@ models/*.bin
 # SpeechBrain legt beim ersten Diarisierungs-Lauf Symlinks in
 # den huggingface-Cache — maschinenspezifisch, nie ins Repo
 models/speechbrain/
+# SpeakerKit-Modelle (16 MB, Core ML) holt scripts/hole-argmax.mjs
+models/speakerkit/
 bin/
 dist/
 *.dmg

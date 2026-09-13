@@ -10,8 +10,8 @@ REFI-QDA for ATLAS.ti.
 
 - **Transcription:** [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
   (Metal), `large-v3-turbo` bundled.
-- **Diarisation:** silero-vad + SpeechBrain ECAPA-TDNN — no Hugging Face
-  token, no account, no network.
+- **Diarisation:** SpeakerKit (Argmax, MIT) running pyannote
+  community-1 on Core ML — no Hugging Face token, no account, no network.
 - **Interface:** German, English, French, Italian.
 - **Loopback only:** `127.0.0.1:5628` (`LOCT` on a phone keypad;
   `LT_SERVE_PORT` overrides). Requests from any other host are rejected
@@ -248,8 +248,9 @@ cd frontend && npx tauri build      # .app + .dmg, shell sealed
 ```
 
 **The order is mandatory.** Tauri signs the shell and the main binary
-only; the 250 bundled libraries (python3, whisper-cli, ffmpeg, torch,
-SpeechBrain) would otherwise keep the linker's ad-hoc signature — and
+only; the bundled executables (python3, whisper-cli, ffmpeg,
+argmax-cli and the libraries) would otherwise keep the linker's ad-hoc
+signature — and
 Apple's notary service rejects those, after the 1.9 GB upload.
 `sign-resources.mjs` signs them with the Developer ID, hardened runtime,
 entitlements and a timestamp (55 s); the signature lives inside the
@@ -331,7 +332,7 @@ of §13. The source is public anyway; the "Source code (GitHub)" button
 in the About dialog is the offer inside the app itself.
 
 Bundled, among others: whisper.cpp (MIT), large-v3-turbo model (OpenAI,
-MIT), silero-vad (MIT), SpeechBrain ECAPA (Apache-2.0), PyTorch
-(BSD-3), enrich-core (B/IAS, MIT), FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
+MIT), silero-vad (MIT), SpeakerKit (Argmax, MIT) with pyannote
+community-1 (CC-BY-4.0), enrich-core (B/IAS, MIT), FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
 (GPL-3.0 build, `--enable-gpl --enable-version3`) — the complete list is
 in the settings.

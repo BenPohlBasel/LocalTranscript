@@ -24,7 +24,7 @@ propre Mac.
 |---|---|---|---|
 | whisper.cpp avec le modèle `large-v3-turbo` | Reconnaissance vocale : audio → texte avec codes temporels | modèle d'OpenAI (MIT), exécution whisper.cpp (MIT) | localement, sur la carte graphique du Mac |
 | silero-vad | Activité vocale : détecte où l'on parle | MIT | localement |
-| SpeechBrain ECAPA-TDNN | Séparation des locuteurs : calcule des profils de voix et les regroupe par locuteur | Apache-2.0 | localement |
+| SpeakerKit (pyannote community-1) | Séparation des locuteurs : détecte les changements de locuteur, chevauchements compris, et regroupe les voix | modèle pyannote community-1 (CC-BY-4.0), moteur SpeakerKit d'Argmax (MIT) | localement, sur le Neural Engine du Mac |
 
 Les trois modèles sont contenus dans le paquet de l'application (un
 autre modèle whisper.cpp peut être déposé dans le dossier « Modelle »
@@ -100,8 +100,8 @@ enregistrements.
 
 > Les enregistrements ont été transcrits avec LocalTranscript 2.4.3
 > (B/IAS Bâle, AGPL-3.0 ; reconnaissance vocale whisper.cpp avec le
-> modèle large-v3-turbo, séparation des locuteurs avec SpeechBrain
-> ECAPA-TDNN) entièrement en local sur un ordinateur du groupe de
+> modèle large-v3-turbo, séparation des locuteurs avec pyannote
+> community-1) entièrement en local sur un ordinateur du groupe de
 > recherche, sans transmission à des services externes. Les
 > transcriptions brutes ont ensuite été corrigées contre
 > l'enregistrement et pseudonymisées.

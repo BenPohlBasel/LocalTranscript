@@ -45,8 +45,7 @@ personali `[sì / no: …]`.
    MOV, M4V in H.264/HEVC — da un video viene letta solo la traccia
    audio, il video non viene mai convertito).
 2. **Elaborazione.** Il riconoscimento vocale (whisper.cpp, modello
-   large-v3-turbo) e la separazione dei parlanti (silero-vad, SpeechBrain
-   ECAPA) girano nel processo dell'applicazione, sul processore o sulla
+   large-v3-turbo) e la separazione dei parlanti (silero-vad, pyannote community-1) girano nel processo dell'applicazione, sul processore o sulla
    scheda grafica del dispositivo. Tutti i modelli sono contenuti nel
    pacchetto dell'applicazione (altri modelli whisper.cpp si possono
    aggiungere solo a mano, nella cartella «Modelle» della libreria —

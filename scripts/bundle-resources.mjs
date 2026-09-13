@@ -42,6 +42,33 @@ for (const teil of ["python-runtime", "bin", "lib", "models"]) {
   kopiere(quelle, ziel);
 }
 
+// 1a. SpeakerKit (Sprechertrennung): argmax-cli + Core-ML-Modelle.
+//     Beides liegt im Checkout unter bin/ bzw. models/speakerkit und
+//     wird von `node scripts/hole-argmax.mjs` beschafft.
+{
+  const cli = path.join(ROOT, "bin/argmax-cli");
+  const mdl = path.join(ROOT, "models/speakerkit");
+  if (!fs.existsSync(cli) || !da(path.join(mdl, "speaker_segmenter"))) {
+    console.error("FEHLT: argmax-cli und/oder models/speakerkit — " +
+      "einmal `node scripts/hole-argmax.mjs` laufen lassen " +
+      "(baut die Swift-CLI, lädt die Core-ML-Modelle).");
+    process.exit(1);
+  }
+  fs.copyFileSync(cli, path.join(RES, "bin/argmax-cli"));
+  fs.chmodSync(path.join(RES, "bin/argmax-cli"), 0o755);
+  kopiere(mdl, path.join(RES, "models/speakerkit"));
+  console.log("✓ SpeakerKit: CLI + Modelle im Bundle");
+}
+
+// 1a2. Altlast wegräumen: die SpeechBrain-Gewichte (85 MB) trug das
+//      Bundle bis 2.4.3 für die alte Sprechertrennung — seit 2.5.0
+//      rührt sie kein Code mehr an.
+{
+  const alt = path.join(RES, "models/speechbrain");
+  if (da(alt)) { fs.rmSync(alt, { recursive: true, force: true });
+                 console.log("✓ alte SpeechBrain-Modelle entfernt (85 MB)"); }
+}
+
 // 1b. LIZENZ-WÄCHTER (Live-Befund 2026-08-30): der v1-ffmpeg
 //     (osxexperts-Build) erklärte sich selbst „not legally
 //     redistributable" (--enable-nonfree) — so ein Binary darf NIE
@@ -96,7 +123,7 @@ if (forceVenv || leer(venv) || !fs.existsSync(path.join(venv, "bin/python3"))) {
                   path.join(venv, "lib/libpython3.13.dylib"));
   // Smoke-Test
   execFileSync(path.join(venv, "bin/python3"),
-    ["-c", "import localtranscript.main, enrich_core, torch, speechbrain, silero_vad, sklearn; print('venv ok')"],
+    ["-c", "import localtranscript.main, enrich_core; print('venv ok')"],
     { stdio: "inherit" });
 } else {
   // venv steht — aber unser Backend-Code ändert sich laufend:

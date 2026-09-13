@@ -23,7 +23,7 @@ own Mac.
 |---|---|---|---|
 | whisper.cpp with the model `large-v3-turbo` | Speech recognition: audio → text with timecodes | model by OpenAI (MIT), runtime whisper.cpp (MIT) | locally, on the Mac's graphics unit |
 | silero-vad | Voice activity: detects where speech occurs at all | MIT | locally |
-| SpeechBrain ECAPA-TDNN | Speaker separation: computes voice profiles and clusters them into speakers | Apache-2.0 | locally |
+| SpeakerKit (pyannote community-1) | Speaker separation: detects speaker changes including overlap and groups the voices | pyannote community-1 model (CC-BY-4.0), SpeakerKit runtime by Argmax (MIT) | locally, on the Mac's Neural Engine |
 
 All three models ship inside the application package. There is no
 access to an AI service, no account, no API key. Anyone wishing to use
@@ -92,7 +92,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 > The recordings were transcribed with LocalTranscript 2.4.3 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
-> large-v3-turbo, speaker separation with SpeechBrain ECAPA-TDNN)
+> large-v3-turbo, speaker separation with pyannote community-1-TDNN)
 > entirely locally on a computer of the research group, without
 > transmission to external services. The raw transcripts were then
 > corrected against the recording and pseudonymised.

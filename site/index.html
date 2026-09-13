@@ -551,7 +551,7 @@ betroffen sein `[ja / nein: …]`.
    MP4, MOV, M4V mit H.264/HEVC — aus Video wird nur die Tonspur
    gelesen, das Video wird nie umgewandelt).
 2. **Verarbeitung.** Spracherkennung (whisper.cpp, Modell
-   large-v3-turbo) und Sprechertrennung (silero-vad, SpeechBrain ECAPA)
+   large-v3-turbo) und Sprechertrennung (silero-vad, pyannote community-1)
    laufen im Prozess der Anwendung auf dem Prozessor bzw. der Grafikkarte
    des Endgeräts. Sämtliche Modelle sind im Programmpaket enthalten; beim
    ersten Start wird nichts nachgeladen. Eigene whisper.cpp-Modelle
@@ -690,8 +690,7 @@ conversation, special categories of personal data may be involved
    MOV, M4V with H.264/HEVC — from video only the sound track is read,
    the video is never transcoded).
 2. **Processing.** Speech recognition (whisper.cpp, model
-   large-v3-turbo) and speaker separation (silero-vad, SpeechBrain
-   ECAPA) run inside the application's process on the device's
+   large-v3-turbo) and speaker separation (silero-vad, pyannote community-1) run inside the application's process on the device's
    processor or graphics unit. All models are contained in the
    application package; nothing is downloaded on first launch. A user
    can add whisper.cpp models only by hand, into the library's
@@ -827,8 +826,7 @@ particulières de données personnelles peuvent être concernées
    vidéo : MP4, MOV, M4V en H.264/HEVC — d'une vidéo seule la piste
    audio est lue, la vidéo n'est jamais convertie).
 2. **Traitement.** La reconnaissance vocale (whisper.cpp, modèle
-   large-v3-turbo) et la séparation des locuteurs (silero-vad,
-   SpeechBrain ECAPA) s'exécutent dans le processus de l'application, sur
+   large-v3-turbo) et la séparation des locuteurs (silero-vad, pyannote community-1) s'exécutent dans le processus de l'application, sur
    le processeur ou la carte graphique de l'appareil. Tous les modèles
    sont contenus dans le paquet de l'application (d'autres modèles
    whisper.cpp ne peuvent être ajoutés qu'à la main, dans le dossier
@@ -973,8 +971,7 @@ personali `[sì / no: …]`.
    MOV, M4V in H.264/HEVC — da un video viene letta solo la traccia
    audio, il video non viene mai convertito).
 2. **Elaborazione.** Il riconoscimento vocale (whisper.cpp, modello
-   large-v3-turbo) e la separazione dei parlanti (silero-vad, SpeechBrain
-   ECAPA) girano nel processo dell'applicazione, sul processore o sulla
+   large-v3-turbo) e la separazione dei parlanti (silero-vad, pyannote community-1) girano nel processo dell'applicazione, sul processore o sulla
    scheda grafica del dispositivo. Tutti i modelli sono contenuti nel
    pacchetto dell'applicazione (altri modelli whisper.cpp si possono
    aggiungere solo a mano, nella cartella «Modelle» della libreria —
@@ -1094,7 +1091,7 @@ mitgibt. Alles davon geschieht auf dem eigenen Mac.
 |---|---|---|---|
 | whisper.cpp mit Modell `large-v3-turbo` | Spracherkennung: Audio → Text mit Zeitmarken | Modell von OpenAI (MIT), Laufzeit whisper.cpp (MIT) | lokal, auf der Grafikeinheit des Macs |
 | silero-vad | Sprachaktivität: erkennt, wo überhaupt gesprochen wird | MIT | lokal |
-| SpeechBrain ECAPA-TDNN | Sprechertrennung: berechnet Stimmprofile und gruppiert sie zu Sprechern | Apache-2.0 | lokal |
+| SpeakerKit (pyannote community-1) | Sprechertrennung: erkennt Sprecherwechsel samt Überlappung und gruppiert die Stimmen | Modell pyannote community-1 (CC-BY-4.0), Laufzeit SpeakerKit von Argmax (MIT) | lokal, auf der Neural Engine des Macs |
 
 Alle drei Modelle liegen im Programmpaket. Es gibt keinen Zugang zu
 einem KI-Dienst, kein Konto, keinen Schlüssel. Wer ein anderes
@@ -1169,7 +1166,7 @@ die Aufnahmen.
 
 > Die Aufnahmen wurden mit LocalTranscript 2.4.3 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
-> Sprechertrennung mit SpeechBrain ECAPA-TDNN) vollständig lokal auf
+> Sprechertrennung mit pyannote community-1-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an
 > externe Dienste. Die Rohtranskripte wurden anschliessend gegen die
 > Aufnahme korrigiert und pseudonymisiert.
@@ -1206,7 +1203,7 @@ own Mac.
 |---|---|---|---|
 | whisper.cpp with the model `large-v3-turbo` | Speech recognition: audio → text with timecodes | model by OpenAI (MIT), runtime whisper.cpp (MIT) | locally, on the Mac's graphics unit |
 | silero-vad | Voice activity: detects where speech occurs at all | MIT | locally |
-| SpeechBrain ECAPA-TDNN | Speaker separation: computes voice profiles and clusters them into speakers | Apache-2.0 | locally |
+| SpeakerKit (pyannote community-1) | Speaker separation: detects speaker changes including overlap and groups the voices | pyannote community-1 model (CC-BY-4.0), SpeakerKit runtime by Argmax (MIT) | locally, on the Mac's Neural Engine |
 
 All three models ship inside the application package. There is no
 access to an AI service, no account, no API key. Anyone wishing to use
@@ -1275,7 +1272,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 > The recordings were transcribed with LocalTranscript 2.4.3 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
-> large-v3-turbo, speaker separation with SpeechBrain ECAPA-TDNN)
+> large-v3-turbo, speaker separation with pyannote community-1-TDNN)
 > entirely locally on a computer of the research group, without
 > transmission to external services. The raw transcripts were then
 > corrected against the recording and pseudonymised.
@@ -1313,7 +1310,7 @@ propre Mac.
 |---|---|---|---|
 | whisper.cpp avec le modèle `large-v3-turbo` | Reconnaissance vocale : audio → texte avec codes temporels | modèle d'OpenAI (MIT), exécution whisper.cpp (MIT) | localement, sur la carte graphique du Mac |
 | silero-vad | Activité vocale : détecte où l'on parle | MIT | localement |
-| SpeechBrain ECAPA-TDNN | Séparation des locuteurs : calcule des profils de voix et les regroupe par locuteur | Apache-2.0 | localement |
+| SpeakerKit (pyannote community-1) | Séparation des locuteurs : détecte les changements de locuteur, chevauchements compris, et regroupe les voix | modèle pyannote community-1 (CC-BY-4.0), moteur SpeakerKit d'Argmax (MIT) | localement, sur le Neural Engine du Mac |
 
 Les trois modèles sont contenus dans le paquet de l'application (un
 autre modèle whisper.cpp peut être déposé dans le dossier « Modelle »
@@ -1389,8 +1386,8 @@ enregistrements.
 
 > Les enregistrements ont été transcrits avec LocalTranscript 2.4.3
 > (B/IAS Bâle, AGPL-3.0 ; reconnaissance vocale whisper.cpp avec le
-> modèle large-v3-turbo, séparation des locuteurs avec SpeechBrain
-> ECAPA-TDNN) entièrement en local sur un ordinateur du groupe de
+> modèle large-v3-turbo, séparation des locuteurs avec pyannote
+> community-1) entièrement en local sur un ordinateur du groupe de
 > recherche, sans transmission à des services externes. Les
 > transcriptions brutes ont ensuite été corrigées contre
 > l'enregistrement et pseudonymisées.
@@ -1427,7 +1424,7 @@ REFI-QDA. Tutto avviene sul proprio Mac.
 |---|---|---|---|
 | whisper.cpp con il modello `large-v3-turbo` | Riconoscimento vocale: audio → testo con codici temporali | modello di OpenAI (MIT), runtime whisper.cpp (MIT) | in locale, sulla scheda grafica del Mac |
 | silero-vad | Attività vocale: rileva dove si parla | MIT | in locale |
-| SpeechBrain ECAPA-TDNN | Separazione dei parlanti: calcola profili vocali e li raggruppa per parlante | Apache-2.0 | in locale |
+| SpeakerKit (pyannote community-1) | Separazione dei parlanti: riconosce i cambi di parlante, sovrapposizioni comprese, e raggruppa le voci | modello pyannote community-1 (CC-BY-4.0), motore SpeakerKit di Argmax (MIT) | in locale, sul Neural Engine del Mac |
 
 Tutti e tre i modelli sono contenuti nel pacchetto dell'applicazione
 (un altro modello whisper.cpp può essere collocato nella cartella
@@ -1502,8 +1499,8 @@ registrazioni.
 
 > Le registrazioni sono state trascritte con LocalTranscript 2.4.3
 > (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
-> modello large-v3-turbo, separazione dei parlanti con SpeechBrain
-> ECAPA-TDNN) interamente in locale su un computer del gruppo di ricerca,
+> modello large-v3-turbo, separazione dei parlanti con pyannote
+> community-1) interamente in locale su un computer del gruppo di ricerca,
 > senza trasmissione a servizi esterni. Le trascrizioni grezze sono poi
 > state corrette contro la registrazione e pseudonimizzate.
 
@@ -1607,13 +1604,13 @@ de:{
   yes:"Ja", no:"Nein",
   proofsH:"Sicherheit, die du selbst prüfen kannst",
   p1a:"Localhost only", p1b:"Der interne Dienst bindet ausschliesslich an localhost. Anfragen von jedem anderen Host werden mit 421 abgewiesen. Der Code dafür steht in main.py.",
-  p2a:"Die Modelle liegen im Bundle.", p2b:"Whisper large-v3-turbo, silero-vad und SpeechBrain ECAPA werden mitgeliefert. Kein Hugging-Face-Token, kein Konto, kein Download beim ersten Start. Andere whisper.cpp-Modelle — etwa large-v3-turbo-swiss-german für Schweizerdeutsch — legst du selbst in den Ordner «Modelle» der Bibliothek; die App lädt nie nach.",
+  p2a:"Die Modelle liegen im Bundle.", p2b:"Whisper large-v3-turbo, silero-vad und pyannote community-1 werden mitgeliefert. Kein Hugging-Face-Token, kein Konto, kein Download beim ersten Start. Andere whisper.cpp-Modelle — etwa large-v3-turbo-swiss-german für Schweizerdeutsch — legst du selbst in den Ordner «Modelle» der Bibliothek; die App lädt nie nach.",
   p3a:"Selbst weiterentwickeln und kompilieren.", p3b:"Das Repository enthält die vollständige Build-Kette bis zur signierten DMG. Wer der Binärdatei nicht traut, kompiliert.",
   dpoH:"Texte für Datenschutz und Methodenteil",
   dpoLede:"Verantwortliche und Forschende bekommen hier fertige Absätze — für Methodenteil, Verfahrensverzeichnis, Datenschutz-Folgenabschätzung und Ethikantrag. Als Markdown und als Word-Datei, viersprachig, mit allen Links zu Quellcode, Lizenzen, genutzten Modellen und B/IAS – Basel Institut für angewandte Stadtforschung.",
   flowT:"Datenfluss einer Transkription",
   d1:"<b>Eingabe:</b> Audio- oder Videodatei vom lokalen Dateisystem; aus Video wird nur der Ton gelesen.",
-  d2:"<b>Verarbeitung:</b> whisper.cpp und SpeechBrain im Prozess der App, auf der lokalen GPU.",
+  d2:"<b>Verarbeitung:</b> whisper.cpp und SpeakerKit im Prozess der App, auf der lokalen GPU.",
   d3:"<b>Ablage:</b> Ein Ordner pro Transkript am Speicherort deiner Wahl, mit Audio (bei Video zusätzlich die unveränderte Videodatei), JSON und Verlaufsschnappschüssen.",
   d4:"<b>Netz:</b> Keine ausgehenden Verbindungen. Keine Telemetrie, keine Update-Prüfung, keine Absturzberichte.",
   d5:"<b>Ausgabe:</b> Exportdateien dorthin, wo du sie speicherst.",
@@ -1718,13 +1715,13 @@ en:{
   yes:"Yes", no:"No",
   proofsH:"Security you can check yourself",
   p1a:"Localhost only", p1b:"The internal service binds to localhost only. Requests from any other host are rejected with 421. The code is in main.py.",
-  p2a:"The models ship inside the bundle.", p2b:"Whisper large-v3-turbo, silero-vad and SpeechBrain ECAPA are included. No Hugging Face token, no account, no download on first launch. Other whisper.cpp models — say large-v3-turbo-swiss-german for Swiss German — you place yourself in the library's “Modelle” folder; the app never downloads.",
+  p2a:"The models ship inside the bundle.", p2b:"Whisper large-v3-turbo, silero-vad and pyannote community-1 are included. No Hugging Face token, no account, no download on first launch. Other whisper.cpp models — say large-v3-turbo-swiss-german for Swiss German — you place yourself in the library's “Modelle” folder; the app never downloads.",
   p3a:"Develop it further and compile it yourself.", p3b:"The repository holds the complete build chain up to the signed DMG. If you don't trust the binary, compile.",
   dpoH:"Texts for data protection and the methods section",
   dpoLede:"Controllers and researchers get ready-made paragraphs here — for the methods section, the record of processing, a data protection impact assessment and an ethics application. As Markdown and as a Word file, in four languages, with every link to source code, licences, the models used and B/IAS – Basel Institut für angewandte Stadtforschung.",
   flowT:"Data flow of one transcription",
   d1:"<b>Input:</b> audio or video file from the local file system; from video only the sound is read.",
-  d2:"<b>Processing:</b> whisper.cpp and SpeechBrain inside the app's process, on the local GPU.",
+  d2:"<b>Processing:</b> whisper.cpp and SpeakerKit inside the app's process, on the local GPU.",
   d3:"<b>Storage:</b> one folder per transcript at a location you choose, holding audio (for video also the unchanged video file), JSON and history snapshots.",
   d4:"<b>Network:</b> no outbound connections. No telemetry, no update check, no crash reports.",
   d5:"<b>Output:</b> export files wherever you save them.",
@@ -1829,13 +1826,13 @@ fr:{
   yes:"Oui", no:"Non",
   proofsH:"Une sécurité que vous pouvez vérifier vous-même",
   p1a:"Localhost only", p1b:"Le service interne se lie uniquement à localhost. Toute requête d'un autre hôte est refusée avec un 421. Le code est dans main.py.",
-  p2a:"Les modèles sont dans le paquet.", p2b:"Whisper large-v3-turbo, silero-vad et SpeechBrain ECAPA sont livrés avec l'application. Pas de jeton Hugging Face, pas de compte, aucun téléchargement au premier lancement. D’autres modèles whisper.cpp — par exemple large-v3-turbo-swiss-german pour le suisse allemand — se déposent soi-même dans le dossier « Modelle » de la bibliothèque ; l’application ne télécharge jamais.",
+  p2a:"Les modèles sont dans le paquet.", p2b:"Whisper large-v3-turbo, silero-vad et pyannote community-1 sont livrés avec l'application. Pas de jeton Hugging Face, pas de compte, aucun téléchargement au premier lancement. D’autres modèles whisper.cpp — par exemple large-v3-turbo-swiss-german pour le suisse allemand — se déposent soi-même dans le dossier « Modelle » de la bibliothèque ; l’application ne télécharge jamais.",
   p3a:"La développer et la compiler soi-même.", p3b:"Le dépôt contient toute la chaîne de construction jusqu'au DMG signé. Qui ne fait pas confiance au binaire compile.",
   dpoH:"Textes pour la protection des données et la méthodologie",
   dpoLede:"Responsables du traitement et chercheur·euse·s trouvent ici des paragraphes prêts à l'emploi — pour la partie méthodologique, le registre des traitements, l'analyse d'impact et la demande au comité d'éthique. En Markdown et en fichier Word, en quatre langues, avec tous les liens vers le code source, les licences, les modèles utilisés et le B/IAS – Basel Institut für angewandte Stadtforschung.",
   flowT:"Flux de données d'une transcription",
   d1:"<b>Entrée :</b> fichier audio ou vidéo du système de fichiers local ; d'une vidéo seul le son est lu.",
-  d2:"<b>Traitement :</b> whisper.cpp et SpeechBrain dans le processus de l'application, sur le GPU local.",
+  d2:"<b>Traitement :</b> whisper.cpp et SpeakerKit dans le processus de l'application, sur le GPU local.",
   d3:"<b>Stockage :</b> un dossier par transcription à l'emplacement de votre choix, avec audio (pour une vidéo aussi le fichier vidéo inchangé), JSON et instantanés d'historique.",
   d4:"<b>Réseau :</b> aucune connexion sortante. Pas de télémétrie, pas de vérification de mise à jour, pas de rapport de plantage.",
   d5:"<b>Sortie :</b> fichiers d'export là où vous les enregistrez.",
@@ -1940,13 +1937,13 @@ it:{
   yes:"Sì", no:"No",
   proofsH:"Sicurezza che puoi verificare da solo",
   p1a:"Localhost only", p1b:"Il servizio interno si collega esclusivamente a localhost. Le richieste da qualsiasi altro host vengono rifiutate con 421. Il codice è in main.py.",
-  p2a:"I modelli sono nel pacchetto.", p2b:"Whisper large-v3-turbo, silero-vad e SpeechBrain ECAPA sono inclusi. Nessun token Hugging Face, nessun account, nessun download al primo avvio. Altri modelli whisper.cpp — ad esempio large-v3-turbo-swiss-german per lo svizzero tedesco — li metti tu nella cartella «Modelle» della libreria; l’app non scarica mai.",
+  p2a:"I modelli sono nel pacchetto.", p2b:"Whisper large-v3-turbo, silero-vad e pyannote community-1 sono inclusi. Nessun token Hugging Face, nessun account, nessun download al primo avvio. Altri modelli whisper.cpp — ad esempio large-v3-turbo-swiss-german per lo svizzero tedesco — li metti tu nella cartella «Modelle» della libreria; l’app non scarica mai.",
   p3a:"Svilupparla e compilarla da sé.", p3b:"Il repository contiene l'intera catena di build fino al DMG firmato. Chi non si fida del binario compila.",
   dpoH:"Testi per la protezione dei dati e la sezione metodologica",
   dpoLede:"Titolari e ricercatori trovano qui paragrafi pronti — per la sezione metodologica, il registro dei trattamenti, la valutazione d'impatto e la domanda al comitato etico. In Markdown e come file Word, in quattro lingue, con tutti i link a codice sorgente, licenze, modelli utilizzati e B/IAS – Basel Institut für angewandte Stadtforschung.",
   flowT:"Flusso dei dati di una trascrizione",
   d1:"<b>Ingresso:</b> file audio o video dal file system locale; da un video viene letto solo il suono.",
-  d2:"<b>Elaborazione:</b> whisper.cpp e SpeechBrain nel processo dell'app, sulla GPU locale.",
+  d2:"<b>Elaborazione:</b> whisper.cpp e SpeakerKit nel processo dell'app, sulla GPU locale.",
   d3:"<b>Archiviazione:</b> una cartella per trascrizione nella posizione che scegli, con audio (per un video anche il file video invariato), JSON e istantanee della cronologia.",
   d4:"<b>Rete:</b> nessuna connessione in uscita. Niente telemetria, niente controllo aggiornamenti, niente rapporti di arresto.",
   d5:"<b>Uscita:</b> file di esportazione dove li salvi tu.",

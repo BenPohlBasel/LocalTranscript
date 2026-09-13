@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 APP_NAME = "LocalTranscript"
-APP_VERSION = "2.4.3"
+APP_VERSION = "2.5.0"
 #: DER LocalTranscript-Port (2026-09-09): 5628 = „LOCT" auf der
 #: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
 #: (23119 = „ZOT"). Vier Buchstaben, nicht fünf: „LOCTR" wäre 56287
@@ -72,6 +72,33 @@ def get_whisper_cli() -> str:
 
 def get_ffmpeg_cli() -> str:
     return _find_executable("ffmpeg", get_app_root() / "bin" / "ffmpeg")
+
+
+def get_argmax_cli() -> str:
+    """Die SpeakerKit-Kommandozeile (Argmax OSS, MIT). Im Bundle unter
+    Resources/bin, im Checkout unter <repo>/bin — dorthin legt sie
+    `node scripts/hole-argmax.mjs`."""
+    try:
+        return _find_executable("argmax-cli", get_app_root() / "bin" / "argmax-cli")
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            "argmax-cli fehlt — Sprechertrennung nicht möglich. "
+            "Im Checkout einmal `node scripts/hole-argmax.mjs` laufen "
+            "lassen (baut die CLI und lädt die Core-ML-Modelle)."
+        ) from e
+
+
+def get_speakerkit_dir() -> Path:
+    """Ordner der SpeakerKit-Modelle (pyannote community-1 als Core ML)."""
+    env = os.environ.get("LT_SPEAKERKIT_DIR")
+    if env:
+        return Path(env)
+    p = get_app_root() / "models" / "speakerkit"
+    if not (p / "speaker_segmenter").is_dir():
+        raise FileNotFoundError(
+            f"SpeakerKit-Modelle fehlen ({p}) — im Checkout einmal "
+            "`node scripts/hole-argmax.mjs` laufen lassen.")
+    return p
 
 
 def get_models_dir() -> Path:

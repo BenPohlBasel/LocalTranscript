@@ -127,9 +127,9 @@ def test_whisper_lauf_steht_im_by(client, tmp_path):
     d = bibliothek.anlegen("w", [{"start": 0.0, "end": 1.0, "sprecher": None, "text": "x"}],
                            [], {"erzeugt": "transcription", "model": "large-v3-turbo"},
                            by={"tool": "whisper.cpp", "model": "large-v3-turbo",
-                               "diarization": "speechbrain-ecapa"})
+                               "diarization": "pyannote-community-1"})
     by = transkript_schicht(d, {"user": None, "install": "ins-x"}).by
-    assert by.model == "whisper.cpp large-v3-turbo" and by.diarization == "speechbrain-ecapa"
+    assert by.model == "whisper.cpp large-v3-turbo" and by.diarization == "pyannote-community-1"
 
 
 def test_enrich_liest_den_container(client, eintrag, tmp_path):

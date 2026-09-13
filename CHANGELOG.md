@@ -3,6 +3,31 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## 2.5.0 — 2026-09-13
+
+### Changed
+
+- **New speaker separation.** Speakers are now found by pyannote
+  community-1 running on the Mac's Neural Engine, through Argmax's
+  SpeakerKit command line (MIT). The old chain (silero-VAD plus
+  SpeechBrain ECAPA plus agglomerative clustering) knew nothing about
+  overlapping speech and miscounted voices. Measured on the same
+  five-minute field recording: the old chain invented eight speakers in
+  8.4 seconds, the new one finds three in 0.9 seconds, and with a
+  speaker count given it returns exactly that many (two speakers, 0.8
+  seconds). An hour-long workshop recording is separated in 11.9
+  seconds. Nothing is downloaded: the models sit in the application
+  package and are read from there.
+- **The application package shrinks by about 770 MB.** PyTorch,
+  torchaudio, SpeechBrain, silero-vad, scikit-learn and SciPy leave the
+  bundle (793 MB); the Core ML models and the command line add 24 MB.
+  Voice activity detection for transcription is unaffected. It still
+  runs inside whisper.cpp with the bundled Silero model.
+- **Licence note.** The bundled weights are pyannote community-1
+  (CC-BY-4.0), the runtime is SpeakerKit by Argmax (MIT). Both are
+  listed in Settings, on the website and in the four information
+  sheets.
+
 ## 2.4.3 — 2026-09-12
 
 ### Fixed

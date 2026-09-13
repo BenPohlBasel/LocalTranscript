@@ -5,7 +5,7 @@ alle Jobs UND ihre Bearbeitbarkeit).
 Pipeline je Job (eigener Thread):
   1. ffmpeg → 16 kHz mono WAV (IMMER — v1 ließ .wav-Uploads unkonvertiert
      zu whisper.cpp durch, ein gemessener v1-Bug)
-  2. optional Diarisierung (silero-vad + ECAPA + Clustering)
+  2. optional Diarisierung (SpeakerKit: pyannote community-1, Core ML)
   3. whisper.cpp: je Sprecher-Block ein Clip (diarisiert) oder die
      ganze Datei mit Live-Text-Streaming (klassisch)
   4. Bibliotheks-Eintrag anlegen (Sprecher als Entitäten)
@@ -256,7 +256,8 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             diar = diarize_audio(str(wav), p["min_speakers"],
                                  p["max_speakers"],
                                  p["cluster_threshold"],
-                                 fortschritt=_diar_fortschritt)
+                                 fortschritt=_diar_fortschritt,
+                                 register=_register_fuer(job["id"]))
             _pruefe_abbruch(job)
             bloecke = merge_consecutive_speakers(diar)
             labels: dict[str, str] = {}   # SPEAKER_00 → Entitäts-ID
@@ -323,7 +324,8 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             audio=audio_fuer_bibliothek, video=quelle if ist_video else None,
             origin="machine",
             by={"tool": "whisper.cpp", "model": p["model"],
-                **({"diarization": "speechbrain-ecapa"} if p["diarize"] else {})})
+                **({"diarization": "pyannote-community-1 (speakerkit)"}
+                   if p["diarize"] else {})})
         _setze(job, status="completed", progress=100, message="fertig",
                eintrag=eintrag["id"])
     except Abbruch:

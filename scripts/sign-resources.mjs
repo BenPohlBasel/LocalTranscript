@@ -4,7 +4,7 @@
 //
 // Warum es diesen Schritt braucht: Tauri signiert nur die Hülle und das
 // Hauptprogramm. Im Bundle stecken aber 253 weitere Mach-O-Dateien
-// (python3, whisper-cli, ffmpeg, 244 dylib/so aus torch/numpy/
+// (python3, whisper-cli, ffmpeg, argmax-cli, dylib/so aus numpy/
 // SpeechBrain), und die tragen nur die Ad-hoc-Signatur, die der Linker
 // vergibt. Apples Notardienst verlangt für JEDE ausführbare Datei die
 // Developer ID samt Hardened Runtime — ohne diesen Lauf wird das

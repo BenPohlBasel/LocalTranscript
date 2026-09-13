@@ -192,33 +192,19 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
 
 ## Gemessen, nicht gebaut
 
-- **Diarisierung: welches Modell? (Recherche 2026-09-12/13, nichts
-  gebaut).** Heute: silero-VAD + SpeechBrain ECAPA + AHC/Spectral —
-  keine Überlappungs-Erkennung, Clustering eine Generation alt; in
-  keinem Benchmark vertreten. Stand der Technik ist **pyannote
-  community-1** (pyannote.audio 4.0): Gewichte CC-BY-4.0, Code MIT,
-  offline aus lokalem Verzeichnis ladbar, `num_speakers` /
-  `min_speakers` / `max_speakers` — passt auf unsere Sprecherzahl-Liste
-  (s. 10). Gewinn gegenüber 3.1 laut Modellkarte (ohne Collar, mit
-  Überlappung): AliMeeting −17 %, AMI SDM −12 %, AMI IHM −10 %,
-  MSDWild −10 %, VoxConverse ±0, REPERE +1 — der Gewinn steckt im
-  Mehrsprecher- und Überlappungsmaterial. Unabhängig (ETH, arXiv
-  2509.26177) ist pyannote 3.1 bei 2–4 Sprechern schwach (19,9/19,8/
-  17,1 DER) und auf Deutsch 19,0; precision-2 (kommerziell) 8,3.
-  **precision-2 scheidet aus:** Nutzungsbedingungen verbieten Einbetten
-  und Weitergabe, dazu AGPL und unser «nichts verlässt den Rechner».
-  **Haken bei community-1:** pyannote.audio 4.0 sendet Telemetrie
-  (Modellherkunft, Dateidauer, Sprecherzahl-Parameter) — muss hart aus
-  (`PYANNOTE_METRICS_ENABLED=0` + `set_telemetry_metrics(False)`) und
-  mit einem Test abgesichert werden; torch bleibt im Bundle (+150 MB).
-  Alternativen ohne torch (−750 MB): **Argmax SpeakerKit OSS** (MIT,
-  community-1 auf CoreML, <10 MB, Swift-Sidecar nötig, feste
-  Sprecherzahl offen) und **sherpa-onnx** (Apache-2.0, Python-Wheel,
-  `num_clusters` exakt, aber ältere segmentation-3.0). Nächster
-  Schritt, bevor irgendetwas umgebaut wird: 20 min echtes Material
-  (Zweier-Interview + Workshop mit vier Stimmen) grob annotieren und
-  die drei Wege messen — die Bench-Zahlen stammen von Meetings, nicht
-  von unseren Aufnahmen.
+- **Diarisierung: welches Modell? (Recherche 2026-09-12/13)** — GEBAUT
+  2026-09-13 mit Argmax SpeakerKit, siehe CHANGELOG 2.5.0. Verworfen:
+  **precision-2** (Nutzungsbedingungen verbieten Einbetten und
+  Weitergabe, dazu AGPL-Konflikt), **pyannote.audio 4.0 in Python**
+  (Telemetrie müsste hart abgeschaltet und mit einem Test gesichert
+  werden, torch bliebe im Bundle), **DiariZen/Reverb** (nicht-
+  kommerzielle Lizenz), **sherpa-onnx** (ältere segmentation-3.0),
+  **NVIDIA Sortformer** (höchstens vier Sprecher). Offen daraus:
+  **Lizenz der Gewichte klären.** Das Modell-Repository
+  `argmaxinc/speakerkit-coreml` nennt auf Hugging Face KEINE Lizenz;
+  stromaufwärts steht pyannote community-1 unter CC-BY-4.0 und der
+  SpeakerKit-Code unter MIT. Vor einer Veröffentlichung des Bundles
+  mit Argmax klären und die Antwort hier festhalten.
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
   MLX wäre gut»).** Messung auf diesem Mac, 5-min-Ausschnitt einer echten

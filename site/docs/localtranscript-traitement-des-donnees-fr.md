@@ -46,8 +46,7 @@ particulières de données personnelles peuvent être concernées
    vidéo : MP4, MOV, M4V en H.264/HEVC — d'une vidéo seule la piste
    audio est lue, la vidéo n'est jamais convertie).
 2. **Traitement.** La reconnaissance vocale (whisper.cpp, modèle
-   large-v3-turbo) et la séparation des locuteurs (silero-vad,
-   SpeechBrain ECAPA) s'exécutent dans le processus de l'application, sur
+   large-v3-turbo) et la séparation des locuteurs (silero-vad, pyannote community-1) s'exécutent dans le processus de l'application, sur
    le processeur ou la carte graphique de l'appareil. Tous les modèles
    sont contenus dans le paquet de l'application (d'autres modèles
    whisper.cpp ne peuvent être ajoutés qu'à la main, dans le dossier

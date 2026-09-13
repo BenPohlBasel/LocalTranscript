@@ -23,7 +23,7 @@ mitgibt. Alles davon geschieht auf dem eigenen Mac.
 |---|---|---|---|
 | whisper.cpp mit Modell `large-v3-turbo` | Spracherkennung: Audio → Text mit Zeitmarken | Modell von OpenAI (MIT), Laufzeit whisper.cpp (MIT) | lokal, auf der Grafikeinheit des Macs |
 | silero-vad | Sprachaktivität: erkennt, wo überhaupt gesprochen wird | MIT | lokal |
-| SpeechBrain ECAPA-TDNN | Sprechertrennung: berechnet Stimmprofile und gruppiert sie zu Sprechern | Apache-2.0 | lokal |
+| SpeakerKit (pyannote community-1) | Sprechertrennung: erkennt Sprecherwechsel samt Überlappung und gruppiert die Stimmen | Modell pyannote community-1 (CC-BY-4.0), Laufzeit SpeakerKit von Argmax (MIT) | lokal, auf der Neural Engine des Macs |
 
 Alle drei Modelle liegen im Programmpaket. Es gibt keinen Zugang zu
 einem KI-Dienst, kein Konto, keinen Schlüssel. Wer ein anderes
@@ -98,7 +98,7 @@ die Aufnahmen.
 
 > Die Aufnahmen wurden mit LocalTranscript 2.4.3 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
-> Sprechertrennung mit SpeechBrain ECAPA-TDNN) vollständig lokal auf
+> Sprechertrennung mit pyannote community-1-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an
 > externe Dienste. Die Rohtranskripte wurden anschliessend gegen die
 > Aufnahme korrigiert und pseudonymisiert.

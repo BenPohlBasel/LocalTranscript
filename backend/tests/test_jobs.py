@@ -37,7 +37,7 @@ def test_diarize_pipeline_landet_in_bibliothek(client, tmp_path,
     # `fortschritt` spiegelt die echte Signatur — der Job meldet damit
     # den Diarisierungs-Fortschritt (10 → 25 %); der Doppelgänger ruft
     # ihn einmal, damit der Meldeweg mitgeprüft ist.
-    def fake_diarize(pfad, mi, ma, th, fortschritt=None):
+    def fake_diarize(pfad, mi, ma, th, fortschritt=None, register=None):
         if fortschritt is not None:
             fortschritt(0, 2)
         return [SpeakerSegment(0.0, 5.0, "SPEAKER_01"),
