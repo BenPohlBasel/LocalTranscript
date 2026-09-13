@@ -24,7 +24,7 @@ propre Mac.
 |---|---|---|---|
 | whisper.cpp avec le modèle `large-v3-turbo` | Reconnaissance vocale : audio → texte avec codes temporels | modèle d'OpenAI (MIT), exécution whisper.cpp (MIT) | localement, sur la carte graphique du Mac |
 | silero-vad | Activité vocale : détecte où l'on parle | MIT | localement |
-| SpeakerKit (pyannote community-1) | Séparation des locuteurs : détecte les changements de locuteur, chevauchements compris, et regroupe les voix | modèle pyannote community-1 (CC-BY-4.0), moteur SpeakerKit d'Argmax (MIT) | localement, sur le Neural Engine du Mac |
+| SpeakerKit (pyannote community-1) | Séparation des locuteurs : détecte les changements de locuteur, chevauchements compris, et regroupe les voix | modèle pyannote community-1 (CC BY 4.0), converti en Core ML et quantifié par Argmax ; moteur SpeakerKit d'Argmax (MIT) | localement, sur le Neural Engine du Mac |
 
 Les trois modèles sont contenus dans le paquet de l'application (un
 autre modèle whisper.cpp peut être déposé dans le dossier « Modelle »

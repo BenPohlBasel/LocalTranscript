@@ -3,6 +3,20 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
+## Unreleased
+
+### Changed
+
+- **Fuller attribution for the diarization models.** Argmax's model
+  repository now states its licence in its own metadata: the SpeakerKit
+  framework is MIT, the models it is built on are CC BY 4.0. That
+  licence asks for attribution and for marking changes, so the licence
+  list in Settings, the README, the website and the four information
+  sheets now name both models, pyannote community-1 and WeSpeaker
+  ResNet34, and say that Argmax converted them to Core ML and quantised
+  them. The licence list inside the application still carries the
+  shorter wording; it follows with a later release.
+
 ## 2.5.0 — 2026-09-13
 
 ### Changed

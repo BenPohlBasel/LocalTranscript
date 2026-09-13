@@ -181,6 +181,17 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Klick hält den alten an, ein zweiter Klick auf dieselbe Stimme stoppt,
    und beim Verlassen des Panels ist Ruhe.
 
+12. **Lizenzzeile in der App nachziehen (User 2026-09-14).** README,
+   Website und die vier Blätter nennen seit dem 14. September beide
+   Modelle — pyannote community-1 und WeSpeaker ResNet34 — unter CC BY
+   4.0 samt dem Hinweis, dass Argmax sie nach Core ML umgewandelt und
+   quantisiert hat. CC BY 4.0 verlangt neben der Namensnennung
+   ausdrücklich die Kennzeichnung von Änderungen. `st.lizenzen.text` in
+   `frontend/src/lib/i18n.ts` trägt noch die kürzere Fassung; sie ist
+   nicht falsch, nur unvollständig. Beim nächsten Release in allen vier
+   Sprachen nachziehen — der Wortlaut steht im CHANGELOG unter
+   «Unreleased» und in Punkt 10 der Recherche.
+
 ## Gemessen, nicht gebaut
 
 - **Diarisierung: welches Modell? (Recherche 2026-09-12/13)** — GEBAUT
@@ -190,12 +201,20 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
   (Telemetrie müsste hart abgeschaltet und mit einem Test gesichert
   werden, torch bliebe im Bundle), **DiariZen/Reverb** (nicht-
   kommerzielle Lizenz), **sherpa-onnx** (ältere segmentation-3.0),
-  **NVIDIA Sortformer** (höchstens vier Sprecher). Offen daraus:
-  **Lizenz der Gewichte klären.** Das Modell-Repository
-  `argmaxinc/speakerkit-coreml` nennt auf Hugging Face KEINE Lizenz;
-  stromaufwärts steht pyannote community-1 unter CC-BY-4.0 und der
-  SpeakerKit-Code unter MIT. Vor einer Veröffentlichung des Bundles
-  mit Argmax klären und die Antwort hier festhalten.
+  **NVIDIA Sortformer** (höchstens vier Sprecher). Daraus war die
+  **Lizenz der Gewichte** offen — GEKLÄRT am 13. September 2026: das
+  Repository `argmaxinc/speakerkit-coreml` trägt jetzt `license:
+  cc-by-4.0` im Frontmatter (Commit `556fc52`, 20:20 UTC; die Revision
+  davor, `36b58e2`, sagte noch `mit`), und die Modellkarte sagt im Text:
+  «SpeakerKit the Swift framework has MIT license. The models SpeakerKit
+  is built on have CC BY 4 license.» Die frühere Proprietary-Notiz war
+  schon am 7. Mai 2026 entfernt worden (`86ec9c9`). CC BY 4.0 erlaubt
+  kommerzielle Nutzung und Weitergabe ohne ShareAlike; Pflicht ist die
+  Namensnennung UND die Kennzeichnung von Änderungen — Argmax hat die
+  Gewichte nach Core ML umgewandelt und quantisiert. Genau so steht es
+  jetzt in den Lizenzen der App, im README, auf der Website und in den
+  vier Blättern. Belege:
+  https://huggingface.co/argmaxinc/speakerkit-coreml/blob/556fc52a13327837688f02289457cded017802e9/README.md
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
   MLX wäre gut»).** Messung auf diesem Mac, 5-min-Ausschnitt einer echten

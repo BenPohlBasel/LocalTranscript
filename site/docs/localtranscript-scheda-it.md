@@ -23,7 +23,7 @@ REFI-QDA. Tutto avviene sul proprio Mac.
 |---|---|---|---|
 | whisper.cpp con il modello `large-v3-turbo` | Riconoscimento vocale: audio → testo con codici temporali | modello di OpenAI (MIT), runtime whisper.cpp (MIT) | in locale, sulla scheda grafica del Mac |
 | silero-vad | Attività vocale: rileva dove si parla | MIT | in locale |
-| SpeakerKit (pyannote community-1) | Separazione dei parlanti: riconosce i cambi di parlante, sovrapposizioni comprese, e raggruppa le voci | modello pyannote community-1 (CC-BY-4.0), motore SpeakerKit di Argmax (MIT) | in locale, sul Neural Engine del Mac |
+| SpeakerKit (pyannote community-1) | Separazione dei parlanti: riconosce i cambi di parlante, sovrapposizioni comprese, e raggruppa le voci | modello pyannote community-1 (CC BY 4.0), convertito in Core ML e quantizzato da Argmax; motore SpeakerKit di Argmax (MIT) | in locale, sul Neural Engine del Mac |
 
 Tutti e tre i modelli sono contenuti nel pacchetto dell'applicazione
 (un altro modello whisper.cpp può essere collocato nella cartella

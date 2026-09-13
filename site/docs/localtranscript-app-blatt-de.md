@@ -23,7 +23,7 @@ mitgibt. Alles davon geschieht auf dem eigenen Mac.
 |---|---|---|---|
 | whisper.cpp mit Modell `large-v3-turbo` | Spracherkennung: Audio → Text mit Zeitmarken | Modell von OpenAI (MIT), Laufzeit whisper.cpp (MIT) | lokal, auf der Grafikeinheit des Macs |
 | silero-vad | Sprachaktivität: erkennt, wo überhaupt gesprochen wird | MIT | lokal |
-| SpeakerKit (pyannote community-1) | Sprechertrennung: erkennt Sprecherwechsel samt Überlappung und gruppiert die Stimmen | Modell pyannote community-1 (CC-BY-4.0), Laufzeit SpeakerKit von Argmax (MIT) | lokal, auf der Neural Engine des Macs |
+| SpeakerKit (pyannote community-1) | Sprechertrennung: erkennt Sprecherwechsel samt Überlappung und gruppiert die Stimmen | Modell pyannote community-1 (CC BY 4.0), von Argmax nach Core ML umgewandelt und quantisiert; Laufzeit SpeakerKit von Argmax (MIT) | lokal, auf der Neural Engine des Macs |
 
 Alle drei Modelle liegen im Programmpaket. Es gibt keinen Zugang zu
 einem KI-Dienst, kein Konto, keinen Schlüssel. Wer ein anderes

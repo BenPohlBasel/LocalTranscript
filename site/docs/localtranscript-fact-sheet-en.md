@@ -23,7 +23,7 @@ own Mac.
 |---|---|---|---|
 | whisper.cpp with the model `large-v3-turbo` | Speech recognition: audio → text with timecodes | model by OpenAI (MIT), runtime whisper.cpp (MIT) | locally, on the Mac's graphics unit |
 | silero-vad | Voice activity: detects where speech occurs at all | MIT | locally |
-| SpeakerKit (pyannote community-1) | Speaker separation: detects speaker changes including overlap and groups the voices | pyannote community-1 model (CC-BY-4.0), SpeakerKit runtime by Argmax (MIT) | locally, on the Mac's Neural Engine |
+| SpeakerKit (pyannote community-1) | Speaker separation: detects speaker changes including overlap and groups the voices | pyannote community-1 model (CC BY 4.0), converted to Core ML and quantised by Argmax; SpeakerKit runtime by Argmax (MIT) | locally, on the Mac's Neural Engine |
 
 All three models ship inside the application package. There is no
 access to an AI service, no account, no API key. Anyone wishing to use

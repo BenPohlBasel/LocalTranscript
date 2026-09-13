@@ -332,7 +332,8 @@ of §13. The source is public anyway; the "Source code (GitHub)" button
 in the About dialog is the offer inside the app itself.
 
 Bundled, among others: whisper.cpp (MIT), large-v3-turbo model (OpenAI,
-MIT), silero-vad (MIT), SpeakerKit (Argmax, MIT) with pyannote
-community-1 (CC-BY-4.0), enrich-core (B/IAS, MIT), FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
+MIT), silero-vad (MIT), SpeakerKit (Argmax, MIT) with the pyannote
+community-1 and WeSpeaker ResNet34 models (CC BY 4.0, converted to
+Core ML and quantised by Argmax), enrich-core (B/IAS, MIT), FastAPI/uvicorn (MIT), React/Radix (MIT), Lucide (ISC), ffmpeg
 (GPL-3.0 build, `--enable-gpl --enable-version3`) — the complete list is
 in the settings.
