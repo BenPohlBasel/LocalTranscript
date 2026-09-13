@@ -168,7 +168,57 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    2,1 GB statt Tauris 1,9 GB (Kompressionsstufe) — akzeptabel, oder
    Tauris `bundle_dmg.sh` aus dem target-Ordner nachnutzen.
 
+10. **Sprecherzahl je Batch-Eintrag, Pflichtangabe (User 2026-09-13).**
+   Heute gilt die Auswahl «Sprecher 1…6 / Automatisch» global für den
+   ganzen Lauf (AiTranscriptModule: ein `range` für alle Dateien).
+   Richtig wäre: **jede Datei in der Batch-Liste bekommt ihre eigene
+   Auswahl**, und **ohne Auswahl startet kein Lauf** — kein
+   stillschweigendes «Automatisch», weil die Zahl das Ergebnis stark
+   bestimmt und hinterher niemand mehr weiss, was gewählt war. Umbau:
+   Batch-Liste führt je Eintrag `{datei, sprecherzahl}`; der Startknopf
+   bleibt gesperrt, solange ein Eintrag ohne Angabe ist (Hinweis am
+   Eintrag, nicht als Dialog); die globale Einstellung ist nur noch
+   Vorschlag für neu hinzugefügte Dateien. Drop mehrerer Dateien setzt
+   sie auf «nicht gewählt». Der Wert gehört in `quelle` und ins Journal,
+   damit im Transkript steht, mit welcher Vorgabe es entstand.
+
+11. **Stimmenvorschau bricht die vorherige ab (User 2026-09-13).**
+   `SprecherPanel.sample()` legt bei jedem Klick ein neues `Audio` an
+   und spielt los; zwei schnelle Klicks = zwei Stimmen gleichzeitig.
+   Fix: eine Referenz auf das laufende Element halten, beim nächsten
+   Klick `pause()` + `currentTime = 0`, beim Verlassen des Panels
+   ebenso; ein zweiter Klick auf dieselbe Stimme stoppt (Play/Pause).
+   Kleinigkeit, aber im Betrieb störend.
+
 ## Gemessen, nicht gebaut
+
+- **Diarisierung: welches Modell? (Recherche 2026-09-12/13, nichts
+  gebaut).** Heute: silero-VAD + SpeechBrain ECAPA + AHC/Spectral —
+  keine Überlappungs-Erkennung, Clustering eine Generation alt; in
+  keinem Benchmark vertreten. Stand der Technik ist **pyannote
+  community-1** (pyannote.audio 4.0): Gewichte CC-BY-4.0, Code MIT,
+  offline aus lokalem Verzeichnis ladbar, `num_speakers` /
+  `min_speakers` / `max_speakers` — passt auf unsere Sprecherzahl-Liste
+  (s. 10). Gewinn gegenüber 3.1 laut Modellkarte (ohne Collar, mit
+  Überlappung): AliMeeting −17 %, AMI SDM −12 %, AMI IHM −10 %,
+  MSDWild −10 %, VoxConverse ±0, REPERE +1 — der Gewinn steckt im
+  Mehrsprecher- und Überlappungsmaterial. Unabhängig (ETH, arXiv
+  2509.26177) ist pyannote 3.1 bei 2–4 Sprechern schwach (19,9/19,8/
+  17,1 DER) und auf Deutsch 19,0; precision-2 (kommerziell) 8,3.
+  **precision-2 scheidet aus:** Nutzungsbedingungen verbieten Einbetten
+  und Weitergabe, dazu AGPL und unser «nichts verlässt den Rechner».
+  **Haken bei community-1:** pyannote.audio 4.0 sendet Telemetrie
+  (Modellherkunft, Dateidauer, Sprecherzahl-Parameter) — muss hart aus
+  (`PYANNOTE_METRICS_ENABLED=0` + `set_telemetry_metrics(False)`) und
+  mit einem Test abgesichert werden; torch bleibt im Bundle (+150 MB).
+  Alternativen ohne torch (−750 MB): **Argmax SpeakerKit OSS** (MIT,
+  community-1 auf CoreML, <10 MB, Swift-Sidecar nötig, feste
+  Sprecherzahl offen) und **sherpa-onnx** (Apache-2.0, Python-Wheel,
+  `num_clusters` exakt, aber ältere segmentation-3.0). Nächster
+  Schritt, bevor irgendetwas umgebaut wird: 20 min echtes Material
+  (Zweier-Interview + Workshop mit vier Stimmen) grob annotieren und
+  die drei Wege messen — die Bench-Zahlen stammen von Meetings, nicht
+  von unseren Aufnahmen.
 
 - **MLX als zweiter Runtime (User-Frage 2026-09-11: «beschleunigt mit
   MLX wäre gut»).** Messung auf diesem Mac, 5-min-Ausschnitt einer echten
