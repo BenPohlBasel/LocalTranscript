@@ -100,4 +100,6 @@ folder inside a synchronised folder synchronises the recordings.
 ---
 
 Source: <https://github.com/BenPohlBasel/LocalTranscript> (folder
-`site/docs`). The sheet may be used and adapted freely.
+`site/docs`). The sheet is licensed CC BY 4.0: use and adapt it
+freely, commercially too, as long as B/IAS is credited and changes are
+marked.

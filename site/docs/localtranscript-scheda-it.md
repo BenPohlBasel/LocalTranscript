@@ -106,4 +106,6 @@ registrazioni.
 ---
 
 Fonte: <https://github.com/BenPohlBasel/LocalTranscript> (cartella
-`site/docs`). La scheda può essere usata e adattata liberamente.
+`site/docs`). La scheda è pubblicata con licenza CC BY 4.0: uso e
+adattamento liberi, anche commerciali, citando B/IAS e indicando le
+modifiche.

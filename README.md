@@ -325,6 +325,14 @@ Recursive fonts are no longer bundled. The strictest bundled tool is
 now ffmpeg (GPL-3.0 build); GPLv3 and AGPLv3 are compatible (GPLv3
 §13).
 
+**Texts and images are CC BY 4.0.** The website in `site/`, the eight
+sheets in `site/docs/`, this README, the changelog and the backlog may
+be used and adapted, commercially too, as long as B/IAS is named and
+changes are marked — see `LICENSE-docs`. That is deliberate: the sheets
+exist to be pasted into an ethics application or a data management
+plan. The code stays AGPL-3.0-or-later, and the Recursive font on the
+website stays SIL OFL 1.1.
+
 **The network clause is satisfied before it applies:** LocalTranscript
 binds to `127.0.0.1` only, and the host guard in `main.py` turns
 everything foreign away with 421 — there is no remote use in the sense

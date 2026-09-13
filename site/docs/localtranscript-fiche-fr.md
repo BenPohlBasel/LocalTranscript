@@ -109,4 +109,6 @@ enregistrements.
 ---
 
 Source : <https://github.com/BenPohlBasel/LocalTranscript> (dossier
-`site/docs`). La fiche peut être utilisée et adaptée librement.
+`site/docs`). La fiche est publiée sous CC BY 4.0 : utilisation et
+adaptation libres, y compris commerciales, à condition de citer B/IAS
+et d'indiquer les modifications.

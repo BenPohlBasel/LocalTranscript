@@ -136,4 +136,6 @@ compilarlo.
 ---
 
 Fonte di questo testo: <https://github.com/BenPohlBasel/LocalTranscript>
-(cartella `site/docs`). Può essere usato e adattato liberamente.
+(cartella `site/docs`). È pubblicato con licenza CC BY 4.0: uso e
+adattamento liberi, anche commerciali, citando B/IAS e indicando le
+modifiche.

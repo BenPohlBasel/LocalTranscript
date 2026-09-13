@@ -106,4 +106,6 @@ die Aufnahmen.
 ---
 
 Quelle: <https://github.com/BenPohlBasel/LocalTranscript> (Ordner
-`site/docs`). Das Blatt darf frei verwendet und angepasst werden.
+`site/docs`). Das Blatt steht unter CC BY 4.0: frei verwendbar und
+anpassbar, auch kommerziell, sofern B/IAS genannt und Änderungen
+gekennzeichnet werden.

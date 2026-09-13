@@ -128,4 +128,6 @@ can build it.
 ---
 
 Source of this text: <https://github.com/BenPohlBasel/LocalTranscript>
-(folder `site/docs`). It may be used and adapted freely.
+(folder `site/docs`). It is licensed CC BY 4.0: use and adapt it
+freely, commercially too, as long as B/IAS is credited and changes are
+marked.

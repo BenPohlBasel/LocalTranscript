@@ -133,4 +133,6 @@ erzeugen.
 ---
 
 Quelle dieses Textes: <https://github.com/BenPohlBasel/LocalTranscript>
-(Ordner `site/docs`). Er darf frei verwendet und angepasst werden.
+(Ordner `site/docs`). Er steht unter CC BY 4.0: frei verwendbar und
+anpassbar, auch kommerziell, sofern B/IAS genannt und Änderungen
+gekennzeichnet werden.

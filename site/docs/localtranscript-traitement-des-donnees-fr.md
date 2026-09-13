@@ -140,4 +140,6 @@ confiance au binaire distribué peut le compiler.
 ---
 
 Source de ce texte : <https://github.com/BenPohlBasel/LocalTranscript>
-(dossier `site/docs`). Il peut être utilisé et adapté librement.
+(dossier `site/docs`). Il est publié sous CC BY 4.0 : utilisation et
+adaptation libres, y compris commerciales, à condition de citer B/IAS
+et d'indiquer les modifications.
