@@ -44,6 +44,11 @@ a version are the corresponding section of this file.
 - **The voice sample stops the one before it.** Two quick clicks played
   two voices at once. A second click on the same voice now stops it, and
   leaving the speaker panel silences it.
+- **Clicking beside a speaker badge no longer opens the speaker menu.**
+  The badge button used to fill its whole column, so the empty strip
+  between badge and text belonged to it. That strip is now neutral: a
+  click there takes the focus out of the text field, which is what the
+  up and down arrow keys need to walk the segments again.
 
 ## 2.4.3 — 2026-09-12
 

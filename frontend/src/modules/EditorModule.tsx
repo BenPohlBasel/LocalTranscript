@@ -2,8 +2,8 @@
 // Autosave (debounced) + History im Backend; Sprecher sind Entitäten
 // (umbenennen überall, Segment umhängen, zusammenführen); Segment-Ops
 // teilen/verbinden/löschen; Audio-Player mit Folgen-Modus.
-import { memo, useCallback, useEffect, useMemo, useRef, useState }
-  from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState,
+  type MouseEvent as ReactMouseEvent } from "react";
 import {
   Badge, Button, Checkbox, ErrorNote, Flex, IconButton,
   SearchField, SegTabs, Select, SidePanel, Spinner, Text, TextField,
@@ -28,6 +28,17 @@ const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
 // sitzen auf derselben Mittellinie (vorher 13,5–18,75 px Streuung).
 const SEG_SLOT = { height: 28, display: "flex",
                    alignItems: "center" } as const;
+
+/** Klick auf FREIE Fläche (neben dem Sprecher-Abzeichen, im Rand der
+    Liste): nur dann, wenn wirklich der Hintergrund getroffen wurde —
+    er nimmt dem Textfeld den Fokus, damit ↑/↓ wieder die Segmente
+    entlanglaufen (User 2026-09-13: „der Bereich zwischen den Badges
+    und den Textfeldern sollte neutral sein zum Herausklicken"). */
+function fokusLoesen(e: ReactMouseEvent<HTMLElement>): void {
+  if (e.target !== e.currentTarget) return;
+  const a = document.activeElement;
+  if (a instanceof HTMLElement) a.blur();
+}
 
 let _seq = 0;
 function neueId(): string {
@@ -537,6 +548,7 @@ export default function EditorModule({ id, onExit }: {
         )}
 
         <div ref={listRef}
+             onMouseDown={fokusLoesen}
              style={{ flex: 1, overflowY: "auto", minHeight: 0,
                       padding: "8px 16px 96px" }}>
           {ladeN > 0 && (
@@ -968,6 +980,7 @@ const SegmentZeile = memo(function SegmentZeile({
 
   return (
     <div data-seg={index}
+         onMouseDown={fokusLoesen}
          style={{
            display: "grid",
            gridTemplateColumns: "26px 74px 130px 1fr 76px",
@@ -1002,6 +1015,9 @@ const SegmentZeile = memo(function SegmentZeile({
               }}
               style={{ ...SEG_SLOT, background: "none", border: "none",
                        padding: 0, textAlign: "left", cursor: "pointer",
+                       // Nur so breit wie das Abzeichen: die restliche
+                       // Spalte bis zum Textfeld bleibt neutral.
+                       justifySelf: "start", width: "fit-content",
                        maxWidth: 130, overflow: "hidden" }}>
         <Badge color={farbe} variant="soft">
           {name || tr("ed.sprecher.ohne")}
