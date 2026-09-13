@@ -1088,10 +1088,29 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
 }) {
   const tr = useT();
   const ohne = segmente.filter((s) => !s.sprecher).length;
+  // Stimmenvorschau: IMMER nur eine zugleich (User 2026-09-13 — zwei
+  // schnelle Klicks spielten zwei Stimmen übereinander). Der laufende
+  // Klang wird angehalten, ein zweiter Klick auf dieselbe Stimme
+  // stoppt sie (Play/Pause), und beim Verlassen des Panels ist Ruhe.
+  const klang = useRef<HTMLAudioElement | null>(null);
+  const [laeuft, setLaeuft] = useState<string | null>(null);
+  const stopp = useCallback(() => {
+    const a = klang.current;
+    if (a) { a.pause(); a.currentTime = 0; klang.current = null; }
+    setLaeuft(null);
+  }, []);
+  useEffect(() => stopp, [stopp]);
   const sample = (sid: string) => {
+    const lief = laeuft;
+    stopp();
+    if (lief === sid) return;              // zweiter Klick = Stopp
     const a = new Audio(
       `${API_BASE}/api/transcripts/${id}/sprecher/${sid}/sample`);
-    void a.play();
+    a.onended = () => { if (klang.current === a) stopp(); };
+    a.onerror = () => { if (klang.current === a) stopp(); };
+    klang.current = a;
+    setLaeuft(sid);
+    void a.play().catch(() => { if (klang.current === a) stopp(); });
   };
   // Zusammenführen als Icon-Knopf mit Klappmenü (Layout-Befund
   // 2026-09-09): der breite Select-Platzhalter „Zusammenführen in …"
@@ -1145,9 +1164,12 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
                 {tr("ed.sprecher.n", { n })}</Text>
               <div style={{ flex: 1 }} />
               {hatAudio && n > 0 && (
-                <IconButton title={tr("ed.sprecher.probe")}
+                <IconButton title={laeuft === s.id
+                              ? tr("ed.sprecher.probe.stopp")
+                              : tr("ed.sprecher.probe")}
                             onClick={() => sample(s.id)}>
-                  <Icon name="sample" size={14} /></IconButton>
+                  <Icon name={laeuft === s.id ? "pause" : "sample"}
+                        size={14} /></IconButton>
               )}
               {sprecher.length > 1 && (
                 <IconButton title={tr("ed.sprecher.merge")}

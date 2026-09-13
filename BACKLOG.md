@@ -168,27 +168,18 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    2,1 GB statt Tauris 1,9 GB (Kompressionsstufe) — akzeptabel, oder
    Tauris `bundle_dmg.sh` aus dem target-Ordner nachnutzen.
 
-10. **Sprecherzahl je Batch-Eintrag, Pflichtangabe (User 2026-09-13).**
-   Heute gilt die Auswahl «Sprecher 1…6 / Automatisch» global für den
-   ganzen Lauf (AiTranscriptModule: ein `range` für alle Dateien).
-   Richtig wäre: **jede Datei in der Batch-Liste bekommt ihre eigene
-   Auswahl**, und **ohne Auswahl startet kein Lauf** — kein
-   stillschweigendes «Automatisch», weil die Zahl das Ergebnis stark
-   bestimmt und hinterher niemand mehr weiss, was gewählt war. Umbau:
-   Batch-Liste führt je Eintrag `{datei, sprecherzahl}`; der Startknopf
-   bleibt gesperrt, solange ein Eintrag ohne Angabe ist (Hinweis am
-   Eintrag, nicht als Dialog); die globale Einstellung ist nur noch
-   Vorschlag für neu hinzugefügte Dateien. Drop mehrerer Dateien setzt
-   sie auf «nicht gewählt». Der Wert gehört in `quelle` und ins Journal,
-   damit im Transkript steht, mit welcher Vorgabe es entstand.
+10. ~~**Sprecherzahl je Batch-Eintrag, Pflichtangabe**~~ — GEBAUT
+   2026-09-13 (CHANGELOG 2.5.0): Dateien sammeln sich in einer
+   Warteschlange, jede mit eigener Auswahl; der Startknopf bleibt
+   gesperrt, solange eine Angabe fehlt, und der gewählte Wert steht in
+   `quelle.sprecherzahl` und im Journal (`by.speakers`). Die globale
+   Auswahl ist nur noch Vorgabe für neu hinzugefügte Dateien; beim Ablegen
+   mehrerer Dateien bleibt die Wahl offen.
 
-11. **Stimmenvorschau bricht die vorherige ab (User 2026-09-13).**
-   `SprecherPanel.sample()` legt bei jedem Klick ein neues `Audio` an
-   und spielt los; zwei schnelle Klicks = zwei Stimmen gleichzeitig.
-   Fix: eine Referenz auf das laufende Element halten, beim nächsten
-   Klick `pause()` + `currentTime = 0`, beim Verlassen des Panels
-   ebenso; ein zweiter Klick auf dieselbe Stimme stoppt (Play/Pause).
-   Kleinigkeit, aber im Betrieb störend.
+11. ~~**Stimmenvorschau bricht die vorherige ab**~~ — GEBAUT 2026-09-13
+   (CHANGELOG 2.5.0): eine Referenz auf den laufenden Klang, jeder neue
+   Klick hält den alten an, ein zweiter Klick auf dieselbe Stimme stoppt,
+   und beim Verlassen des Panels ist Ruhe.
 
 ## Gemessen, nicht gebaut
 

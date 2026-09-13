@@ -156,6 +156,7 @@ def _params(model: str, language: str, speaker_range: str,
             min_sp = max_sp = 0
     return {"model": model, "language": language,
             "min_speakers": min_sp, "max_speakers": max_sp,
+            "speaker_range": speaker_range or "auto",
             "cluster_threshold": cluster_threshold, "diarize": diarize}
 
 

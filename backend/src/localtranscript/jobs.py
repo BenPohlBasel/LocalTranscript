@@ -326,11 +326,13 @@ def _lauf(job: dict, quelle: Path, name: str) -> None:
             name=name, segmente=segmente, sprecher=sprecher,
             quelle={"datei": job["filename"], "model": p["model"],
                     "language": p["language"], "diarize": p["diarize"],
+                    "sprecherzahl": p.get("speaker_range", "auto"),
                     "erzeugt": "transcription"},
             audio=audio_fuer_bibliothek, video=quelle if ist_video else None,
             origin="machine",
             by={"tool": "whisper.cpp", "model": p["model"],
-                **({"diarization": "pyannote-community-1 (speakerkit)"}
+                **({"diarization": "pyannote-community-1 (speakerkit)",
+                    "speakers": p.get("speaker_range", "auto")}
                    if p["diarize"] else {})})
         _setze(job, status="completed", progress=100, message="fertig",
                eintrag=eintrag["id"])

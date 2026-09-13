@@ -28,6 +28,23 @@ a version are the corresponding section of this file.
   listed in Settings, on the website and in the four information
   sheets.
 
+### Added
+
+- **Every recording in the queue gets its own speaker count, and
+  nothing starts without one.** Dropped files now collect in a list
+  instead of starting straight away. Each line carries its own choice,
+  and the start button stays locked while one is missing. The count
+  shapes the result, so it is written into the transcript's source data
+  and journal, where it can be read back later. The setting in the
+  options is now only a default for newly added files; dropping several
+  files at once leaves the choice open.
+
+### Fixed
+
+- **The voice sample stops the one before it.** Two quick clicks played
+  two voices at once. A second click on the same voice now stops it, and
+  leaving the speaker panel silences it.
+
 ## 2.4.3 — 2026-09-12
 
 ### Fixed

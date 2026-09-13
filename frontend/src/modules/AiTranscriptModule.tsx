@@ -3,7 +3,7 @@
 // Human-Editor). Die Bibliotheks-Liste lebt im Human-Editor-Tab.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Badge, Button, Disclosure, ErrorNote, Flex, Karte,
+  Badge, Button, Disclosure, ErrorNote, Flex, IconButton, Karte,
   LabeledSelect, Progress, Text,
 } from "../components/ui";
 import { Icon } from "../components/icons";
@@ -26,6 +26,11 @@ const AUDIO_EXT = [".mp3", ".m4a", ".aac", ".wav", ".ogg", ".flac",
 // entfällt. Das ersetzt die frühere Checkbox „Sprechererkennung";
 // zwei Bedienelemente für denselben Zustand widersprechen sich sonst.
 const AUS = "1-1";
+
+/** Ein Eintrag der Warteschlange: Datei plus IHRE Sprecherzahl
+    (leer = noch nicht gewählt, dann startet nichts). */
+type Wartend = { key: string; name: string; zahl: string;
+                 pfad?: string; datei?: File };
 const SPRECHERZAHL = [AUS, "2-2", "3-3", "4-4", "5-5", "6-6", "auto"];
 
 export default function AiTranscriptModule({ settings, onEdit }: {
@@ -49,7 +54,6 @@ export default function AiTranscriptModule({ settings, onEdit }: {
     const s = settings?.speaker_range ?? "";
     return SPRECHERZAHL.includes(s) ? s : "auto";
   });
-  const diarize = range !== AUS;
   const [threshold, setThreshold] = useState(
     String(settings?.cluster_threshold ?? 0.5));
 
@@ -70,48 +74,77 @@ export default function AiTranscriptModule({ settings, onEdit }: {
     return () => window.clearInterval(t);
   }, [aktiveJobs]);
 
-  const starteDateien = useCallback(async (pfade: string[]) => {
+  // Dateien laufen NICHT mehr sofort los (User 2026-09-13): sie
+  // sammeln sich hier, jede mit EIGENER Sprecherzahl. Ohne Angabe
+  // startet kein Lauf — die Zahl bestimmt das Ergebnis stark, und
+  // hinterher wüsste niemand mehr, was gewählt war.
+  const [wartend, setWartend] = useState<Wartend[]>([]);
+  const lfd = useRef(0);
+  const reihen = useCallback((neue: Omit<Wartend, "key" | "zahl">[]) => {
+    if (!neue.length) return;
+    // Eine einzelne Datei übernimmt die Vorgabe aus den Optionen; bei
+    // mehreren bleibt die Wahl bewusst offen, sonst rutschte eine
+    // Sammel-Vorgabe stillschweigend über lauter verschiedene Aufnahmen.
+    const zahl = neue.length === 1 ? range : "";
+    setWartend((w) => [...w, ...neue.map((n) => ({
+      ...n, zahl, key: `w${++lfd.current}` }))]);
     setFehler("");
-    for (const p of pfade) {
-      const ext = p.slice(p.lastIndexOf(".")).toLowerCase();
-      if (!AUDIO_EXT.includes(ext)) continue;
-      try {
-        await apiSend("/api/transcribe-path", {
-          path: p, model, language, speaker_range: range,
-          cluster_threshold: Number(threshold), diarize });
-      } catch (e) { setFehler(errMsg(e)); }
-    }
-    const r = await apiGet<{ jobs: Job[] }>("/api/jobs");
-    setJobs(r.jobs);
-  }, [model, language, range, threshold, diarize]);
+  }, [range]);
 
-  const starteRef = useRef(starteDateien);
-  starteRef.current = starteDateien;
+  const nimmPfade = useCallback((pfade: string[]) => {
+    reihen(pfade
+      .filter((p) => AUDIO_EXT.includes(p.slice(p.lastIndexOf(".")).toLowerCase()))
+      .map((p) => ({ name: p.split("/").pop() || p, pfad: p })));
+  }, [reihen]);
+
+  const nimmDateien = useCallback((files: FileList | null) => {
+    if (!files?.length) return;
+    reihen(Array.from(files)
+      .filter((f) => AUDIO_EXT.includes(
+        f.name.slice(f.name.lastIndexOf(".")).toLowerCase()))
+      .map((f) => ({ name: f.name, datei: f })));
+  }, [reihen]);
+
+  const nimmRef = useRef(nimmPfade);
+  nimmRef.current = nimmPfade;
   useEffect(() => {
     let ab: (() => void) | undefined;
     let weg = false;
-    void onFileDrop((paths) => { void starteRef.current(paths); })
+    void onFileDrop((paths) => { nimmRef.current(paths); })
       .then((f) => { if (weg) f(); else ab = f; });
     return () => { weg = true; ab?.(); };
   }, []);
 
-  const starteUpload = useCallback(async (files: FileList | null) => {
-    if (!files?.length) return;
-    setFehler("");
-    for (const f of Array.from(files)) {
-      const fd = new FormData();
-      fd.append("file", f);
-      fd.append("model", model);
-      fd.append("language", language);
-      fd.append("speaker_range", range);
-      fd.append("cluster_threshold", threshold);
-      fd.append("diarize", String(diarize));
-      try { await apiUpload("/api/transcribe", fd); }
-      catch (e) { setFehler(errMsg(e)); }
+  const offen = wartend.some((w) => !w.zahl);
+  const [schickt, setSchickt] = useState(false);
+  const starte = useCallback(async () => {
+    if (!wartend.length || offen || schickt) return;
+    setFehler(""); setSchickt(true);
+    const rest: Wartend[] = [];
+    for (const w of wartend) {
+      const diar = w.zahl !== AUS;
+      try {
+        if (w.pfad) {
+          await apiSend("/api/transcribe-path", {
+            path: w.pfad, model, language, speaker_range: w.zahl,
+            cluster_threshold: Number(threshold), diarize: diar });
+        } else if (w.datei) {
+          const fd = new FormData();
+          fd.append("file", w.datei);
+          fd.append("model", model);
+          fd.append("language", language);
+          fd.append("speaker_range", w.zahl);
+          fd.append("cluster_threshold", threshold);
+          fd.append("diarize", String(diar));
+          await apiUpload("/api/transcribe", fd);
+        }
+      } catch (e) { setFehler(errMsg(e)); rest.push(w); }
     }
+    setWartend(rest);          // nur Fehlgeschlagenes bleibt stehen
+    setSchickt(false);
     const r = await apiGet<{ jobs: Job[] }>("/api/jobs");
     setJobs(r.jobs);
-  }, [model, language, range, threshold, diarize]);
+  }, [wartend, offen, schickt, model, language, threshold]);
 
   return (
     <Flex direction="column" gap="3" p="4"
@@ -119,14 +152,14 @@ export default function AiTranscriptModule({ settings, onEdit }: {
       <div
         onClick={() => {
           if (isTauri()) {
-            void pickAudio().then((p) => p && starteDateien(p));
+            void pickAudio().then((p) => p && nimmPfade(p));
           } else fileRef.current?.click();
         }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
           e.preventDefault(); setDragOver(false);
-          void starteUpload(e.dataTransfer.files);
+          nimmDateien(e.dataTransfer.files);
         }}
         style={{
           border: `2px dashed var(${dragOver ? "--accent-9" : "--gray-a7"})`,
@@ -141,7 +174,7 @@ export default function AiTranscriptModule({ settings, onEdit }: {
         </Flex>
         <input ref={fileRef} type="file" multiple hidden
                accept={AUDIO_EXT.join(",")}
-               onChange={(e) => { void starteUpload(e.target.files);
+               onChange={(e) => { nimmDateien(e.target.files);
                  e.target.value = ""; }} />
       </div>
 
@@ -161,7 +194,9 @@ export default function AiTranscriptModule({ settings, onEdit }: {
               „2-2" noch „Genau 2" hieß; beim Portieren ging das Label
               verloren und übrig blieb eine Liste, die exakte Angaben
               versteckte und bei 3 oder 5 gar keine anbot. */}
-          <LabeledSelect label={tr("bib.sprecherzahl")} value={range}
+          <LabeledSelect
+            label={`${tr("bib.sprecherzahl")} · ${tr("ai.vorgabe")}`}
+            value={range}
             onChange={setRange}
             options={SPRECHERZAHL}
             optionLabels={{ auto: tr("bib.auto"), "1-1": "1", "2-2": "2",
@@ -176,6 +211,40 @@ export default function AiTranscriptModule({ settings, onEdit }: {
               "0.25": tr("bib.trennung.sehr") }} />
         </Flex>
       </Disclosure>
+
+      {wartend.length > 0 && (
+        <Karte titel={tr("ai.warteschlange")}>
+          {wartend.map((w) => (
+            <Flex key={w.key} align="center" gap="3" wrap="wrap" py="2"
+                  style={{ borderBottom: "1px solid var(--gray-a4)" }}>
+              <Text size="2" style={{ flex: 1, minWidth: 140 }}>
+                {kuerze(w.name)}</Text>
+              {!w.zahl && (
+                <Text size="1" color="orange">{tr("ai.zahl.fehlt")}</Text>
+              )}
+              <LabeledSelect label={tr("bib.sprecherzahl")} value={w.zahl}
+                emptyLabel={tr("ai.zahl.fehlt")}
+                onChange={(v) => setWartend((l) => l.map((x) =>
+                  x.key === w.key ? { ...x, zahl: v } : x))}
+                options={SPRECHERZAHL}
+                optionLabels={{ auto: tr("bib.auto"), "1-1": "1",
+                  "2-2": "2", "3-3": "3", "4-4": "4", "5-5": "5",
+                  "6-6": "6" }} />
+              <IconButton title={tr("ai.entfernen")}
+                          onClick={() => setWartend((l) =>
+                            l.filter((x) => x.key !== w.key))}>
+                <Icon name="close" size={14} /></IconButton>
+            </Flex>
+          ))}
+          <Flex align="center" gap="3" wrap="wrap" pt="3">
+            <Text size="1" color="gray">{tr("ai.zahl.hinweis")}</Text>
+            <div style={{ flex: 1 }} />
+            <Button disabled={offen || schickt}
+                    onClick={() => void starte()}>
+              {tr("ai.starten", { n: wartend.length })}</Button>
+          </Flex>
+        </Karte>
+      )}
 
       {fehler && <ErrorNote>{fehler}</ErrorNote>}
 
