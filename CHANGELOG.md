@@ -20,8 +20,6 @@ a version are the corresponding section of this file.
   re-exporting to REFI-QDA keeps the same identifiers, so ATLAS.ti sees the
   same sources as before.
 
-### Changed
-
 - **Fuller attribution for the diarization models.** Argmax's model
   repository now states its licence in its own metadata: the SpeakerKit
   framework is MIT, the models it is built on are CC BY 4.0. That
@@ -29,8 +27,7 @@ a version are the corresponding section of this file.
   list in Settings, the README, the website and the four information
   sheets now name both models, pyannote community-1 and WeSpeaker
   ResNet34, and say that Argmax converted them to Core ML and quantised
-  them. The licence list inside the application still carries the
-  shorter wording; it follows with a later release.
+  them. The licence list in Settings carries the same full wording.
 
 ## 2.5.0 — 2026-09-13
 
