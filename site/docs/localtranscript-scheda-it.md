@@ -45,7 +45,7 @@ inglese vengono riconosciuti bene, lo svizzero tedesco in modo lacunoso
 
 ## Dove si trova il codice
 
-- Codice sorgente: <https://github.com/BenPohlBasel/LocalTranscript>
+- Codice sorgente: <https://github.com/bias-city/LocalTranscript>
 - Licenza: AGPL-3.0-or-later — software libero, che può essere usato,
   esaminato, modificato e ridistribuito
 - Sviluppato al B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -105,7 +105,7 @@ registrazioni.
 
 ---
 
-Fonte: <https://github.com/BenPohlBasel/LocalTranscript> (cartella
+Fonte: <https://github.com/bias-city/LocalTranscript> (cartella
 `site/docs`). La scheda è pubblicata con licenza CC BY 4.0: uso e
 adattamento liberi, anche commerciali, citando B/IAS e indicando le
 modifiche.

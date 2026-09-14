@@ -44,7 +44,7 @@ speakers are still separated cleanly.
 
 ## Where the code lives
 
-- Source code: <https://github.com/BenPohlBasel/LocalTranscript>
+- Source code: <https://github.com/bias-city/LocalTranscript>
 - Licence: AGPL-3.0-or-later — free software that may be used,
   inspected, modified and passed on
 - Developed at B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -99,7 +99,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ---
 
-Source: <https://github.com/BenPohlBasel/LocalTranscript> (folder
+Source: <https://github.com/bias-city/LocalTranscript> (folder
 `site/docs`). The sheet is licensed CC BY 4.0: use and adapt it
 freely, commercially too, as long as B/IAS is credited and changes are
 marked.

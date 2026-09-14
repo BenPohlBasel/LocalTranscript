@@ -192,6 +192,21 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Sprachen nachziehen — der Wortlaut steht im CHANGELOG unter
    «Unreleased» und in Punkt 10 der Recherche.
 
+13. **App umbenennen; Repository ist umgezogen (User 2026-09-14).** Der
+   Name «LocalTranscript» kollidiert mit einer geschlossenen Meeting-App
+   aus demselben Umfeld (github.com/localtranscript, intern «Secure
+   Transcript»); belegbar war unser Name 36 Stunden früher öffentlich
+   (GH Archive: unser erster Push 25.4.2026 21:58 UTC, sein erstes
+   Ereignis 27.4.2026 10:26 UTC). Das Repository liegt seit dem
+   14. September unter github.com/bias-city/LocalTranscript; die alte
+   Adresse leitet weiter. Website, Blätter und LICENSE-docs zeigen schon
+   auf den neuen Ort. Bei der Umbenennung mit erledigen: die Verweise in
+   `frontend/src/App.tsx` und `EinstellungenModule.tsx`, Produktname,
+   Bundle-Kennung, Bibliotheksordner (mit Übernahme bestehender
+   Installationen), Website-Adresse bias.city/localtranscript, Texte in
+   vier Sprachen. Vorher den neuen Namen gegen GitHub, Domains, App-Namen
+   und die Markenregister Swissreg und EUIPO prüfen.
+
 ## Gemessen, nicht gebaut
 
 - **Diarisierung: welches Modell? (Recherche 2026-09-12/13)** — GEBAUT

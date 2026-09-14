@@ -17,7 +17,7 @@ substitute for legal advice.
 LocalTranscript, version `[2.5.0]`. Free software under
 AGPL-3.0-or-later, developed at B/IAS – Basel Institut für angewandte
 Stadtforschung. Source code public at
-<https://github.com/BenPohlBasel/LocalTranscript>. The software runs as
+<https://github.com/bias-city/LocalTranscript>. The software runs as
 a local application on macOS (Apple Silicon) and is installed and
 operated by the controller itself.
 
@@ -127,7 +127,7 @@ can build it.
 
 ---
 
-Source of this text: <https://github.com/BenPohlBasel/LocalTranscript>
+Source of this text: <https://github.com/bias-city/LocalTranscript>
 (folder `site/docs`). It is licensed CC BY 4.0: use and adapt it
 freely, commercially too, as long as B/IAS is credited and changes are
 marked.

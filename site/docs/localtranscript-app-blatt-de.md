@@ -45,7 +45,7 @@ Italienisch und Englisch werden gut erkannt, Schweizerdeutsch lückenhaft
 
 ## Wo der Code liegt
 
-- Quellcode: <https://github.com/BenPohlBasel/LocalTranscript>
+- Quellcode: <https://github.com/bias-city/LocalTranscript>
 - Lizenz: AGPL-3.0-or-later — freie Software, darf genutzt, geprüft,
   verändert und weitergegeben werden
 - Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -105,7 +105,7 @@ die Aufnahmen.
 
 ---
 
-Quelle: <https://github.com/BenPohlBasel/LocalTranscript> (Ordner
+Quelle: <https://github.com/bias-city/LocalTranscript> (Ordner
 `site/docs`). Das Blatt steht unter CC BY 4.0: frei verwendbar und
 anpassbar, auch kommerziell, sofern B/IAS genannt und Änderungen
 gekennzeichnet werden.

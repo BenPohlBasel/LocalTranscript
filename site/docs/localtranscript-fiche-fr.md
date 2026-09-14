@@ -46,7 +46,7 @@ les locuteurs sont néanmoins séparés proprement.
 
 ## Où se trouve le code
 
-- Code source : <https://github.com/BenPohlBasel/LocalTranscript>
+- Code source : <https://github.com/bias-city/LocalTranscript>
 - Licence : AGPL-3.0-or-later — logiciel libre, qui peut être utilisé,
   examiné, modifié et redistribué
 - Développé au B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -108,7 +108,7 @@ enregistrements.
 
 ---
 
-Source : <https://github.com/BenPohlBasel/LocalTranscript> (dossier
+Source : <https://github.com/bias-city/LocalTranscript> (dossier
 `site/docs`). La fiche est publiée sous CC BY 4.0 : utilisation et
 adaptation libres, y compris commerciales, à condition de citer B/IAS
 et d'indiquer les modifications.
