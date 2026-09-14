@@ -192,23 +192,29 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Sprachen nachziehen — der Wortlaut steht im CHANGELOG unter
    «Unreleased» und in Punkt 10 der Recherche.
 
-13. **Umbenennung in TurnScript — im Code GEBAUT 2026-09-14, nicht
-   veröffentlicht.** Anlass: «LocalTranscript» kollidiert mit einer
+13. ~~**Umbenennung in TurnScript**~~ — VERÖFFENTLICHT 2026-09-15 als
+   3.0.0 (github.com/bias-city/TurnScript/releases/tag/v3.0.0, notarisiert
+   und gestapelt). Anlass: «LocalTranscript» kollidiert mit einer
    geschlossenen Meeting-App (github.com/localtranscript); belegbar war
-   unser Name 36 Stunden früher öffentlich (GH Archive: unser erster Push
-   25.4.2026 21:58 UTC, sein erstes Ereignis 27.4.2026 10:26 UTC). Auch
-   «Turnscript» gibt es schon als iOS-App (Jonathan Vogelbusch, seit
-   21.8.2026, CH/DE/US) — der User nimmt das in Kauf und schreibt
-   TurnScript. Gebaut: Repo github.com/bias-city/TurnScript (alte Adressen
-   leiten weiter), Produktname, Bundle `city.bias.turnscript`, Python-
-   Paket `turnscript`, Version 3.0.0, Kopie der alten Einstellungen beim
-   ersten Start, alte Dossiers bleiben eigene, Website und Blätter.
-   OFFEN: (a) Release 3.0.0 bauen, notarisieren, veröffentlichen;
-   (b) Website erst DANACH hochladen, Ziel klären (bias.city/turnscript
-   mit Weiterleitung von /localtranscript, oder turnscript.com);
-   (c) neue Screenshots — alle zeigen noch «LocalTranscript»;
-   (d) enrich-core README und FORMAT.md nennen LocalTranscript;
-   (e) Lizenzzeile der App nach Punkt 12 im selben Release nachziehen.
+   unser Name 36 Stunden früher öffentlich (GH Archive). Auch «Turnscript»
+   gibt es als iOS-App (Jonathan Vogelbusch, seit 21.8.2026) — der User
+   nimmt das in Kauf und schreibt TurnScript.
+   Erledigt: Repo bias-city/TurnScript (alte Adressen leiten weiter),
+   Bundle `city.bias.turnscript`, Paket `turnscript`, Übernahme der
+   LocalTranscript-Einstellungen (nur config.json; auf dem Mac des Users
+   echt geprüft: Bibliothek, Kennung, Zotero-Einwilligung identisch),
+   alte Dossiers bleiben eigene, QDPX-Kennungen stabil, Lizenzzeile
+   (Punkt 12), alle Screenshots neu (automatisch, vier Sprachen, Demo-
+   Backend mit erfundenem Interview), Website bias.city/turnscript,
+   bias.city/localtranscript leitet dauerhaft weiter (auch die alten
+   Blattnamen).
+   Lehre: die Pauschalersetzung hatte `ALTER_NAME` mitgenommen, das erste
+   notarisierte Paket wurde verworfen; seither Test über den echten
+   Ablauf und eigener Konfigurationsordner für jeden Test.
+   OFFEN: (a) Open-Tools-Eintrag auf bias.city in WordPress (Name,
+   «Electron», «MIT»); (b) enrich-core README und FORMAT.md nennen
+   LocalTranscript; (c) DeFace Privacy: Datenschutz-Adresse in App Store
+   Connect auf bias-city.github.io/deface/privacy.html ändern.
 
 ## Gemessen, nicht gebaut
 
