@@ -66,7 +66,7 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
     Audio sind ein gültiger Eingangszustand, die empfangende Anwendung
     setzt die Lesefassung selbst» (enrich tut es beim Import). Damit
     entfällt hier der Setzer samt PyMuPDF und Fonts (Entscheid
-    2026-09-11): der Container ist klein, und LocalTranscript hängt an
+    2026-09-11): der Container ist klein, und TurnScript hängt an
     enrich-core, nicht mehr an enrich-serve."""
     import shutil
 
@@ -130,7 +130,7 @@ def _enrich_paket(eid: str, daten: dict, seg: list[dict],
                                         user=wer["user"]),
                                 started=utc_now()))
         d.inventar_pflegen()           # das Audio ins Inventar (Hash)
-        d.set_analyse_kette("narrativ", "localtranscript")
+        d.set_analyse_kette("narrativ", TOOL)
         zot = daten.get("zotero")
         if zot:
             # Die Zotero-Schicht über enrichs EINEN Schreibweg —

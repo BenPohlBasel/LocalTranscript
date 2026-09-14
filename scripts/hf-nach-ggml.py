@@ -16,7 +16,7 @@
 #   mkdir -p whisper-repo/whisper/assets && curl -L -o whisper-repo/whisper/assets/mel_filters.npz \
 #       https://raw.githubusercontent.com/openai/whisper/main/whisper/assets/mel_filters.npz
 #   python scripts/hf-nach-ggml.py cw whisper-repo aus/
-#   mv aus/ggml-model.bin ~/Documents/LocalTranscript/Modelle/ggml-crisperwhisper.bin
+#   mv aus/ggml-model.bin ~/Documents/TurnScript/Modelle/ggml-crisperwhisper.bin
 # Lizenz des MODELLS beachten (CrisperWhisper: CC-BY-NC-4.0, nicht kommerziell).
 # Convert Hugging Face fine-tuned models to ggml format
 #

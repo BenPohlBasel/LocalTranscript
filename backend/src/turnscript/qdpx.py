@@ -47,6 +47,9 @@ _XSI = "http://www.w3.org/2001/XMLSchema-instance"
 
 #: Eigene Namensräume je Sorte — GUIDs kollidieren so nie über Sorten
 #: hinweg, auch wenn zwei Objekte dieselbe id tragen.
+# Die Namensräume tragen bewusst den ALTEN Namen: aus ihnen entstehen die
+# GUIDs der Quellen, Codes und Auswahlen. Blieben sie nicht gleich, sähe
+# ATLAS.ti einen erneuten Export nach der Umbenennung als neue Quelle.
 _NS_QUELLE = uuid.uuid5(uuid.NAMESPACE_URL, "localtranscript:refi-source")
 _NS_CODE = uuid.uuid5(uuid.NAMESPACE_URL, "localtranscript:refi-code")
 _NS_SEL = uuid.uuid5(uuid.NAMESPACE_URL, "localtranscript:refi-selection")

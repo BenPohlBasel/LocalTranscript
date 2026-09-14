@@ -10,8 +10,8 @@ from fastapi.testclient import TestClient
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("LT_CONFIG_DIR", str(tmp_path / "cfg"))
-    from localtranscript import config
-    from localtranscript.main import app
+    from turnscript import config
+    from turnscript.main import app
     lib = tmp_path / "bibliothek"
     lib.mkdir()
     config.write_config({"library_root": str(lib)})

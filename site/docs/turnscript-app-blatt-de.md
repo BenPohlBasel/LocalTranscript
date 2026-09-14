@@ -1,4 +1,4 @@
-# LocalTranscript — App-Blatt für Forschende
+# TurnScript — App-Blatt für Forschende
 
 Was die App ist, welche KI darin was tut, wo der Code liegt, und warum
 das Transkript den Rechner nicht verlässt. Zum Weitergeben an
@@ -7,7 +7,7 @@ Projektleitung, Ethikkommission oder Kolleg:innen. Stand 11. September
 
 ## Was die App tut
 
-LocalTranscript wandelt Audioaufnahmen — Interviews, Gruppengespräche,
+TurnScript wandelt Audioaufnahmen — Interviews, Gruppengespräche,
 Workshops — in Text mit Zeitmarken und Sprecherzuordnung um. Danach
 wird das Transkript in einem Editor korrigiert, Sprecher werden
 benannt, Namen ersetzt, und das Ergebnis wird für die Auswertung
@@ -38,14 +38,14 @@ war.
 **Grenze der Spracherkennung.** Whisper ist ein neuronales Modell. Wo
 es nichts versteht (Nebengeräusche, Dialekt, Überlappungen), kann es
 Wörter setzen, die nicht gesagt wurden. Ein Transkript aus
-LocalTranscript ist ein **Rohtranskript**, das gegen die Aufnahme geprüft
+TurnScript ist ein **Rohtranskript**, das gegen die Aufnahme geprüft
 werden muss; der Editor ist dafür gebaut. Standarddeutsch, Französisch,
 Italienisch und Englisch werden gut erkannt, Schweizerdeutsch lückenhaft
 — die Sprecher werden trotzdem sauber getrennt.
 
 ## Wo der Code liegt
 
-- Quellcode: <https://github.com/bias-city/LocalTranscript>
+- Quellcode: <https://github.com/bias-city/TurnScript>
 - Lizenz: AGPL-3.0-or-later — freie Software, darf genutzt, geprüft,
   verändert und weitergegeben werden
 - Entwickelt am B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -62,7 +62,7 @@ Italienisch und Englisch werden gut erkannt, Schweizerdeutsch lückenhaft
   eigenen Absturzberichte.
 - Ihr interner Dienst hört nur auf der Loopback-Adresse `127.0.0.1`
   des eigenen Rechners und weist jede Anfrage von anderswo ab. Der
-  Code dafür steht in `backend/src/localtranscript/main.py` — für jede
+  Code dafür steht in `backend/src/turnscript/main.py` — für jede
   Person nachlesbar.
 - Audio und Transkript liegen ausschliesslich im gewählten
   Bibliotheksordner. Gelöschtes wandert in einen Papierkorb-Ordner
@@ -96,7 +96,7 @@ die Aufnahmen.
 
 ## Für den Methodenteil
 
-> Die Aufnahmen wurden mit LocalTranscript 2.5.0 (B/IAS Basel,
+> Die Aufnahmen wurden mit TurnScript 2.5.0 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
 > Sprechertrennung mit pyannote community-1-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an
@@ -105,7 +105,7 @@ die Aufnahmen.
 
 ---
 
-Quelle: <https://github.com/bias-city/LocalTranscript> (Ordner
+Quelle: <https://github.com/bias-city/TurnScript> (Ordner
 `site/docs`). Das Blatt steht unter CC BY 4.0: frei verwendbar und
 anpassbar, auch kommerziell, sofern B/IAS genannt und Änderungen
 gekennzeichnet werden.

@@ -28,7 +28,7 @@ def test_speichern_schreibt_history(client, eintrag):
     neu = client.get(f"/api/transcripts/{eintrag}").json()
     assert neu["segmente"][0]["text"] == "Korrigierter Wortlaut."
     # History hält den ALTEN Stand
-    from localtranscript import bibliothek
+    from turnscript import bibliothek
     hist = sorted((bibliothek.eintrag_pfad(eintrag) / "history")
                   .glob("*.json"))
     assert len(hist) == 1
@@ -56,7 +56,7 @@ def test_umbenennen_und_papierkorb(client, eintrag):
     assert r.status_code == 200
     assert client.get(f"/api/transcripts/{eintrag}").status_code == 404
     # Papierkorb hält den Ordner (nie destruktiv)
-    from localtranscript.config import library_root
+    from turnscript.config import library_root
     korb = list((library_root() / "_papierkorb").iterdir())
     assert len(korb) == 1 and korb[0].name.startswith(eintrag)
 

@@ -27,8 +27,8 @@ export function useSprache(): Sprache {
 type Eintrag = { de: string; en: string; fr?: string; it?: string };
 
 const W: Record<string, Eintrag> = {
-  "app.titel": { de: "LocalTranscript", en: "LocalTranscript",
-    fr: "LocalTranscript", it: "LocalTranscript" },
+  "app.titel": { de: "TurnScript", en: "TurnScript",
+    fr: "TurnScript", it: "TurnScript" },
   "app.untertitel": { de: "Offline-Transkription mit Sprechererkennung",
     en: "Offline transcription with speaker detection",
     fr: "Transcription hors ligne avec détection des locuteurs",
@@ -348,10 +348,10 @@ const W: Record<string, Eintrag> = {
     fr: "Aucun segment.", it: "Nessun segmento." },
 
   "st.agpl": {
-    de: "AGPL §13 verlangt, Fernnutzern den Quellcode anzubieten. LocalTranscript hört nur auf 127.0.0.1 und weist fremde Hosts ab — es gibt keine Fernnutzung. Der Quellcode liegt zudem offen auf GitHub.",
-    en: "AGPL §13 requires offering the source to remote users. LocalTranscript listens on 127.0.0.1 only and rejects foreign hosts — there is no remote use. The source is public on GitHub anyway.",
-    fr: "L'AGPL §13 exige d'offrir le code source aux utilisateurs distants. LocalTranscript n'écoute que sur 127.0.0.1 et rejette les hôtes étrangers — aucun usage distant. Le code est de toute façon public sur GitHub.",
-    it: "L'AGPL §13 richiede di offrire il codice agli utenti remoti. LocalTranscript ascolta solo su 127.0.0.1 e rifiuta host estranei — nessun uso remoto. Il codice è comunque pubblico su GitHub." },
+    de: "AGPL §13 verlangt, Fernnutzern den Quellcode anzubieten. TurnScript hört nur auf 127.0.0.1 und weist fremde Hosts ab — es gibt keine Fernnutzung. Der Quellcode liegt zudem offen auf GitHub.",
+    en: "AGPL §13 requires offering the source to remote users. TurnScript listens on 127.0.0.1 only and rejects foreign hosts — there is no remote use. The source is public on GitHub anyway.",
+    fr: "L'AGPL §13 exige d'offrir le code source aux utilisateurs distants. TurnScript n'écoute que sur 127.0.0.1 et rejette les hôtes étrangers — aucun usage distant. Le code est de toute façon public sur GitHub.",
+    it: "L'AGPL §13 richiede di offrire il codice agli utenti remoti. TurnScript ascolta solo su 127.0.0.1 e rifiuta host estranei — nessun uso remoto. Il codice è comunque pubblico su GitHub." },
   "st.formate": { de: "Formate", en: "Formats", fr: "Formats",
     it: "Formati" },
   "st.formate.sub": {
@@ -363,20 +363,20 @@ const W: Record<string, Eintrag> = {
   // Zertifizierung für REFI-QDA, und Markenrechte deckt die
   // MIT-Lizenz der Spezifikation nicht ab (User 2026-09-09).
   "st.formate.refi": {
-    de: "REFI-QDA (.qdpx) — LocalTranscript unterstützt den Export nach REFI-QDA; die Spezifikation steht unter der MIT-Lizenz, Copyright 2019 REFI-QDA. Keine offizielle Zertifizierung, keine Marken-Lizenz.",
-    en: "REFI-QDA (.qdpx) — LocalTranscript supports export to REFI-QDA; the specification is MIT-licensed, Copyright 2019 REFI-QDA. No official certification, no trademark license.",
-    fr: "REFI-QDA (.qdpx) — LocalTranscript prend en charge l'export vers REFI-QDA ; la spécification est sous licence MIT, Copyright 2019 REFI-QDA. Aucune certification officielle, aucune licence de marque.",
-    it: "REFI-QDA (.qdpx) — LocalTranscript supporta l'export in REFI-QDA; la specifica è sotto licenza MIT, Copyright 2019 REFI-QDA. Nessuna certificazione ufficiale, nessuna licenza di marchio." },
+    de: "REFI-QDA (.qdpx) — TurnScript unterstützt den Export nach REFI-QDA; die Spezifikation steht unter der MIT-Lizenz, Copyright 2019 REFI-QDA. Keine offizielle Zertifizierung, keine Marken-Lizenz.",
+    en: "REFI-QDA (.qdpx) — TurnScript supports export to REFI-QDA; the specification is MIT-licensed, Copyright 2019 REFI-QDA. No official certification, no trademark license.",
+    fr: "REFI-QDA (.qdpx) — TurnScript prend en charge l'export vers REFI-QDA ; la spécification est sous licence MIT, Copyright 2019 REFI-QDA. Aucune certification officielle, aucune licence de marque.",
+    it: "REFI-QDA (.qdpx) — TurnScript supporta l'export in REFI-QDA; la specifica è sotto licenza MIT, Copyright 2019 REFI-QDA. Nessuna certificazione ufficiale, nessuna licenza di marchio." },
   "st.formate.enrich": {
-    de: "enrich-Dossier (.enrich) — Formatbeschreibung FORMAT.md und Referenz-Leser enrich-core, beide MIT (github.com/BenPohlBasel/enrich-core), B/IAS. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
+    de: "enrich-Dossier (.enrich) — Formatbeschreibung FORMAT.md und Referenz-Leser enrich-core, beide MIT (github.com/bias-city/enrich-core), B/IAS. WebVTT (W3C) · CSV · TXT sind offen und unbeschränkt.",
     en: "enrich dossier (.enrich) — format description FORMAT.md in the enrich repository, MIT licence, B/IAS. WebVTT (W3C) · CSV · TXT are open and unrestricted.",
     fr: "Dossier enrich (.enrich) — description du format FORMAT.md dans le dépôt enrich, licence MIT, B/IAS. WebVTT (W3C) · CSV · TXT sont ouverts et sans restriction.",
     it: "Dossier enrich (.enrich) — descrizione del formato FORMAT.md nel repository enrich, licenza MIT, B/IAS. WebVTT (W3C) · CSV · TXT sono aperti e senza restrizioni." },
   "st.formate.xsd": {
-    de: "Die REFI-Schemas (XSD) liegen NICHT im Bundle — LocalTranscript schreibt nach der Spezifikation und verweist nur auf die Schema-Adresse. Damit greift die MIT-Beilagepflicht nicht.",
-    en: "The REFI schemas (XSD) are NOT bundled — LocalTranscript writes to the specification and only references the schema URL. The MIT attribution requirement therefore does not apply.",
-    fr: "Les schémas REFI (XSD) ne sont PAS embarqués — LocalTranscript écrit selon la spécification et ne référence que l'adresse du schéma. L'obligation d'attribution MIT ne s'applique donc pas.",
-    it: "Gli schemi REFI (XSD) NON sono inclusi — LocalTranscript scrive secondo la specifica e cita solo l'indirizzo dello schema. L'obbligo di attribuzione MIT non si applica." },
+    de: "Die REFI-Schemas (XSD) liegen NICHT im Bundle — TurnScript schreibt nach der Spezifikation und verweist nur auf die Schema-Adresse. Damit greift die MIT-Beilagepflicht nicht.",
+    en: "The REFI schemas (XSD) are NOT bundled — TurnScript writes to the specification and only references the schema URL. The MIT attribution requirement therefore does not apply.",
+    fr: "Les schémas REFI (XSD) ne sont PAS embarqués — TurnScript écrit selon la spécification et ne référence que l'adresse du schéma. L'obligation d'attribution MIT ne s'applique donc pas.",
+    it: "Gli schemi REFI (XSD) NON sono inclusi — TurnScript scrive secondo la specifica e cita solo l'indirizzo dello schema. L'obbligo di attribuzione MIT non si applica." },
   "st.link.refi": { de: "REFI-QDA-Standard", en: "REFI-QDA standard",
     fr: "Standard REFI-QDA", it: "Standard REFI-QDA" },
   "st.bias": { de: "BIAS.City", en: "BIAS.City", fr: "BIAS.City",
@@ -388,10 +388,10 @@ const W: Record<string, Eintrag> = {
     fr: "Basel Institut für angewandte Stadtforschung",
     it: "Basel Institut für angewandte Stadtforschung" },
   "st.bias.text": {
-    de: "LocalTranscript entsteht am B-IAS. Die App ist freie Software und bleibt es.",
-    en: "LocalTranscript is made at B-IAS. The app is free software and stays that way.",
-    fr: "LocalTranscript est développé au B-IAS. L'application est un logiciel libre et le reste.",
-    it: "LocalTranscript nasce al B-IAS. L'app è software libero e tale resta." },
+    de: "TurnScript entsteht am B-IAS. Die App ist freie Software und bleibt es.",
+    en: "TurnScript is made at B-IAS. The app is free software and stays that way.",
+    fr: "TurnScript est développé au B-IAS. L'application est un logiciel libre et le reste.",
+    it: "TurnScript nasce al B-IAS. L'app è software libero e tale resta." },
   "st.bias.link": { de: "bias.city öffnen", en: "Open bias.city",
     fr: "Ouvrir bias.city", it: "Apri bias.city" },
 
@@ -502,12 +502,12 @@ const W: Record<string, Eintrag> = {
   "st.lizenzen": { de: "Lizenzen", en: "Licenses", fr: "Licences",
     it: "Licenze" },
   "st.lizenzen.text": {
-    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT, auch als ggml für whisper.cpp) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) u. a. — LocalTranscript selbst: AGPL-3.0-or-later.",
-    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) and others — LocalTranscript itself: AGPL-3.0-or-later.",
-    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript : AGPL-3.0-or-later.",
-    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/BenPohlBasel/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — LocalTranscript: AGPL-3.0-or-later." },
-  "st.app": { de: "LocalTranscript", en: "LocalTranscript",
-    fr: "LocalTranscript", it: "LocalTranscript" },
+    de: "whisper.cpp (MIT) · Modell large-v3-turbo (OpenAI, MIT) · silero-vad (MIT, auch als ggml für whisper.cpp) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/bias-city/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL-Build) u. a. — TurnScript selbst: AGPL-3.0-or-later.",
+    en: "whisper.cpp (MIT) · large-v3-turbo model (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/bias-city/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (GPL build) and others — TurnScript itself: AGPL-3.0-or-later.",
+    fr: "whisper.cpp (MIT) · modèle large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/bias-city/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — TurnScript : AGPL-3.0-or-later.",
+    it: "whisper.cpp (MIT) · modello large-v3-turbo (OpenAI, MIT) · silero-vad (MIT) · SpeakerKit (Argmax, MIT) mit pyannote community-1 (CC-BY-4.0, Core ML) · enrich-core (B/IAS, MIT — github.com/bias-city/enrich-core) · FastAPI/uvicorn (MIT) · React/Radix (MIT) · Lucide (ISC) · ffmpeg (build GPL) etc. — TurnScript: AGPL-3.0-or-later." },
+  "st.app": { de: "TurnScript", en: "TurnScript",
+    fr: "TurnScript", it: "TurnScript" },
   "st.app.sub": {
     de: "Freie Software — AGPL-3.0-or-later · BIAS.City",
     en: "Free software — AGPL-3.0-or-later · BIAS.City",
@@ -521,16 +521,16 @@ const W: Record<string, Eintrag> = {
     en: "Source code, license text and releases on GitHub. The app is deliberately under the AGPL; the strictest bundled tool is ffmpeg (GPL-3.0 build). The network clause is satisfied before it applies: the app listens on 127.0.0.1 only.",
     fr: "Code source, licence et versions sur GitHub. L'application est délibérément sous AGPL ; l'outil embarqué le plus strict est ffmpeg (build GPL-3.0). La clause réseau est satisfaite avant de s'appliquer : l'application n'écoute que sur 127.0.0.1.",
     it: "Codice sorgente, licenza e release su GitHub. L'app è deliberatamente sotto AGPL; lo strumento incluso più restrittivo è ffmpeg (build GPL-3.0). La clausola di rete è soddisfatta prima di applicarsi: l'app ascolta solo su 127.0.0.1." },
-  "ueber.titel": { de: "Über LocalTranscript",
-    en: "About LocalTranscript", fr: "À propos de LocalTranscript",
-    it: "Informazioni su LocalTranscript" },
+  "ueber.titel": { de: "Über TurnScript",
+    en: "About TurnScript", fr: "À propos de TurnScript",
+    it: "Informazioni su TurnScript" },
   "ueber.version": { de: "Version {v}", en: "Version {v}",
     fr: "Version {v}", it: "Versione {v}" },
   "ueber.herkunft": {
-    de: "LocalTranscript entsteht am B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
-    en: "LocalTranscript is built at B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
-    fr: "LocalTranscript est développé au B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
-    it: "LocalTranscript nasce al B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City." },
+    de: "TurnScript entsteht am B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
+    en: "TurnScript is built at B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
+    fr: "TurnScript est développé au B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City.",
+    it: "TurnScript nasce al B/IAS — Basel Institut für angewandte Stadtforschung, BIAS.City." },
   "st.link.lizenztext": { de: "Lizenztext (AGPL-3.0)",
     en: "License text (AGPL-3.0)", fr: "Texte de licence (AGPL-3.0)",
     it: "Testo della licenza (AGPL-3.0)" },

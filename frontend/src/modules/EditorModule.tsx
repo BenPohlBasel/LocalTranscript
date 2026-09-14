@@ -1153,7 +1153,7 @@ function SprecherPanel({ id, sprecher, segmente, hatAudio, onRename,
   }, [merge]);
   return (
     // EIN Rasterrand für die ganze App (User 2026-09-09): 16 px —
-    // dieselbe Kante wie „LocalTranscript" links und der
+    // dieselbe Kante wie „TurnScript" links und der
     // Einstellungen-Knopf rechts. Ghost-Knöpfe tragen negative
     // Ränder, ihr GLYPH sitzt damit ebenfalls auf 16 px.
     // Mit Video (User 2026-09-11): die Sprecherliste scrollt für sich,

@@ -1,4 +1,4 @@
-"""LocalTranscript 2.0 — FastAPI-Backend (Loopback, Port 5628).
+"""TurnScript 2.0 — FastAPI-Backend (Loopback, Port 5628).
 
 Die Shell (Tauri) ist dumm: sie spawnt uvicorn und lädt das UI; Config,
 Bibliothek und Jobs besitzt das Backend. Statisches Frontend wird —

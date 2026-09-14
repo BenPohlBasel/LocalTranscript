@@ -9,7 +9,7 @@ import re
 import socket
 import zipfile
 
-from localtranscript import config, exporte
+from turnscript import config, exporte
 
 
 def _teil(z: zipfile.ZipFile, endung: str) -> bytes:
@@ -54,8 +54,8 @@ def test_export_traegt_app_install_und_email(client, eintrag):
     z = zipfile.ZipFile(io.BytesIO(inhalt))
     tj = json.loads(_teil(z, "transcript.json"))
     m = json.loads(_teil(z, "manifest.json"))
-    assert m["producer"]["app"] == "localtranscript"
-    eigene = [r for r in m["runs"] if r["who"]["app"] == "localtranscript"]
+    assert m["producer"]["app"] == "turnscript"
+    eigene = [r for r in m["runs"] if r["who"]["app"] == "turnscript"]
     assert eigene and all(r["who"]["install"].startswith("ins-") for r in eigene)
     assert eigene[0]["who"].get("user") is None
     # der letzte MENSCHLICHE Run trägt die Person; danach folgt nur noch
@@ -65,7 +65,7 @@ def test_export_traegt_app_install_und_email(client, eintrag):
     # Die Person steht im Journal (who.user) UND im Kopf der übernommenen
     # Quelle (`by`, enrich@edc497e respektiert ein mitgebrachtes `by`)
     assert tj["kind"] == "transcript" and tj["origin"] in ("mixed", "human")
-    assert tj["by"]["user"] == "nora@uni.ch" and tj["by"]["tool"] == "localtranscript"
+    assert tj["by"]["user"] == "nora@uni.ch" and tj["by"]["tool"] == "turnscript"
     manifest = _teil(z, "manifest.json").decode()
     host = socket.gethostname()               # nie eine Geräte-Kennung
     assert host not in manifest and host not in json.dumps(tj)
@@ -76,5 +76,5 @@ def test_ohne_email_steht_die_app_im_dossier(client, eintrag):
     z = zipfile.ZipFile(io.BytesIO(inhalt))
     m = json.loads(_teil(z, "manifest.json"))
     assert all(r["who"].get("user") is None for r in m["runs"]
-               if r["who"]["app"] == "localtranscript")
-    assert m["producer"] == {"app": "localtranscript", "version": config.APP_VERSION}
+               if r["who"]["app"] == "turnscript")
+    assert m["producer"] == {"app": "turnscript", "version": config.APP_VERSION}

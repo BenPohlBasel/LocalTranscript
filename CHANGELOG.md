@@ -3,7 +3,22 @@
 All notable changes to LocalTranscript. The GitHub release notes for
 a version are the corresponding section of this file.
 
-## Unreleased
+## 3.0.0 — unreleased
+
+### Changed
+
+- **LocalTranscript is now TurnScript.** Another transcription app uses
+  a name close to the old one, so the application, its bundle identifier
+  (`city.bias.turnscript`), the repository (github.com/bias-city/TurnScript)
+  and the website carry the new name. Old GitHub and download links
+  redirect.
+- **Nothing is lost on the way.** On first launch TurnScript copies the
+  settings of LocalTranscript, including the chosen library folder,
+  and leaves the old ones in place. New installations are offered an
+  existing LocalTranscript library folder instead of an empty one. Dossiers
+  written by LocalTranscript are still recognised as TurnScript's own, and
+  re-exporting to REFI-QDA keeps the same identifiers, so ATLAS.ti sees the
+  same sources as before.
 
 ### Changed
 

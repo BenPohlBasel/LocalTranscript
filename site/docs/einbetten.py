@@ -22,14 +22,14 @@ import base64, re, shutil, subprocess
 HIER = Path(__file__).resolve().parent
 INDEX = HIER.parent / "index.html"
 DATEIEN = {
-    "verfahren": {"de": "localtranscript-datenverarbeitung-de.md",
-                  "en": "localtranscript-data-processing-en.md",
-                  "fr": "localtranscript-traitement-des-donnees-fr.md",
-                  "it": "localtranscript-trattamento-dei-dati-it.md"},
-    "blatt":     {"de": "localtranscript-app-blatt-de.md",
-                  "en": "localtranscript-fact-sheet-en.md",
-                  "fr": "localtranscript-fiche-fr.md",
-                  "it": "localtranscript-scheda-it.md"},
+    "verfahren": {"de": "turnscript-datenverarbeitung-de.md",
+                  "en": "turnscript-data-processing-en.md",
+                  "fr": "turnscript-traitement-des-donnees-fr.md",
+                  "it": "turnscript-trattamento-dei-dati-it.md"},
+    "blatt":     {"de": "turnscript-app-blatt-de.md",
+                  "en": "turnscript-fact-sheet-en.md",
+                  "fr": "turnscript-fiche-fr.md",
+                  "it": "turnscript-scheda-it.md"},
 }
 ANFANG, ENDE = "<!-- docs:start -->", "<!-- docs:end -->"
 

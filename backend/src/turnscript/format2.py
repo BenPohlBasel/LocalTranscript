@@ -1,5 +1,5 @@
 """Der .enrich-Container nach FORMAT.md, Format 2 — enrich-core schreibt,
-LocalTranscript ergänzt.
+TurnScript ergänzt.
 
 `exporte._enrich_paket` legt das Dossier über enrich-core an:
 Transkript-Schicht (die QUELLE, `source/transcript.json`), Audio,
@@ -17,7 +17,7 @@ enrich@f871d33, 2026-09-11):
   als schlanke `RunRecord`s (wann, was, wer, wo; FORMAT.md §3.1) VOR
   den Läufen des Textsatzes (das Transkript ist die Quelle aller anderen
   Schichten); die Kette wird über alle Einträge neu geschlossen.
-- `producer` = LocalTranscript, `title`. Die Sendung selbst baut enrichs
+- `producer` = TurnScript, `title`. Die Sendung selbst baut enrichs
   `Dossier.pack(profile="handover")`: eine Wurzel, unkomprimiert, ohne
   `_history/`, Inventar vollständig, Kette in sich geschlossen.
 
@@ -42,7 +42,10 @@ from enrich_core.schemas.transcript import Segment, Speaker, TranscriptLayer
 from . import bibliothek
 from .config import APP_VERSION, identitaet
 
-TOOL = "localtranscript"
+TOOL = "turnscript"
+#: Frühere Namen desselben Schreibers: Dossiers, die TurnScript bis
+#: 2.5.0 geschrieben hat, gelten beim Einlesen weiter als eigene.
+EIGENE_TOOLS = frozenset({TOOL, "localtranscript"})
 
 
 # ---------- Schreiben ----------
@@ -173,8 +176,8 @@ def inventar_pruefen(z: zipfile.ZipFile, wurzel: str, m: dict) -> None:
 
 def _ist_unser_run(r: dict) -> bool:
     """Schlanke Runs sagen es in `who.app`, ältere in `tool`."""
-    return ((r.get("who") or {}).get("app") == TOOL
-            or r.get("tool") == TOOL)
+    app = ((r.get("who") or {}).get("app") or "").split("/", 1)[0]
+    return app in EIGENE_TOOLS or r.get("tool") in EIGENE_TOOLS
 
 
 def lies(z: zipfile.ZipFile, wurzel: str, m: dict) -> dict | None:

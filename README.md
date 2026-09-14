@@ -1,4 +1,10 @@
-# LocalTranscript
+# TurnScript
+
+> **Formerly LocalTranscript.** Renamed to TurnScript in 3.0.0 because
+> another transcription app uses a similar name. Existing installations
+> keep everything: on first launch TurnScript copies the old settings
+> (including the chosen library folder) and reads dossiers written by
+> LocalTranscript as its own. Old GitHub and download links redirect.
 
 A native macOS app for **fully local** audio transcription with speaker
 diarisation. Whisper runs on your machine, the diarisation runs on your
@@ -95,7 +101,7 @@ people go into the transcript by role — the interviewee is not
 preselected, so a pseudonymised transcript does not get their name
 through Zotero — and link. Title, date, interviewer and citekey then
 appear on page 1 of the `.enrich` export and travel as the layer
-`source/zotero.json`. LocalTranscript reads Zotero only on request,
+`source/zotero.json`. TurnScript reads Zotero only on request,
 read-only (Zotero can stay open) and only after you enable it in
 Settings; nothing is sent to Zotero or the network.
 
@@ -186,7 +192,7 @@ Files are checked (ggml magic, finished copying) before they are
 offered, and Settings names what was ignored and why. Settings also
 show the full list of bundled components with their
 licences, the interchange formats with theirs, and the links to the
-sources. The same texts appear in the *About LocalTranscript* dialog in
+sources. The same texts appear in the *About TurnScript* dialog in
 the app menu.
 
 ## Documentation
@@ -235,7 +241,7 @@ of the `.enrich` export.
 cd backend && uv sync && uv run pytest          # backend + tests
 cd frontend && npm install
 npm run dev                                      # browser dev (proxy :5628)
-uv run uvicorn localtranscript.main:app --port 5628    # in backend/
+uv run uvicorn turnscript.main:app --port 5628    # in backend/
 npx tauri dev                                    # app dev
 ```
 
@@ -267,7 +273,7 @@ appleid.apple.com):
 ```bash
 export APPLE_ID=…  APPLE_PASSWORD=…  APPLE_TEAM_ID=CCRJ4A42D3
 cd frontend && npm run release
-spctl -a -vv /Applications/LocalTranscript.app   # → Notarized Developer ID
+spctl -a -vv /Applications/TurnScript.app   # → Notarized Developer ID
 ```
 
 `npm run release` chains the steps: stage the resources, sign the
@@ -298,17 +304,17 @@ release.
 
 ## Interchange formats and their licences
 
-**REFI-QDA (`.qdpx.zip`).** LocalTranscript *supports export to REFI-QDA*.
+**REFI-QDA (`.qdpx.zip`).** TurnScript *supports export to REFI-QDA*.
 The specification is under the **MIT licence, Copyright 2019 REFI-QDA**
 (<https://www.qdasoftware.org/>). There is no official certification for
 REFI-QDA, and the MIT licence of the specification does not cover
 trademarks — no such claim is made here. The REFI schemas (XSD) are
-**not** bundled: LocalTranscript writes to the specification and only
+**not** bundled: TurnScript writes to the specification and only
 references the schema URL, so the MIT attribution requirement does not
 apply.
 
 **enrich dossier (`.enrich`).** The format is described in
-`FORMAT.md` — Format 2, which enrich and LocalTranscript write today,
+`FORMAT.md` — Format 2, which enrich and TurnScript write today,
 and Format 1 for reading — and implemented by the reference package
 [enrich-core](https://github.com/bias-city/enrich-core), both under
 the **MIT licence** (B/IAS).
@@ -333,7 +339,7 @@ exist to be pasted into an ethics application or a data management
 plan. The code stays AGPL-3.0-or-later, and the Recursive font on the
 website stays SIL OFL 1.1.
 
-**The network clause is satisfied before it applies:** LocalTranscript
+**The network clause is satisfied before it applies:** TurnScript
 binds to `127.0.0.1` only, and the host guard in `main.py` turns
 everything foreign away with 421 — there is no remote use in the sense
 of §13. The source is public anyway; the "Source code (GitHub)" button

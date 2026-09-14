@@ -1,8 +1,8 @@
-# LocalTranscript — Description of the data processing
+# TurnScript — Description of the data processing
 
 A text block to paste into a record of processing activities, a data
 protection impact assessment, an ethics application or a data
-management plan. As of 13 September 2026, LocalTranscript 2.5.0. Items
+management plan. As of 13 September 2026, TurnScript 2.5.0. Items
 in `[square brackets]` are completed by the controller.
 
 The text describes what the software does and does not do. The legal
@@ -14,10 +14,10 @@ substitute for legal advice.
 
 ## 1. Software used
 
-LocalTranscript, version `[2.5.0]`. Free software under
+TurnScript, version `[2.5.0]`. Free software under
 AGPL-3.0-or-later, developed at B/IAS – Basel Institut für angewandte
 Stadtforschung. Source code public at
-<https://github.com/bias-city/LocalTranscript>. The software runs as
+<https://github.com/bias-city/TurnScript>. The software runs as
 a local application on macOS (Apple Silicon) and is installed and
 operated by the controller itself.
 
@@ -50,7 +50,7 @@ conversation, special categories of personal data may be involved
    can add whisper.cpp models only by hand, into the library's
    “Modelle” folder — the application never downloads.
 3. **Storage.** For each transcript a folder is created at the chosen
-   location `[path, e.g. ~/Documents/LocalTranscript]` holding a copy of
+   location `[path, e.g. ~/Documents/TurnScript]` holding a copy of
    the audio (for video: the sound track as MP3 and the unchanged video
    file), the canonical transcript file (JSON), history snapshots
    written on every save, and the derived exports. Temporary working
@@ -120,14 +120,14 @@ information letter of …]`. The software contributes nothing here.
 
 The statements in section 4 can be checked against the source code: the
 binding of the internal service to `127.0.0.1` and the rejection of
-foreign hosts are in `backend/src/localtranscript/main.py`. The
+foreign hosts are in `backend/src/turnscript/main.py`. The
 repository contains the complete build chain up to the signed
 installation package; anyone who does not trust the distributed binary
 can build it.
 
 ---
 
-Source of this text: <https://github.com/bias-city/LocalTranscript>
+Source of this text: <https://github.com/bias-city/TurnScript>
 (folder `site/docs`). It is licensed CC BY 4.0: use and adapt it
 freely, commercially too, as long as B/IAS is credited and changes are
 marked.

@@ -1,4 +1,4 @@
-# LocalTranscript — Fact sheet for researchers
+# TurnScript — Fact sheet for researchers
 
 What the app is, which AI in it does what, where the code lives, and
 why the transcript never leaves your computer. For handing to a project
@@ -7,7 +7,7 @@ lead, an ethics board or colleagues. As of 13 September 2026, version
 
 ## What the app does
 
-LocalTranscript turns audio recordings — interviews, group discussions,
+TurnScript turns audio recordings — interviews, group discussions,
 workshops — into text with timecodes and speaker attribution. The
 transcript is then corrected in an editor, speakers are named, names are
 replaced, and the result is exported for analysis (ATLAS.ti, MAXQDA,
@@ -37,14 +37,14 @@ The app delivers what was said — not what was meant.
 **Limits of speech recognition.** Whisper is a neural model. Where it
 understands nothing (background noise, dialect, overlapping speech) it
 may insert words that were never said. A transcript from
-LocalTranscript is a **raw transcript** that must be checked against the
+TurnScript is a **raw transcript** that must be checked against the
 recording; the editor is built for that. Standard German, French,
 Italian and English are recognised well, Swiss German patchily — the
 speakers are still separated cleanly.
 
 ## Where the code lives
 
-- Source code: <https://github.com/bias-city/LocalTranscript>
+- Source code: <https://github.com/bias-city/TurnScript>
 - Licence: AGPL-3.0-or-later — free software that may be used,
   inspected, modified and passed on
 - Developed at B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -60,7 +60,7 @@ speakers are still separated cleanly.
   usage statistics, no update check, no crash reports of its own.
 - Its internal service listens only on the loopback address `127.0.0.1`
   of the machine itself and rejects any request from elsewhere. The code
-  for this is in `backend/src/localtranscript/main.py` — readable by
+  for this is in `backend/src/turnscript/main.py` — readable by
   anyone.
 - Audio and transcript live exclusively in the chosen library folder.
   Deleted items move to a trash folder inside the library until it is
@@ -90,7 +90,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ## For the methods section
 
-> The recordings were transcribed with LocalTranscript 2.5.0 (B/IAS
+> The recordings were transcribed with TurnScript 2.5.0 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
 > large-v3-turbo, speaker separation with pyannote community-1-TDNN)
 > entirely locally on a computer of the research group, without
@@ -99,7 +99,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ---
 
-Source: <https://github.com/bias-city/LocalTranscript> (folder
+Source: <https://github.com/bias-city/TurnScript> (folder
 `site/docs`). The sheet is licensed CC BY 4.0: use and adapt it
 freely, commercially too, as long as B/IAS is credited and changes are
 marked.

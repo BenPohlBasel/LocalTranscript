@@ -1,4 +1,4 @@
-# LocalTranscript — Scheda per ricercatrici e ricercatori
+# TurnScript — Scheda per ricercatrici e ricercatori
 
 Che cos'è l'app, quale IA al suo interno fa che cosa, dove si trova il
 codice e perché la trascrizione non lascia mai il computer. Da
@@ -7,7 +7,7 @@ Stato al 13 settembre 2026, versione 2.5.0.
 
 ## Che cosa fa l'app
 
-LocalTranscript trasforma registrazioni audio — interviste, discussioni
+TurnScript trasforma registrazioni audio — interviste, discussioni
 di gruppo, workshop — in testo con codici temporali e attribuzione dei
 parlanti. La trascrizione viene poi corretta in un editor, i parlanti
 vengono nominati, i nomi sostituiti, e il risultato esportato per
@@ -37,7 +37,7 @@ intendeva.
 
 **Limiti del riconoscimento vocale.** Whisper è un modello neurale. Dove
 non capisce nulla (rumori di fondo, dialetto, sovrapposizioni) può
-inserire parole mai pronunciate. Una trascrizione di LocalTranscript è
+inserire parole mai pronunciate. Una trascrizione di TurnScript è
 una **trascrizione grezza** che va verificata contro la registrazione;
 l'editor è fatto per questo. Tedesco standard, francese, italiano e
 inglese vengono riconosciuti bene, lo svizzero tedesco in modo lacunoso
@@ -45,7 +45,7 @@ inglese vengono riconosciuti bene, lo svizzero tedesco in modo lacunoso
 
 ## Dove si trova il codice
 
-- Codice sorgente: <https://github.com/bias-city/LocalTranscript>
+- Codice sorgente: <https://github.com/bias-city/TurnScript>
 - Licenza: AGPL-3.0-or-later — software libero, che può essere usato,
   esaminato, modificato e ridistribuito
 - Sviluppato al B/IAS – Basel Institut für angewandte Stadtforschung,
@@ -63,7 +63,7 @@ inglese vengono riconosciuti bene, lo svizzero tedesco in modo lacunoso
 - Il suo servizio interno ascolta solo sull'indirizzo di loopback
   `127.0.0.1` della macchina stessa e rifiuta ogni richiesta
   proveniente da altrove. Il codice si trova in
-  `backend/src/localtranscript/main.py` — leggibile da chiunque.
+  `backend/src/turnscript/main.py` — leggibile da chiunque.
 - Audio e trascrizione si trovano esclusivamente nella cartella della
   libreria scelta. Ciò che viene eliminato finisce in una cartella
   cestino all'interno della libreria, finché non viene svuotata.
@@ -96,7 +96,7 @@ registrazioni.
 
 ## Per la sezione metodologica
 
-> Le registrazioni sono state trascritte con LocalTranscript 2.5.0
+> Le registrazioni sono state trascritte con TurnScript 2.5.0
 > (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
 > modello large-v3-turbo, separazione dei parlanti con pyannote
 > community-1) interamente in locale su un computer del gruppo di ricerca,
@@ -105,7 +105,7 @@ registrazioni.
 
 ---
 
-Fonte: <https://github.com/bias-city/LocalTranscript> (cartella
+Fonte: <https://github.com/bias-city/TurnScript> (cartella
 `site/docs`). La scheda è pubblicata con licenza CC BY 4.0: uso e
 adattamento liberi, anche commerciali, citando B/IAS e indicando le
 modifiche.

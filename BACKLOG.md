@@ -192,20 +192,23 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Sprachen nachziehen — der Wortlaut steht im CHANGELOG unter
    «Unreleased» und in Punkt 10 der Recherche.
 
-13. **App umbenennen; Repository ist umgezogen (User 2026-09-14).** Der
-   Name «LocalTranscript» kollidiert mit einer geschlossenen Meeting-App
-   aus demselben Umfeld (github.com/localtranscript, intern «Secure
-   Transcript»); belegbar war unser Name 36 Stunden früher öffentlich
-   (GH Archive: unser erster Push 25.4.2026 21:58 UTC, sein erstes
-   Ereignis 27.4.2026 10:26 UTC). Das Repository liegt seit dem
-   14. September unter github.com/bias-city/LocalTranscript; die alte
-   Adresse leitet weiter. Website, Blätter und LICENSE-docs zeigen schon
-   auf den neuen Ort. Bei der Umbenennung mit erledigen: die Verweise in
-   `frontend/src/App.tsx` und `EinstellungenModule.tsx`, Produktname,
-   Bundle-Kennung, Bibliotheksordner (mit Übernahme bestehender
-   Installationen), Website-Adresse bias.city/localtranscript, Texte in
-   vier Sprachen. Vorher den neuen Namen gegen GitHub, Domains, App-Namen
-   und die Markenregister Swissreg und EUIPO prüfen.
+13. **Umbenennung in TurnScript — im Code GEBAUT 2026-09-14, nicht
+   veröffentlicht.** Anlass: «LocalTranscript» kollidiert mit einer
+   geschlossenen Meeting-App (github.com/localtranscript); belegbar war
+   unser Name 36 Stunden früher öffentlich (GH Archive: unser erster Push
+   25.4.2026 21:58 UTC, sein erstes Ereignis 27.4.2026 10:26 UTC). Auch
+   «Turnscript» gibt es schon als iOS-App (Jonathan Vogelbusch, seit
+   21.8.2026, CH/DE/US) — der User nimmt das in Kauf und schreibt
+   TurnScript. Gebaut: Repo github.com/bias-city/TurnScript (alte Adressen
+   leiten weiter), Produktname, Bundle `city.bias.turnscript`, Python-
+   Paket `turnscript`, Version 3.0.0, Kopie der alten Einstellungen beim
+   ersten Start, alte Dossiers bleiben eigene, Website und Blätter.
+   OFFEN: (a) Release 3.0.0 bauen, notarisieren, veröffentlichen;
+   (b) Website erst DANACH hochladen, Ziel klären (bias.city/turnscript
+   mit Weiterleitung von /localtranscript, oder turnscript.com);
+   (c) neue Screenshots — alle zeigen noch «LocalTranscript»;
+   (d) enrich-core README und FORMAT.md nennen LocalTranscript;
+   (e) Lizenzzeile der App nach Punkt 12 im selben Release nachziehen.
 
 ## Gemessen, nicht gebaut
 

@@ -13,7 +13,7 @@ import zipfile
 
 import pytest
 
-from localtranscript import bibliothek, exporte, paket
+from turnscript import bibliothek, exporte, paket
 
 
 def test_rundlauf_ist_verlustfrei(client, eintrag):

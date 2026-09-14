@@ -55,10 +55,10 @@ def test_enrich_export_ist_format2_container(client, eintrag, tmp_path):
     assert m["source"]["kind"] == "transcript"
     assert m["source"]["canonical"] == "source/transcript.json"
     assert m["source"].get("rendered") is None
-    assert m["producer"] == {"app": "localtranscript", "version": m["producer"]["version"]}
+    assert m["producer"] == {"app": "turnscript", "version": m["producer"]["version"]}
     assert set(m["files"]) == {"source/transcript.json"}        # Fixture ohne Audio
     t = json.loads(z.read(f"{w}/source/transcript.json"))
-    assert t["kind"] == "transcript" and t["by"]["tool"] == "localtranscript"
+    assert t["kind"] == "transcript" and t["by"]["tool"] == "turnscript"
     namen = {p["id"]: p["name"] for p in t["speakers"]}
     assert [namen[s["speaker"]] for s in t["segments"]] == ["Anna", "Ben"]
     assert t["segments"][0]["text"].startswith("Hallo und willkommen")

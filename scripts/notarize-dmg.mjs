@@ -13,6 +13,8 @@
 // Erwartet APPLE_ID, APPLE_PASSWORD (app-spezifisch), APPLE_TEAM_ID —
 // oder ein hinterlegtes Profil in APPLE_KEYCHAIN_PROFILE (dann muss
 // kein Passwort in der Umgebung stehen).
+// Das Schlüsselbund-Profil heißt weiter «localtranscript»: es ist ein
+// gespeicherter Zugang auf diesem Mac, kein Produktname.
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

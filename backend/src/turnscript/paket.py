@@ -31,7 +31,7 @@ AUDIO_NAMEN = ("audio.mp3", "audio.m4a", "audio.wav", "audio.ogg",
 
 
 class PaketFehler(ValueError):
-    """Das Zip ist kein lesbares LocalTranscript-/enrich-Paket."""
+    """Das Zip ist kein lesbares TurnScript-/enrich-Paket."""
 
 
 def _mitglied(z: zipfile.ZipFile, blatt: str) -> str | None:
@@ -158,7 +158,7 @@ def lies(daten: bytes) -> dict:
             if not zk:
                 raise PaketFehler(
                     "Weder transkript.json noch 2z-zeitkarte.json im "
-                    "Paket — das ist kein LocalTranscript- oder "
+                    "Paket — das ist kein TurnScript- oder "
                     "enrich-Transkript.")
             segmente, sprecher = _aus_zeitkarte(
                 json.loads(z.read(zk).decode("utf-8")), _t1(z))

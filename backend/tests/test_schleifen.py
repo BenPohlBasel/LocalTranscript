@@ -1,6 +1,6 @@
 """Whisper-Schleifen (dreimal derselbe Satz hintereinander) werden zu
 einem Segment — Sicherheitsnetz hinter der VAD (Befund 2026-09-12)."""
-from localtranscript.jobs import schleifen_zusammenziehen
+from turnscript.jobs import schleifen_zusammenziehen
 
 
 def _s(t, a, b): return {"start": a, "end": b, "sprecher": None, "text": t}

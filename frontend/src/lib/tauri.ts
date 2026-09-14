@@ -84,7 +84,7 @@ export async function onDateien(cb: () => void): Promise<() => void> {
   return listen("dateien", () => cb());
 }
 
-/** „About LocalTranscript" aus dem Menü — die Shell schickt nur das
+/** „About TurnScript" aus dem Menü — die Shell schickt nur das
     Signal, den Dialog baut das Frontend (übersetzt, mit Links). */
 export async function onUeber(cb: () => void): Promise<() => void> {
   if (!isTauri()) return () => {};

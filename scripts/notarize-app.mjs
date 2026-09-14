@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const app = process.argv[2]
-  ?? path.join(ROOT, "frontend/src-tauri/target/release/bundle/macos/LocalTranscript.app");
+  ?? path.join(ROOT, "frontend/src-tauri/target/release/bundle/macos/TurnScript.app");
 if (!fs.existsSync(app)) {
   console.error(`Keine App unter ${app} — erst \`tauri build\`.`);
   process.exit(1);
@@ -38,7 +38,7 @@ if (!profil && zugang.some((v) => v === "")) {
   process.exit(1);
 }
 // Apple will ein Zip der .app (ditto hält Ressourcen-Forks und Symlinks)
-const zip = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "lt-notar-")), "LocalTranscript.zip");
+const zip = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "lt-notar-")), "TurnScript.zip");
 execFileSync("/usr/bin/ditto", ["-c", "-k", "--keepParent", app, zip], { stdio: "inherit" });
 console.log(`Reiche ein: ${path.basename(app)} (${(fs.statSync(zip).size / 1e6).toFixed(0)} MB) — Timeout 2 h.`);
 try {

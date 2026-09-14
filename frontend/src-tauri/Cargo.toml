@@ -1,12 +1,12 @@
 [package]
-name = "localtranscript-app"
-version = "2.5.0"
-description = "LocalTranscript — Tauri-Shell (spawnt das Python-Backend)"
+name = "turnscript-app"
+version = "3.0.0"
+description = "TurnScript — Tauri-Shell (spawnt das Python-Backend)"
 authors = ["Ben Pohl / BIAS.City"]
 edition = "2021"
 
 [lib]
-name = "localtranscript_app_lib"
+name = "turnscript_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

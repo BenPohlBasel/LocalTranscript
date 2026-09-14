@@ -10,7 +10,7 @@ import pytest
 ENRICH = Path(__file__).resolve().parents[2].parent / "enrich" \
     / "packages" / "enrich-serve" / "src" / "enrich_serve"
 VENDOR = Path(__file__).resolve().parents[1] / "src" \
-    / "localtranscript" / "enrich_export"
+    / "turnscript" / "enrich_export"
 
 pytestmark = pytest.mark.skipif(not ENRICH.is_dir(),
                                 reason="enrich-Checkout fehlt")

@@ -817,7 +817,7 @@ export function SearchField({ value, onChange, placeholder }: {
 /** Segment-Umschalter (Quelle wählen, Geltungsbereich …). */
 export function SegTabs({ value, onChange, options, fit }: {
   value: string; onChange: (v: string) => void;
-  /** In eine schmale Kopfzeile einpassen (LocalTranscript 2026-09-11):
+  /** In eine schmale Kopfzeile einpassen (TurnScript 2026-09-11):
       volle Breite, die Knöpfe teilen sich den Platz, zu lange
       Beschriftungen enden in «…» statt aus dem Panel zu laufen. */
   fit?: boolean;
@@ -1195,7 +1195,7 @@ export function SidePanel({ side, title, storageKey, defaultWidth = 300,
         {/* Ein STRING wird als Titel gesetzt (gekürzt); ein Knoten —
             etwa eine Unter-Navigation wie SegTabs — kommt roh in die
             Kopfzeile, sonst steckte er in einem <span> mit
-            text-overflow (LocalTranscript 2026-09-09). */}
+            text-overflow (TurnScript 2026-09-09). */}
         {typeof title === "string"
           ? <Text size="1" weight="medium" color="gray"
                   style={{ flex: 1, minWidth: 0 }} truncate>{title}</Text>

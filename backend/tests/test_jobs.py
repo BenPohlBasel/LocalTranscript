@@ -17,9 +17,9 @@ def _warte(client, job_id: str, bis: str, timeout: float = 10.0) -> dict:
 
 def test_diarize_pipeline_landet_in_bibliothek(client, tmp_path,
                                                monkeypatch):
-    from localtranscript import jobs
-    from localtranscript.diarize import SpeakerSegment
-    from localtranscript.transcribe import TranscriptSegment
+    from turnscript import jobs
+    from turnscript.diarize import SpeakerSegment
+    from turnscript.transcribe import TranscriptSegment
 
     audio = tmp_path / "interview.mp3"
     audio.write_bytes(b"ID3fake")
@@ -33,7 +33,7 @@ def test_diarize_pipeline_landet_in_bibliothek(client, tmp_path,
         c.write_bytes(b"RIFFfake")
         return c
     monkeypatch.setattr(jobs, "_clip", fake_clip)
-    import localtranscript.diarize as dia
+    import turnscript.diarize as dia
     # `fortschritt` spiegelt die echte Signatur — der Job meldet damit
     # den Diarisierungs-Fortschritt (10 → 25 %); der Doppelgänger ruft
     # ihn einmal, damit der Meldeweg mitgeprüft ist.
@@ -68,7 +68,7 @@ def test_diarize_pipeline_landet_in_bibliothek(client, tmp_path,
 
 
 def test_abbruch(client, tmp_path, monkeypatch):
-    from localtranscript import jobs
+    from turnscript import jobs
 
     audio = tmp_path / "lang.mp3"
     audio.write_bytes(b"ID3fake")

@@ -7,7 +7,7 @@ import os
 import time
 from pathlib import Path
 
-from localtranscript import config
+from turnscript import config
 
 
 def _modell(p: Path, groesse: int = 40_000_000, alt: bool = True,

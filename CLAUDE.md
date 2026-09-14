@@ -1,4 +1,12 @@
-# LocalTranscript 2.0 (enrich-transcript)
+# TurnScript (vormals LocalTranscript; Ordner enrich-transcript)
+
+Umbenennung 2026-09-14 (User): LocalTranscript → TurnScript, Version 3.0.0,
+Bundle `city.bias.turnscript`, Python-Paket `turnscript`, Repo
+github.com/bias-city/TurnScript. Unverändert und bewusst: Port 5628,
+`LT_*`-Umgebungsvariablen, `lt.*`-Speicherschlüssel, die QDPX-GUID-
+Namensräume (`localtranscript:refi-*`) und das Schlüsselbund-Profil
+`localtranscript`. Alte Dossiers (`localtranscript` als tool/app) gelten
+als eigene; alte Einstellungen werden beim ersten Start kopiert.
 
 Side-Projekt von enrich (User-Auftrag 2026-08-30): Neubau des
 Electron-Prototyps `../whisper-web` als Tauri-App. Plan:
@@ -13,7 +21,7 @@ Electron-Prototyps `../whisper-web` als Tauri-App. Plan:
 - `transkript.json` ist die kanonische Wahrheit; Exporte sind
   abgeleitet. Schreiben immer atomar + history/-Snapshot; Löschen =
   `_papierkorb/`, nie destruktiv.
-- `backend/src/localtranscript/enrich_export/turns.py` ist VENDOR-Code
+- `backend/src/turnscript/enrich_export/turns.py` ist VENDOR-Code
   (nur noch turns.py — textsatz/schrift/fonts sind seit 2.3.0 weg, der
   Export setzt kein PDF mehr, FORMAT.md §5)
   (enrich@3d2b131): nie formatieren/fixen (ruff-exclude!), Drift-Guard
@@ -62,7 +70,7 @@ beliebige Dateien überschreiben (Format-Endung Pflicht) + Host-Wache
 gegen DNS-Rebinding (421). Shell: Quit beendet NUR Selbstgestartetes,
 backend_starten async, venv_fixen laut. Bundle: Tauri DEREFERENZIERT
 venv-Symlinks — libpython3.13.dylib liegt zusätzlich in venv/lib
-(sonst dyld-Abbruch); bundle-resources.mjs spielt localtranscript+
+(sonst dyld-Abbruch); bundle-resources.mjs spielt turnscript+
 enrich-core bei JEDEM Lauf frisch ein.
 Live-Befunde des Users: Datenschutz-Karte (lokal, keine Cloud — v1s
 „24h"-Zeile war irreführend) · UI auch via http://127.0.0.1:5628

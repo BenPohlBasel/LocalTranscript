@@ -73,7 +73,7 @@ def pruefe(pfad: Path) -> dict | None:
             or info["video_codec"] not in CODECS_OK:
         raise VideoFehler("codec", (
             f"Video nicht unterstützt ({info['video_codec']} in "
-            f"{pfad.suffix.lower() or '?'}). LocalTranscript wandelt Video "
+            f"{pfad.suffix.lower() or '?'}). TurnScript wandelt Video "
             "nicht um — bitte extern als H.264 oder HEVC in MP4 exportieren "
             "(z. B. HandBrake, QuickTime «Exportieren»)."))
     if not info["audio_codec"]:

@@ -3,7 +3,7 @@ abgeleitet, nie Quelle — transkript.json ist die Wahrheit).
 
 Formate:
 - VTT: WEBVTT, Sprecher-Präfix "Name: " NUR beim Sprecherwechsel
-  (LocalTranscript-v1-Konvention; enrich parst genau das), lange Cues
+  (TurnScript-v1-Konvention; enrich parst genau das), lange Cues
   werden untertitel-gerecht gesplittet (normalize_vtt_cues, aus v1
   merge.py verbatim übernommen).
 - CSV: "Time-in","Time-out","Speaker","Text" (QUOTE_ALL) — Timecodes

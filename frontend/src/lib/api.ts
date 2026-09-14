@@ -5,7 +5,7 @@ import { isTauri } from "./tauri";
 /** Backend-Adresse im Tauri-Fenster. Der Port lebt an EINER Stelle je
     Sprache (config.py · lib.rs · hier): 5628 = „LOCT" auf der
     Telefontastatur, enrich-Muster. Überschreibbar per localStorage
-    `localtranscript.backend` — z. B. "http://127.0.0.1:5629", wenn
+    `turnscript.backend` — z. B. "http://127.0.0.1:5629", wenn
     parallel ein Scratch-Backend läuft; die CSP erlaubt jeden Port auf
     127.0.0.1. Im Browser bleibt es der Vite-Proxy (same-origin). */
 export const BACKEND_PORT = 5628;
@@ -14,7 +14,9 @@ export const DEFAULT_BACKEND = `http://127.0.0.1:${BACKEND_PORT}`;
 function backendBase(): string {
   if (!isTauri()) return "";
   try {
-    const eigen = window.localStorage.getItem("localtranscript.backend");
+    // alter Schlüssel aus LocalTranscript-Zeiten bleibt als Rückfall gültig
+    const eigen = window.localStorage.getItem("turnscript.backend")
+      ?? window.localStorage.getItem("localtranscript.backend");
     if (eigen && /^https?:\/\/(127\.0\.0\.1|localhost):\d+$/
           .test(eigen.trim())) {
       return eigen.trim();

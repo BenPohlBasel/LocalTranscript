@@ -1,9 +1,9 @@
-# LocalTranscript — Descrizione del trattamento dei dati
+# TurnScript — Descrizione del trattamento dei dati
 
 Blocco di testo da inserire in un registro delle attività di
 trattamento, una valutazione d'impatto sulla protezione dei dati, una
 domanda al comitato etico o un piano di gestione dei dati. Stato al
-13 settembre 2026, LocalTranscript 2.5.0. Le voci tra `[parentesi
+13 settembre 2026, TurnScript 2.5.0. Le voci tra `[parentesi
 quadre]` vengono completate dal titolare del trattamento.
 
 Il testo descrive che cosa il software fa e che cosa non fa. La
@@ -15,10 +15,10 @@ consulenza legale.
 
 ## 1. Software impiegato
 
-LocalTranscript, versione `[2.5.0]`. Software libero sotto
+TurnScript, versione `[2.5.0]`. Software libero sotto
 AGPL-3.0-or-later, sviluppato al B/IAS – Basel Institut für angewandte
 Stadtforschung. Codice sorgente pubblico:
-<https://github.com/bias-city/LocalTranscript>. Il software gira
+<https://github.com/bias-city/TurnScript>. Il software gira
 come applicazione locale su macOS (Apple Silicon) ed è installato e
 gestito dal titolare stesso.
 
@@ -53,7 +53,7 @@ personali `[sì / no: …]`.
    nulla.
 3. **Archiviazione.** Per ogni trascrizione viene creata una cartella
    nella posizione scelta `[percorso, p. es.
-   ~/Documents/LocalTranscript]` con una copia dell'audio (per un
+   ~/Documents/TurnScript]` con una copia dell'audio (per un
    video: la traccia audio in MP3 e il file video invariato), il file
    canonico della trascrizione (JSON), istantanee della cronologia a ogni
    salvataggio e le esportazioni derivate. I file di lavoro temporanei
@@ -128,14 +128,14 @@ lettera informativa del …]`. Il software non contribuisce in alcun modo.
 
 Le affermazioni della sezione 4 sono verificabili nel codice sorgente:
 il collegamento del servizio interno a `127.0.0.1` e il rifiuto degli
-host estranei si trovano in `backend/src/localtranscript/main.py`. Il
+host estranei si trovano in `backend/src/turnscript/main.py`. Il
 repository contiene l'intera catena di build fino al pacchetto
 d'installazione firmato; chi non si fida del binario distribuito può
 compilarlo.
 
 ---
 
-Fonte di questo testo: <https://github.com/bias-city/LocalTranscript>
+Fonte di questo testo: <https://github.com/bias-city/TurnScript>
 (cartella `site/docs`). È pubblicato con licenza CC BY 4.0: uso e
 adattamento liberi, anche commerciali, citando B/IAS e indicando le
 modifiche.

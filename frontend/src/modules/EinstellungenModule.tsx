@@ -11,7 +11,7 @@ import {
 import { setSprache, useT, type Sprache } from "../lib/i18n";
 import { isTauri, ordnerOeffnen, pickOrdner } from "../lib/tauri";
 
-const BIAS_URL = "https://bias.city/localtranscript/";
+const BIAS_URL = "https://bias.city/turnscript/";
 
 export default function EinstellungenModule({ settings, onChange }: {
   settings: Settings | null;
@@ -210,11 +210,11 @@ export default function EinstellungenModule({ settings, onChange }: {
           <Flex gap="2" wrap="wrap">
             <Button size="1" variant="soft" onClick={() =>
               void ordnerOeffnen(
-                "https://github.com/BenPohlBasel/LocalTranscript")}>
+                "https://github.com/bias-city/TurnScript")}>
               {tr("st.link.repo")}</Button>
             <Button size="1" variant="soft" onClick={() =>
-              void ordnerOeffnen("https://github.com/BenPohlBasel/"
-                + "LocalTranscript/releases")}>
+              void ordnerOeffnen("https://github.com/bias-city/"
+                + "TurnScript/releases")}>
               {tr("st.link.releases")}</Button>
             <Button size="1" variant="soft" onClick={() =>
               void ordnerOeffnen("https://ffmpeg.martin-riedl.de")}>
@@ -233,7 +233,7 @@ export default function EinstellungenModule({ settings, onChange }: {
           <Flex gap="2">
             <Button size="1" variant="soft" onClick={() =>
               void ordnerOeffnen(
-                "https://github.com/BenPohlBasel/LocalTranscript")}>
+                "https://github.com/bias-city/TurnScript")}>
               GitHub</Button>
           </Flex>
         </Flex>

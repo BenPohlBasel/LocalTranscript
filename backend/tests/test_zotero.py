@@ -11,7 +11,7 @@ import zipfile
 
 import pytest
 
-from localtranscript import bibliothek, exporte, zotero
+from turnscript import bibliothek, exporte, zotero
 
 ITEMS = [
     {"item_key": "ABCD1234", "item_type": "interview", "citekey": "whitfield2026",

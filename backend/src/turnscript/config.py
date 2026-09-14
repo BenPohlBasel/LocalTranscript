@@ -7,7 +7,7 @@ Zwei Betriebsarten:
   aus den mitgelieferten Resources (bin/, lib/, models/, venv/).
 
 Einstellungen (Bibliotheks-Wurzel, Defaults) leben als JSON unter
-~/Library/Application Support/LocalTranscript/config.json — das BACKEND
+~/Library/Application Support/TurnScript/config.json — das BACKEND
 besitzt die Config (v1: Electron-main.js besaß sie; die Shell soll
 dumm sein).
 """
@@ -20,9 +20,13 @@ import sys
 import time
 from pathlib import Path
 
-APP_NAME = "LocalTranscript"
-APP_VERSION = "2.5.0"
-#: DER LocalTranscript-Port (2026-09-09): 5628 = „LOCT" auf der
+APP_NAME = "TurnScript"
+#: Name bis 2.5.0. Einstellungen früherer Installationen liegen unter
+#: diesem Namen und werden beim ersten Start übernommen; die Bibliothek
+#: bleibt, wo sie liegt — umbenannt wird nie etwas beim Nutzer.
+ALTER_NAME = "TurnScript"
+APP_VERSION = "3.0.0"
+#: DER TurnScript-Port (2026-09-09): 5628 = „LOCT" auf der
 #: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
 #: (23119 = „ZOT"). Vier Buchstaben, nicht fünf: „LOCTR" wäre 56287
 #: und läge im EPHEMEREN Bereich, den macOS selbst verteilt
@@ -242,7 +246,25 @@ def _config_dir() -> Path:
     env = os.environ.get("LT_CONFIG_DIR")
     if env:
         return Path(env)
-    return (Path.home() / "Library" / "Application Support" / APP_NAME)
+    basis = Path.home() / "Library" / "Application Support"
+    neu = basis / APP_NAME
+    _alt_uebernehmen(basis / ALTER_NAME, neu)
+    return neu
+
+
+def _alt_uebernehmen(alt: Path, neu: Path) -> None:
+    """Einmalig die Einstellungen von TurnScript (bis 2.5.0)
+    KOPIEREN, nicht verschieben: die alte App bleibt benutzbar, und mit
+    `config.json` kommen gewählter Bibliotheksordner, Installations-
+    Kennung und E-Mail-Adresse mit. Die Merkdatei der alten Shell bleibt
+    zurück — sie beschreibt einen fremden Prozess."""
+    if neu.exists() or not alt.is_dir():
+        return
+    try:
+        shutil.copytree(alt, neu, ignore=shutil.ignore_patterns(
+            "app-backend.json", "*.tmp"))
+    except OSError:
+        pass
 
 
 def _config_file() -> Path:
@@ -322,7 +344,7 @@ def read_config() -> dict:
 def identitaet() -> dict:
     """Wer im Journal eines Dossiers steht: App, Installation, Person."""
     cfg = read_config()
-    return {"app": f"localtranscript/{APP_VERSION}",
+    return {"app": f"turnscript/{APP_VERSION}",
             "install": cfg["install_id"],
             "user": cfg.get("user_email") or None}
 
@@ -342,7 +364,11 @@ def write_config(aenderungen: dict) -> dict:
 
 
 def default_library_root() -> Path:
-    return Path.home() / "Documents" / APP_NAME
+    doku = Path.home() / "Documents"
+    alt, neu = doku / ALTER_NAME, doku / APP_NAME
+    # Wer schon mit TurnScript gearbeitet hat, bekommt seinen
+    # bestehenden Ordner vorgeschlagen, nicht einen zweiten leeren.
+    return alt if alt.is_dir() and not neu.exists() else neu
 
 
 def library_root() -> Path | None:

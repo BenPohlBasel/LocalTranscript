@@ -576,7 +576,7 @@ body { margin: 0; background: var(--gray-1); }
 .cb-modal-scroll::-webkit-scrollbar-track { background: transparent; }
 
 
-/* ---------- LocalTranscript: Segment-Textfeld ----------
+/* ---------- TurnScript: Segment-Textfeld ----------
    Im Fokus MUSS das Feld als editierbar erkennbar sein (User
    2026-08-30): Rahmen + Grund; solange der Cursor drin ist, gelten
    die Pfeiltasten im Text (der Player-Handler lässt Textfelder in

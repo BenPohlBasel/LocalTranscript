@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "LocalTranscript",
-  "version": "2.5.0",
-  "identifier": "city.bias.localtranscript",
+  "productName": "TurnScript",
+  "version": "3.0.0",
+  "identifier": "city.bias.turnscript",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1421",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "LocalTranscript",
+        "title": "TurnScript",
         "url": "index.html",
         "width": 1100,
         "height": 800,

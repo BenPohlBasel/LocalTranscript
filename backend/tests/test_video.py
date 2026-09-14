@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from localtranscript import bibliothek, config, exporte, video
+from turnscript import bibliothek, config, exporte, video
 
 pytestmark = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg fehlt")
 

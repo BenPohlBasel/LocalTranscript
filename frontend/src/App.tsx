@@ -69,7 +69,7 @@ export default function App() {
       .then((f) => { if (weg) f(); else ab = f; });
     return () => { weg = true; ab?.(); };
   }, [boot, oeffneDateien]);
-  // „About LocalTranscript" aus dem Menü
+  // „About TurnScript" aus dem Menü
   useEffect(() => {
     let ab: (() => void) | undefined;
     let weg = false;
@@ -158,8 +158,8 @@ export default function App() {
   );
 }
 
-const REPO = "https://github.com/BenPohlBasel/LocalTranscript";
-const BIAS = "https://bias.city/localtranscript/";
+const REPO = "https://github.com/bias-city/TurnScript";
+const BIAS = "https://bias.city/turnscript/";
 
 /** Eigener Über-Dialog: das macOS-Standardpanel zeigt nur Name und
     Version, und Links darin wären nicht klickbar. Die Texte kommen aus
