@@ -63,7 +63,7 @@ wheels = [
 [[package]]
 name = "enrich-core"
 version = "0.1.0"
-source = { git = "https://github.com/BenPohlBasel/enrich-core?tag=v0.1.0#aa428aadd346d4d024528d4827041ed20722f00a" }
+source = { git = "https://github.com/bias-city/enrich-core?tag=v0.1.0#04a9c791d68fb2a2430373aaccee32782673e6e6" }
 dependencies = [
     { name = "pydantic" },
 ]
@@ -196,7 +196,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "enrich-core", git = "https://github.com/BenPohlBasel/enrich-core?tag=v0.1.0" },
+    { name = "enrich-core", git = "https://github.com/bias-city/enrich-core?tag=v0.1.0" },
     { name = "fastapi", specifier = ">=0.111" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "python-multipart", specifier = ">=0.0.9" },

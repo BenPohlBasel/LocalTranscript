@@ -5,7 +5,7 @@ diarisation. Whisper runs on your machine, the diarisation runs on your
 machine, and nothing is ever uploaded. Built at **B/IAS — Basel
 Institut für angewandte Stadtforschung** as a [Tauri](https://tauri.app)
 app with the enrich UI kit, and it exports straight into
-[enrich](https://github.com/BenPohlBasel/PDFenrichCLI) and into
+[enrich](https://github.com/bias-city/PDFenrichCLI) and into
 REFI-QDA for ATLAS.ti.
 
 - **Transcription:** [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
@@ -286,7 +286,7 @@ the ticket is already stapled the script does nothing and saves the
 models from a v1 checkout sitting next to this one
 (`../whisper-web/electron/resources`) and builds the venv fresh. The
 dossier reader/writer comes from the public package
-[enrich-core](https://github.com/BenPohlBasel/enrich-core) (MIT), pinned
+[enrich-core](https://github.com/bias-city/enrich-core) (MIT), pinned
 to a tag in `backend/pyproject.toml` — the same code the tests run
 against.
 **ffmpeg**: a redistributable GPL static build from
@@ -310,7 +310,7 @@ apply.
 **enrich dossier (`.enrich`).** The format is described in
 `FORMAT.md` — Format 2, which enrich and LocalTranscript write today,
 and Format 1 for reading — and implemented by the reference package
-[enrich-core](https://github.com/BenPohlBasel/enrich-core), both under
+[enrich-core](https://github.com/bias-city/enrich-core), both under
 the **MIT licence** (B/IAS).
 
 **WebVTT** (W3C) · **CSV** · **TXT** are open and unrestricted.

@@ -18,7 +18,7 @@ const ALT = path.resolve(ROOT, "../whisper-web/electron/resources");
 // enrich-core: das öffentliche MIT-Paket, genau der Stand, gegen den
 // getestet wird (backend/pyproject.toml [tool.uv.sources]) — nie mehr
 // der Geschwister-Checkout, der auch die Analyse-Module trägt.
-const ENRICH_CORE = "enrich-core @ git+https://github.com/BenPohlBasel/enrich-core@v0.1.0";
+const ENRICH_CORE = "enrich-core @ git+https://github.com/bias-city/enrich-core@v0.1.0";
 const forceVenv = process.argv.includes("--force-venv");
 
 function da(p) { try { return fs.statSync(p).isDirectory(); } catch { return false; } }
