@@ -96,7 +96,7 @@ registrazioni.
 
 ## Per la sezione metodologica
 
-> Le registrazioni sono state trascritte con TurnScript 2.5.0
+> Le registrazioni sono state trascritte con TurnScript (già LocalTranscript) 2.5.0
 > (B/IAS Basilea, AGPL-3.0; riconoscimento vocale whisper.cpp con il
 > modello large-v3-turbo, separazione dei parlanti con pyannote
 > community-1) interamente in locale su un computer del gruppo di ricerca,

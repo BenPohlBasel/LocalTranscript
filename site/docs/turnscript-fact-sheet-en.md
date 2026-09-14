@@ -90,7 +90,7 @@ folder inside a synchronised folder synchronises the recordings.
 
 ## For the methods section
 
-> The recordings were transcribed with TurnScript 2.5.0 (B/IAS
+> The recordings were transcribed with TurnScript (formerly LocalTranscript) 2.5.0 (B/IAS
 > Basel, AGPL-3.0; speech recognition whisper.cpp with the model
 > large-v3-turbo, speaker separation with pyannote community-1-TDNN)
 > entirely locally on a computer of the research group, without

@@ -2,7 +2,7 @@
 
 A text block to paste into a record of processing activities, a data
 protection impact assessment, an ethics application or a data
-management plan. As of 13 September 2026, TurnScript 2.5.0. Items
+management plan. As of 13 September 2026, TurnScript (formerly LocalTranscript) 2.5.0. Items
 in `[square brackets]` are completed by the controller.
 
 The text describes what the software does and does not do. The legal
@@ -14,7 +14,7 @@ substitute for legal advice.
 
 ## 1. Software used
 
-TurnScript, version `[2.5.0]`. Free software under
+TurnScript (formerly LocalTranscript), version `[2.5.0]`. Free software under
 AGPL-3.0-or-later, developed at B/IAS – Basel Institut für angewandte
 Stadtforschung. Source code public at
 <https://github.com/bias-city/TurnScript>. The software runs as

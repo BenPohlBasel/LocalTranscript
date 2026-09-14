@@ -96,7 +96,7 @@ die Aufnahmen.
 
 ## Für den Methodenteil
 
-> Die Aufnahmen wurden mit TurnScript 2.5.0 (B/IAS Basel,
+> Die Aufnahmen wurden mit TurnScript (vormals LocalTranscript) 2.5.0 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
 > Sprechertrennung mit pyannote community-1-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an
