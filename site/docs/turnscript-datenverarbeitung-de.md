@@ -2,7 +2,7 @@
 
 Textbaustein zum Einfügen in ein Verfahrensverzeichnis, eine
 Datenschutz-Folgenabschätzung, einen Ethikantrag oder einen
-Datenmanagementplan. Stand 13. September 2026, TurnScript (vormals LocalTranscript) 2.5.0.
+Datenmanagementplan. Stand 15. September 2026, TurnScript 3.0.0.
 Angaben in `[eckigen Klammern]` ergänzt die verantwortliche Stelle.
 
 Der Text beschreibt, was die Software tut und was sie nicht tut. Die
@@ -14,7 +14,7 @@ Text ersetzt keine Rechtsberatung.
 
 ## 1. Eingesetzte Software
 
-TurnScript (vormals LocalTranscript), Version `[2.5.0]`. Freie Software unter
+TurnScript, Version `[3.0.0]`. Freie Software unter
 AGPL-3.0-or-later, entwickelt am B/IAS – Basel Institut für angewandte
 Stadtforschung. Quellcode öffentlich unter
 <https://github.com/bias-city/TurnScript>. Die Software läuft

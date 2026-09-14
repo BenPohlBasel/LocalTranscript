@@ -181,7 +181,7 @@ hervorgehen. Erledigtes wandert ins CHANGELOG.
    Klick hält den alten an, ein zweiter Klick auf dieselbe Stimme stoppt,
    und beim Verlassen des Panels ist Ruhe.
 
-12. **Lizenzzeile in der App nachziehen (User 2026-09-14).** README,
+12. ~~**Lizenzzeile in der App nachziehen (User 2026-09-14).**~~ — GEBAUT mit 3.0.0. README,
    Website und die vier Blätter nennen seit dem 14. September beide
    Modelle — pyannote community-1 und WeSpeaker ResNet34 — unter CC BY
    4.0 samt dem Hinweis, dass Argmax sie nach Core ML umgewandelt und

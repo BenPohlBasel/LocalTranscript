@@ -3,7 +3,7 @@
 Blocco di testo da inserire in un registro delle attività di
 trattamento, una valutazione d'impatto sulla protezione dei dati, una
 domanda al comitato etico o un piano di gestione dei dati. Stato al
-13 settembre 2026, TurnScript (già LocalTranscript) 2.5.0. Le voci tra `[parentesi
+15 settembre 2026, TurnScript 3.0.0. Le voci tra `[parentesi
 quadre]` vengono completate dal titolare del trattamento.
 
 Il testo descrive che cosa il software fa e che cosa non fa. La
@@ -15,7 +15,7 @@ consulenza legale.
 
 ## 1. Software impiegato
 
-TurnScript (già LocalTranscript), versione `[2.5.0]`. Software libero sotto
+TurnScript, versione `[3.0.0]`. Software libero sotto
 AGPL-3.0-or-later, sviluppato al B/IAS – Basel Institut für angewandte
 Stadtforschung. Codice sorgente pubblico:
 <https://github.com/bias-city/TurnScript>. Il software gira

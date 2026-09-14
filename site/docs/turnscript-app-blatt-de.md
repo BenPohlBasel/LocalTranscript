@@ -3,7 +3,7 @@
 Was die App ist, welche KI darin was tut, wo der Code liegt, und warum
 das Transkript den Rechner nicht verlässt. Zum Weitergeben an
 Projektleitung, Ethikkommission oder Kolleg:innen. Stand 11. September
-2026, Version 2.5.0.
+2026, Version 3.0.0.
 
 ## Was die App tut
 
@@ -96,7 +96,7 @@ die Aufnahmen.
 
 ## Für den Methodenteil
 
-> Die Aufnahmen wurden mit TurnScript (vormals LocalTranscript) 2.5.0 (B/IAS Basel,
+> Die Aufnahmen wurden mit TurnScript 3.0.0 (B/IAS Basel,
 > AGPL-3.0; Spracherkennung whisper.cpp mit dem Modell large-v3-turbo,
 > Sprechertrennung mit pyannote community-1-TDNN) vollständig lokal auf
 > einem Rechner der Forschungsgruppe transkribiert, ohne Übermittlung an

@@ -3,7 +3,7 @@
 Bloc de texte à insérer dans un registre des activités de traitement,
 une analyse d'impact relative à la protection des données, une demande
 au comité d'éthique ou un plan de gestion des données. État au
-13 septembre 2026, TurnScript (anciennement LocalTranscript) 2.5.0. Les mentions entre
+15 septembre 2026, TurnScript 3.0.0. Les mentions entre
 `[crochets]` sont complétées par le responsable du traitement.
 
 Ce texte décrit ce que le logiciel fait et ne fait pas. La
@@ -15,7 +15,7 @@ remplace pas un avis juridique.
 
 ## 1. Logiciel utilisé
 
-TurnScript (anciennement LocalTranscript), version `[2.5.0]`. Logiciel libre sous
+TurnScript, version `[3.0.0]`. Logiciel libre sous
 AGPL-3.0-or-later, développé au B/IAS – Basel Institut für angewandte
 Stadtforschung. Code source public :
 <https://github.com/bias-city/TurnScript>. Le logiciel
