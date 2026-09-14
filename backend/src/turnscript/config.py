@@ -24,7 +24,7 @@ APP_NAME = "TurnScript"
 #: Name bis 2.5.0. Einstellungen früherer Installationen liegen unter
 #: diesem Namen und werden beim ersten Start übernommen; die Bibliothek
 #: bleibt, wo sie liegt — umbenannt wird nie etwas beim Nutzer.
-ALTER_NAME = "TurnScript"
+ALTER_NAME = "LocalTranscript"   # NIE pauschal umbenennen — siehe Test
 APP_VERSION = "3.0.0"
 #: DER TurnScript-Port (2026-09-09): 5628 = „LOCT" auf der
 #: Telefontastatur — enrich 36742 = „ENRIC", Zotero-Tradition
@@ -253,16 +253,24 @@ def _config_dir() -> Path:
 
 
 def _alt_uebernehmen(alt: Path, neu: Path) -> None:
-    """Einmalig die Einstellungen von TurnScript (bis 2.5.0)
+    """Einmalig die Einstellungen von LocalTranscript (bis 2.5.0)
     KOPIEREN, nicht verschieben: die alte App bleibt benutzbar, und mit
     `config.json` kommen gewählter Bibliotheksordner, Installations-
-    Kennung und E-Mail-Adresse mit. Die Merkdatei der alten Shell bleibt
-    zurück — sie beschreibt einen fremden Prozess."""
-    if neu.exists() or not alt.is_dir():
+    Kennung, E-Mail-Adresse und Zotero-Einwilligung mit.
+
+    NUR `config.json`, nie der ganze Ordner: bei Installationen aus der
+    Electron-Zeit liegen dort Caches, Cookies und Upload-Reste, und die
+    Merkdatei der alten Shell beschreibt einen fremden Prozess. Ob
+    übernommen wird, entscheidet die Datei, nicht der Ordner — ein
+    leerer neuer Ordner blockiert nichts."""
+    quelle, ziel = alt / "config.json", neu / "config.json"
+    if ziel.exists() or not quelle.is_file():
         return
     try:
-        shutil.copytree(alt, neu, ignore=shutil.ignore_patterns(
-            "app-backend.json", "*.tmp"))
+        neu.mkdir(parents=True, exist_ok=True)
+        tmp = ziel.with_suffix(".uebernahme.tmp")
+        shutil.copyfile(quelle, tmp)
+        tmp.replace(ziel)
     except OSError:
         pass
 
@@ -366,7 +374,7 @@ def write_config(aenderungen: dict) -> dict:
 def default_library_root() -> Path:
     doku = Path.home() / "Documents"
     alt, neu = doku / ALTER_NAME, doku / APP_NAME
-    # Wer schon mit TurnScript gearbeitet hat, bekommt seinen
+    # Wer schon mit LocalTranscript gearbeitet hat, bekommt seinen
     # bestehenden Ordner vorgeschlagen, nicht einen zweiten leeren.
     return alt if alt.is_dir() and not neu.exists() else neu
 

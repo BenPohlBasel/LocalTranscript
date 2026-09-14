@@ -43,7 +43,7 @@ from . import bibliothek
 from .config import APP_VERSION, identitaet
 
 TOOL = "turnscript"
-#: Frühere Namen desselben Schreibers: Dossiers, die TurnScript bis
+#: Frühere Namen desselben Schreibers: Dossiers, die LocalTranscript bis
 #: 2.5.0 geschrieben hat, gelten beim Einlesen weiter als eigene.
 EIGENE_TOOLS = frozenset({TOOL, "localtranscript"})
 
