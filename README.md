@@ -40,7 +40,7 @@ make the first one faster. *Simultaneous runs* in the settings raises
 that to at most four; the queue keeps the order in which files were
 dropped, and a waiting job can still be cancelled.
 
-![Batch list with one running and one queued file](docs/screenshots/01-batch.png)
+![Batch list: files waiting for their speaker count, one run in progress](docs/screenshots/01-batch.png)
 
 The bundled models are `large-v3-turbo` and `medium`. Any other
 whisper.cpp model — a Swiss German fine-tune, a quantised variant —

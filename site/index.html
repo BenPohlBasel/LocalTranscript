@@ -219,7 +219,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
     </div>
     <div class="window">
       <div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div>
-      <img data-img="hero" src="img/hero-de.png" width="1600" height="1000"
+      <img data-img="hero" src="img/hero-de.png?v=3.0.0" width="1600" height="1000"
            alt="TurnScript" data-alt="altHero">
     </div>
   </div>
@@ -238,7 +238,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g1b"></p>
         <p data-t="g1c"></p>
       </div>
-      <div class="shot"><img data-img="batch" src="img/batch-de.png"
+      <div class="shot"><img data-img="batch" src="img/batch-de.png?v=3.0.0"
         width="1200" height="750" alt="" data-alt="altBatch"></div>
     </div>
     <div class="row schritt gross">
@@ -247,7 +247,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g2a"></p>
         <p data-t="g2b"></p>
       </div>
-      <div class="shot"><img data-img="library" src="img/library-de.png"
+      <div class="shot"><img data-img="library" src="img/library-de.png?v=3.0.0"
         width="1200" height="750" alt="" data-alt="altLibrary"></div>
     </div>
     <div class="row schritt gross">
@@ -264,9 +264,9 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g3c"></p>
       </div>
       <div>
-        <div class="shot"><img data-img="edit" src="img/edit-de.png"
+        <div class="shot"><img data-img="edit" src="img/edit-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altEdit"></div>
-        <div class="shot" style="margin-top:1rem"><img data-img="video" src="img/video-de.png"
+        <div class="shot" style="margin-top:1rem"><img data-img="video" src="img/video-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altVideo"></div>
       </div>
     </div>
@@ -276,7 +276,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g4a"></p>
         <p data-t="g4b"></p>
       </div>
-      <div class="shot"><img data-img="find" src="img/find-de.png"
+      <div class="shot"><img data-img="find" src="img/find-de.png?v=3.0.0"
         width="1200" height="750" alt="" data-alt="altFind"></div>
     </div>
     <div class="row schritt gross">
@@ -288,7 +288,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
           <li data-t="e3"></li><li data-t="e4"></li>
         </ul>
       </div>
-      <div class="shot"><img data-img="export" src="img/export-de.png"
+      <div class="shot"><img data-img="export" src="img/export-de.png?v=3.0.0"
         width="1200" height="750" alt="" data-alt="altExport"></div>
     </div>
     <div class="row schritt gross">
@@ -303,9 +303,9 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="zC"></p>
       </div>
       <div>
-        <div class="shot"><img data-img="zotero" src="img/zotero-de.png"
+        <div class="shot"><img data-img="zotero" src="img/zotero-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altZotero"></div>
-        <div class="shot" style="margin-top:1rem"><img data-img="zotero-linked" src="img/zotero-linked-de.png"
+        <div class="shot" style="margin-top:1rem"><img data-img="zotero-linked" src="img/zotero-linked-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altZoteroLinked"></div>
       </div>
     </div>
@@ -320,9 +320,9 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g6c"></p>
       </div>
       <div>
-        <div class="shot"><img data-img="import" src="img/import-de.png"
+        <div class="shot"><img data-img="import" src="img/import-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altImport"></div>
-        <div class="shot" style="margin-top:1rem"><img src="img/import-dialog.png"
+        <div class="shot" style="margin-top:1rem"><img src="img/import-dialog.png?v=3.0.0"
           width="1200" height="314" alt="" data-alt="altImportDialog"></div>
       </div>
     </div>
@@ -334,9 +334,9 @@ footer .links{display:flex;flex-wrap:wrap;gap:.35rem .5rem}
         <p data-t="g7c"></p>
       </div>
       <div>
-        <div class="shot"><img data-img="settings" src="img/settings-de.png"
+        <div class="shot"><img data-img="settings" src="img/settings-de.png?v=3.0.0"
           width="1200" height="750" alt="" data-alt="altSettings"></div>
-        <div class="shot" style="margin-top:1rem"><img src="img/models-folder.png"
+        <div class="shot" style="margin-top:1rem"><img src="img/models-folder.png?v=3.0.0"
           width="1200" height="221" alt="" data-alt="altModelsFolder"></div>
       </div>
     </div>
@@ -2013,7 +2013,7 @@ function setLang(l, inDieUrl){
   });
   /* Bildschirmfotos gibt es je Sprache: img/<name>-<lang>.png */
   document.querySelectorAll('img[data-img], img[data-alt]').forEach(im=>{
-    if(im.dataset.img) im.src = 'img/' + im.dataset.img + '-' + l + '.png';
+    if(im.dataset.img) im.src = 'img/' + im.dataset.img + '-' + l + '.png?v=' + VERSION; /* Version als Anhang: neue Bilder bei gleichem Dateinamen, ohne Browser-Zwischenspeicher */
     const a = im.dataset.alt;
     if(a) im.alt = (a in t) ? t[a] : (T.de[a] || im.alt);
   });
